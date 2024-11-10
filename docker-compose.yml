@@ -1,27 +1,27 @@
-version: "3.8"
-
 services:
-  backend:
+  backend-users:
     build:
-      context: ./
+      context: ./users
       dockerfile: Dockerfile
     restart: always
     ports:
-      - ${PORT}:8000
+      - 8000:8000
     environment:
-      - MYSQL_HOST=mysql
-      - MYSQL_USER=test_user
-      - MYSQL_PASSWORD=test_password
-      - MYSQL_DB=test_db
-    depends_on:
-      - db
-  db:
-    image: mysql:5.7
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: test_db
-      MYSQL_USER: test_user
-      MYSQL_PASSWORD: test_password
-    ports:
-      - 3306:3306
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DB=${MYSQL_DB}
+  
+  # backend-activities:
+  #   build:
+  #     context: ./activities
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   ports:
+  #     - 8000:8001
+  #   environment:
+  #     - MYSQL_HOST=${MYSQL_HOST}
+  #     - MYSQL_USER=${MYSQL_USER}
+  #     - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+  #     - MYSQL_DB=${MYSQL_DB}
+      
