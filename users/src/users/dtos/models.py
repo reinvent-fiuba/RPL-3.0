@@ -1,0 +1,2 @@
+class UserResponseDTO:
+    pass
