@@ -1,27 +1,22 @@
 services:
   backend-users:
     build:
-      context: ./users
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./users/Dockerfile
     restart: always
     ports:
-      - 8000:8000
-    environment:
-      - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_DB=${MYSQL_DB}
-  
+      - 8000:80
+    env_file:
+      - path: ./users/.env
+        required: true
   # backend-activities:
   #   build:
-  #     context: ./activities
-  #     dockerfile: Dockerfile
+  #     context: .
+  #     dockerfile: ./activities/Dockerfile
   #   restart: always
   #   ports:
-  #     - 8000:8001
-  #   environment:
-  #     - MYSQL_HOST=${MYSQL_HOST}
-  #     - MYSQL_USER=${MYSQL_USER}
-  #     - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-  #     - MYSQL_DB=${MYSQL_DB}
-      
+  #     - 8001:80
+  #   env_file:
+  #     - path: ./activities/.env
+  #       required: true
+

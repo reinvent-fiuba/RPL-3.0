@@ -1,0 +1,14 @@
+services:
+  devcontainer:
+    image: python:3.13
+    volumes:
+      - ../..:/workspaces:cached
+    ports:
+      - "9000:80"
+    networks:
+      - dev_network
+    command: sleep infinity
+
+networks:
+  dev_network:
+    driver: bridge

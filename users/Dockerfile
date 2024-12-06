@@ -1,11 +1,12 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
-WORKDIR /code
+WORKDIR /app
 
-COPY ./requirements.txt /code/requirements.txt
+COPY ./base_requirements.txt /app/base_requirements.txt
+COPY ./users/extra_requirements.txt /app/extra_requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /app/base_requirements.txt -r /app/extra_requirements.txt
 
-COPY ./src /code/app 
+COPY ./users/src /app/src
 
-CMD cd /code/app; python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+CMD ["fastapi", "run", "src/main.py", "--port", "80"]

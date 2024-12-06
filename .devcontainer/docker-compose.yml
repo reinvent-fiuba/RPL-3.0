@@ -1,7 +1,0 @@
-services:
-  devcontainer:
-    image: mcr.microsoft.com/devcontainers/python:3.12
-    volumes:
-      - ../..:/workspaces:cached
-    network_mode: service:db
-    command: sleep infinity

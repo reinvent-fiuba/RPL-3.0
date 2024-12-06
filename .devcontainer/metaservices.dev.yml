@@ -1,5 +1,5 @@
 services:
-  local_db:
+  dev_db:
     image: mysql:5.7
     restart: unless-stopped
     environment:
@@ -7,5 +7,10 @@ services:
       MYSQL_DATABASE: test_db
       MYSQL_USER: test_user
       MYSQL_PASSWORD: test_password
-    ports:
-      - 3306:3306
+    networks:
+      - dev_network
+
+networks:
+  dev_network:
+    driver: bridge
+
