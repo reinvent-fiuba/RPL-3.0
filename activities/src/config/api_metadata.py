@@ -4,7 +4,7 @@ FASTAPI_METADATA = {
     "openapi_tags": [
         {
             "name": "Activities",
-            "description": "Endpoints to manage activities",
+            "description": "Endpoints to get, create, modify and delete activities",
         },
     ],
 }

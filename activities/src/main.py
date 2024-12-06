@@ -1,12 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from config.metadata_params import FASTAPI_METADATA
-
-import root.routes
+from fastapi.responses import RedirectResponse
+from config.api_metadata import FASTAPI_METADATA
 
 
 app = FastAPI(**FASTAPI_METADATA)
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,5 +14,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(root.routes.router)
+# app.include_router(users.routes.router)
 
+
+@app.get("/", include_in_schema=False)
+def root_docs_redirect():
+    return RedirectResponse(url="/docs")
