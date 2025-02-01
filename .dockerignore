@@ -12,4 +12,4 @@ __pycache__/
 *.md
 
 mysql_test_data/
-prev_dumps/
+dumps/

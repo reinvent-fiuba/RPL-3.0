@@ -11,5 +11,5 @@ __pycache__/
 .idea/
 *.md
 
-mysql_test_data/
-prev_dumps/
+mysql_*/
+dumps/

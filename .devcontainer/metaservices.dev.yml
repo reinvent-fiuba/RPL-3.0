@@ -1,6 +1,6 @@
 services:
   dev_db:
-    image: mysql:5.7
+    image: mysql:8.0.37
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
@@ -11,6 +11,8 @@ services:
       - ./mysql_test_data:/var/lib/mysql
     networks:
       - dev_network
+    ports:
+      - "3306:3306"
 
 networks:
   dev_network:

@@ -1,11 +1,14 @@
 services:
-  local_db:
-    image: mysql:5.7
+  local_updated_db:
+    build:
+      context: ./mysql80
+      dockerfile: mysql80.Dockerfile
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: test_db
       MYSQL_USER: test_user
       MYSQL_PASSWORD: test_password
+    volumes:
+      - ./mysql_updated_data:/var/lib/mysql
     ports:
-      - 3306:3306
+      - "33068:3306"

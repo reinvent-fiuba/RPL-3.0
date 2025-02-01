@@ -12,8 +12,10 @@ pytest
 ``` -->
 
 
-- Dentro del devcontainer, para correr el servidor:
+- Dentro del devcontainer, para correr el servidor (acceso en `http://localhost:9000/docs`):
 
 ```bash
 fastapi run --reload --port 80
 ``` 
+
+

@@ -1,8 +1,11 @@
 .env
 .DS_Store
 .vscode/
-mysql_test_data/
-prev_dumps/
+mysql*/
+
+dumps/
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
