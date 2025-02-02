@@ -5,3 +5,5 @@ python-dotenv>=1.0.1,<1.1.0
 httpx>=0.28.0,<0.29.0
 sqlmodel>=0.0.22,<0.1.0
 PyMySQL>=1.1.1,<1.2.0
+alembic>=1.14.0,<1.15.0
+cryptography>=44.0.0,<45.0.0
