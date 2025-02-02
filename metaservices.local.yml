@@ -1,5 +1,5 @@
 services:
-  local_updated_db:
+  local_db:
     build:
       context: ./mysql80
       dockerfile: mysql80.Dockerfile
@@ -9,6 +9,6 @@ services:
       MYSQL_USER: test_user
       MYSQL_PASSWORD: test_password
     volumes:
-      - ./mysql_updated_data:/var/lib/mysql
+      - ./mysql_data:/var/lib/mysql
     ports:
       - "33068:3306"
