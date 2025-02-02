@@ -6,20 +6,20 @@ from config.database import Base
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, required=True)
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
     surname = Column(String)
     student_id = Column(String)
-    username = Column(String, unique=True, required=True)
-    email = Column(String, unique=True, required=True)
-    password = Column(String, required=True)
+    username = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
     email_validated = Column(Boolean, default=False)
     is_admin = Column(Boolean, default=False)
     university = Column(String)
     degree = Column(String)
     img_uri = Column(String)
-    date_created = Column(DateTime(timezone=True))
-    last_updated = Column(DateTime(timezone=True))
+    date_created = Column(DateTime)
+    last_updated = Column(DateTime)
 
     @validates("username")
     def validate_username(self, key, username):
