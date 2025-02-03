@@ -7,9 +7,12 @@ services:
       - "9000:80"
     networks:
       - dev_network
-      - default
+      - rpl3_backend_default
     command: sleep infinity
 
 networks:
   dev_network:
     driver: bridge
+    
+  rpl3_backend_default:
+    external: true
