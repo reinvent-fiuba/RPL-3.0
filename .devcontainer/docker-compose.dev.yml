@@ -1,18 +1,21 @@
 services:
   devcontainer:
-    image: python:3.13
+    build:
+      context: ..
+      dockerfile: .devcontainer/dev.Dockerfile
     volumes:
       - ../..:/workspaces:cached
     ports:
       - "9000:80"
     networks:
       - dev_network
-      - rpl3_backend_default
+      - rpl3_backend_default # Requires the db container to be running
     command: sleep infinity
 
 networks:
   dev_network:
     driver: bridge
     
+  # Requires the db container to be running
   rpl3_backend_default:
     external: true

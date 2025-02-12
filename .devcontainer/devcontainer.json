@@ -5,7 +5,7 @@
     // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
     // "image": "mcr.microsoft.com/devcontainers/python:3.12"
     "dockerComposeFile": [
-        "docker-compose.dev.yml"//,
+        "docker-compose.dev.yml" //,
         // "metaservices.dev.yml"
     ],
     "service": "devcontainer",
@@ -15,7 +15,7 @@
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     // "forwardPorts": [],
     // Use 'postCreateCommand' to run commands after the container is created.
-    "postCreateCommand": "pip install --no-cache-dir --upgrade --user -r base_requirements.txt -r .devcontainer/extra_requirements.txt -r activities/extra_requirements.txt -r users/extra_requirements.txt",
+    // "postCreateCommand": "",
     // Configure tool-specific properties.
     "customizations": {
         "vscode": {
