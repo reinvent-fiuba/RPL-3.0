@@ -2,6 +2,9 @@ import os
 from dotenv import load_dotenv
 from sqlmodel import Session, create_engine
 
+# TODO: We no longer use SQLModel but SQLAlchemy directly for better control over the orm and its classes. Change the engine creation
+
+
 load_dotenv()
 DB_URL = os.getenv("DB_URL")
 

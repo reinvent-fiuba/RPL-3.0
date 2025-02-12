@@ -6,6 +6,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+# WARNING: These models are not complete and are only meant to be used for the purpose of the migration script. Additionally, they use core SQLAlchemy features from 1.4, which are still in use but are not recommended anymore since they are considered legacy.
+
 
 class Activity(Base):
     __tablename__ = "activities"
