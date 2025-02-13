@@ -10,7 +10,7 @@
 
 CREATE TABLE activity_categories (
     id BIGINT NOT NULL AUTO_INCREMENT, 
-    course_id BIGINT, 
+    course_id BIGINT NOT NULL, 
     name VARCHAR(255), 
     description VARCHAR(255), 
     active BOOL, 
@@ -31,7 +31,7 @@ CREATE TABLE rpl_files (
 
 CREATE TABLE activities (
     id BIGINT NOT NULL AUTO_INCREMENT, 
-    course_id BIGINT, 
+    course_id BIGINT NOT NULL, 
     activity_category_id BIGINT, 
     name VARCHAR(500), 
     description TEXT, 
@@ -52,7 +52,7 @@ CREATE TABLE activities (
 CREATE TABLE activity_submissions (
     id BIGINT NOT NULL AUTO_INCREMENT, 
     activity_id BIGINT, 
-    user_id BIGINT, 
+    user_id BIGINT NOT NULL, 
     response_files_id BIGINT, 
     status VARCHAR(255), 
     is_final_solution BOOL NOT NULL, 

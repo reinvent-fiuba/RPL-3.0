@@ -12,7 +12,7 @@ Base = declarative_base()
 class Activity(Base):
     __tablename__ = "activities"
     id = Column(BIGINT, primary_key=True)
-    course_id = Column(BIGINT)  # No FK (cross-service)
+    course_id = Column(BIGINT, nullable=False)  # No FK (cross-service)
     activity_category_id = Column(BIGINT, ForeignKey("activity_categories.id"))
     name = Column(String(500))
     description = Column(Text)
@@ -30,7 +30,7 @@ class Activity(Base):
 class ActivityCategory(Base):
     __tablename__ = "activity_categories"
     id = Column(BIGINT, primary_key=True)
-    course_id = Column(BIGINT)  # No FK (cross-service)
+    course_id = Column(BIGINT, nullable=False)  # No FK (cross-service)
     name = Column(String(255))
     description = Column(String(255))
     active = Column(Boolean)
@@ -42,7 +42,7 @@ class ActivitySubmission(Base):
     __tablename__ = "activity_submissions"
     id = Column(BIGINT, primary_key=True)
     activity_id = Column(BIGINT, ForeignKey("activities.id"))
-    user_id = Column(BIGINT)  # No FK (cross-service)
+    user_id = Column(BIGINT, nullable=False)  # No FK (cross-service)
     response_files_id = Column(BIGINT, ForeignKey("rpl_files.id"))
     status = Column(String(255))
     is_final_solution = Column(Boolean, nullable=False, default=False)

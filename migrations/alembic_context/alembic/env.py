@@ -19,9 +19,9 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
-# from models_for_utf8mb4_migration import Base
-# from models_for_users_db_creation import Base
-from models_for_activities_db_creation import Base
+# from models.models_for_utf8mb4_migration import Base
+# from models.models_for_users_db_creation import Base
+from models.models_for_activities_db_creation import Base
 
 target_metadata = Base.metadata
 
