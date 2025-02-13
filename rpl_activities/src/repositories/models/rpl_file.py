@@ -23,9 +23,7 @@ class RplFile(Base):
     date_created: Mapped[DateTime]
     last_updated: Mapped[DateTime]
 
-    activities: Mapped[List["Activity"]] = relationship(
-        "Activity", back_populates="starting_files"
-    )
+    activities: Mapped[List["Activity"]] = relationship(back_populates="starting_files")
     activity_submissions: Mapped[List["ActivitySubmission"]] = relationship(
         back_populates="response_files"
     )
