@@ -1,16 +1,22 @@
 import os
 from dotenv import load_dotenv
-from sqlmodel import Session, create_engine
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+
 
 load_dotenv()
 DB_URL = os.getenv("DB_URL")
 
-engine = create_engine(DB_URL, echo=True)
+engine = create_engine(DB_URL, echo=True, pool_recycle=3600)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def get_db():
-    with Session(engine) as session:
+def get_db_session():
+    session: Session = SessionLocal(engine)
+    try:
         yield session
+    finally:
+        session.close()
 
 
 # This class is designed for use in the Service and Repository levels
