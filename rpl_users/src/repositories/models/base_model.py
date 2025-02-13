@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Annotated
-from sqlalchemy import BigInteger, String, Text
+from sqlalchemy import BigInteger, String
 from sqlalchemy.orm import DeclarativeBase, mapped_column
 
 

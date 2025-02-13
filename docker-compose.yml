@@ -2,21 +2,21 @@ services:
   backend-users:
     build:
       context: .
-      dockerfile: ./users/Dockerfile
+      dockerfile: ./rpl_users/Dockerfile
     restart: always
     ports:
       - 8000:80
     env_file:
-      - path: ./users/.env
+      - path: ./rpl_users/.env
         required: true
   # backend-activities:
   #   build:
   #     context: .
-  #     dockerfile: ./activities/Dockerfile
+  #     dockerfile: ./rpl_activities/Dockerfile
   #   restart: always
   #   ports:
   #     - 8001:80
   #   env_file:
-  #     - path: ./activities/.env
+  #     - path: ./rpl_activities/.env
   #       required: true
 
