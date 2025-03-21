@@ -1,6 +1,6 @@
 services:
-  dev_db:
-    image: mysql:8.0.37
+  testing_db:
+    image: mysql:8.4.3
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
