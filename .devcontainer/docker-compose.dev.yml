@@ -6,7 +6,8 @@ services:
     volumes:
       - ../..:/workspaces:cached
     ports:
-      - "9000:80"
+      - "9000:9000"
+      - "9001:9001"
     networks:
       - dev_network
       # - rpl3_backend_default # Requires the local db container to be running (latest_db at metaservices.local.yml). USEFUL FOR MIGRATIONS
