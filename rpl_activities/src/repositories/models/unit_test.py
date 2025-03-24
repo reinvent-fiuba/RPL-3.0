@@ -2,12 +2,12 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.repositories.models.activity import Activity
-    from src.repositories.models.rpl_file import RplFile
+    from src.repositories.models.rpl_file import RPLFile
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from base_model import Base, BigInt, DateTime, IntPK
+from .base_model import Base, BigInt, DateTime, IntPK
 
 
 class UnitTest(Base):
@@ -20,4 +20,4 @@ class UnitTest(Base):
     last_updated: Mapped[DateTime]
 
     activity: Mapped["Activity"] = relationship(back_populates="unit_tests")
-    test_file: Mapped["RplFile"] = relationship(back_populates="unit_tests")
+    test_file: Mapped["RPLFile"] = relationship(back_populates="unit_tests")

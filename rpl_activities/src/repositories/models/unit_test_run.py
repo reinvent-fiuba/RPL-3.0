@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from base_model import Base, IntPK, BigInt, Str, TextStr, DateTime
+from .base_model import Base, IntPK, BigInt, Str, TextStr, DateTime
 
 
 class UnitTestRun(Base):

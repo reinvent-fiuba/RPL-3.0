@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped
 
-from base_model import Base, DateTime, IntPK, SmallStr
+from .base_model import Base, DateTime, IntPK, SmallStr
 
 
 class Permission(Base):

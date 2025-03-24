@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 
 from sqlalchemy.orm import Mapped, relationship
 
-from base_model import Base, BigInt, DateTime, IntPK, Str
+from .base_model import Base, BigInt, DateTime, IntPK, Str
 
 
 class ActivityCategory(Base):

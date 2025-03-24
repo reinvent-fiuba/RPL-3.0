@@ -6,10 +6,10 @@ if TYPE_CHECKING:
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from base_model import Base, BigInt, DateTime, IntPK, LargeStr, TextStr
+from .base_model import Base, BigInt, DateTime, IntPK, LargeStr, TextStr
 
 
-class IoTest(Base):
+class IOTest(Base):
     __tablename__ = "io_tests"
 
     id: Mapped[IntPK]

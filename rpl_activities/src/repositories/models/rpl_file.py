@@ -10,10 +10,10 @@ if TYPE_CHECKING:
 from sqlalchemy.orm import Mapped, relationship
 
 
-from base_model import Base, DateTime, IntPK, Str
+from .base_model import Base, DateTime, IntPK, Str
 
 
-class RplFile(Base):
+class RPLFile(Base):
     __tablename__ = "rpl_files"
 
     id: Mapped[IntPK]

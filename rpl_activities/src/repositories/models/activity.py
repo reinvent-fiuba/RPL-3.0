@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.repositories.models.activity_category import ActivityCategory
-    from src.repositories.models.rpl_file import RplFile
+    from src.repositories.models.rpl_file import RPLFile
     from src.repositories.models.activity_submission import ActivitySubmission
     from src.repositories.models.io_test import IoTest
     from src.repositories.models.unit_test import UnitTest
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from base_model import Base, BigInt, DateTime, IntPK, Str, LargeStr, TextStr
+from .base_model import Base, BigInt, DateTime, IntPK, Str, LargeStr, TextStr
 
 
 class Activity(Base):
@@ -37,7 +37,7 @@ class Activity(Base):
     activity_category: Mapped["ActivityCategory"] = relationship(
         back_populates="activities"
     )
-    starting_files: Mapped["RplFile"] = relationship(back_populates="activities")
+    starting_files: Mapped["RPLFile"] = relationship(back_populates="activities")
     activity_submissions: Mapped[List["ActivitySubmission"]] = relationship(
         back_populates="activity"
     )

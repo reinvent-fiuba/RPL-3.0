@@ -6,7 +6,7 @@ from sqlalchemy.orm import DeclarativeBase, mapped_column
 
 Str = Annotated[str, 255]
 LargeStr = Annotated[str, 500]
-BigInt = Annotated[int, "bigint"]
+BigInt = Annotated[int, BigInteger]
 
 
 class Base(DeclarativeBase):

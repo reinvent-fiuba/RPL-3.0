@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 from sqlalchemy.orm import Mapped, relationship
 import datetime
 
-from base_model import Base, DateTime, IntPK, Str
+from .base_model import Base, DateTime, IntPK, Str
 
 
 class Course(Base):

@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from base_model import Base, DateTime, IntPK, LargeStr, SmallStr
+from .base_model import Base, DateTime, IntPK, LargeStr, SmallStr
 
 
 class Role(Base):

@@ -7,7 +7,7 @@ from sqlalchemy import ForeignKey
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from base_model import Base, BigInt, IntPK, Str, DateTime
+from .base_model import Base, BigInt, IntPK, Str, DateTime
 
 
 class Result(Base):
