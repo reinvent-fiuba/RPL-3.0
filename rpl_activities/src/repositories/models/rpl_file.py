@@ -2,9 +2,9 @@ from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.repositories.models.activity import Activity
-    from src.repositories.models.activity_submission import ActivitySubmission
-    from src.repositories.models.unit_test import UnitTest
+    from rpl_users.src.repositories.models.activity import Activity
+    from rpl_users.src.repositories.models.activity_submission import ActivitySubmission
+    from rpl_users.src.repositories.models.unit_test import UnitTest
 
 
 from sqlalchemy.orm import Mapped, relationship

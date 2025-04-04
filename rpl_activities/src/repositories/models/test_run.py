@@ -2,9 +2,9 @@ from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.repositories.models.activity_submission import ActivitySubmission
-    from src.repositories.models.io_test_run import IOTestRun
-    from src.repositories.models.unit_test_run import UnitTestRun
+    from rpl_users.src.repositories.models.activity_submission import ActivitySubmission
+    from rpl_users.src.repositories.models.io_test_run import IOTestRun
+    from rpl_users.src.repositories.models.unit_test_run import UnitTestRun
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship

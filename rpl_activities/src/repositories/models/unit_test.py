@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.repositories.models.activity import Activity
-    from src.repositories.models.rpl_file import RPLFile
+    from rpl_users.src.repositories.models.activity import Activity
+    from rpl_users.src.repositories.models.rpl_file import RPLFile
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship

@@ -5,8 +5,8 @@ from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.repositories.models.course_user import CourseUser
-    from src.repositories.models.validation_token import ValidationToken
+    from rpl_users.src.repositories.models.course_user import CourseUser
+    from rpl_users.src.repositories.models.validation_token import ValidationToken
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

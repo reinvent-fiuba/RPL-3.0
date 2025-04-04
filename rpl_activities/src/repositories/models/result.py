@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.repositories.models.activity_submission import ActivitySubmission
+    from rpl_users.src.repositories.models.activity_submission import ActivitySubmission
 
 from sqlalchemy import ForeignKey
 

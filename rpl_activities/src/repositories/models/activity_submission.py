@@ -2,10 +2,10 @@ from typing import List
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.repositories.models.activity import Activity
-    from src.repositories.models.rpl_file import RPLFile
-    from src.repositories.models.result import Result
-    from src.repositories.models.test_run import TestRun
+    from rpl_users.src.repositories.models.activity import Activity
+    from rpl_users.src.repositories.models.rpl_file import RPLFile
+    from rpl_users.src.repositories.models.result import Result
+    from rpl_users.src.repositories.models.test_run import TestRun
 
 from sqlalchemy import ForeignKey
 

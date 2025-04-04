@@ -2,11 +2,11 @@ from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.repositories.models.activity_category import ActivityCategory
-    from src.repositories.models.rpl_file import RPLFile
-    from src.repositories.models.activity_submission import ActivitySubmission
-    from src.repositories.models.io_test import IoTest
-    from src.repositories.models.unit_test import UnitTest
+    from rpl_users.src.repositories.models.activity_category import ActivityCategory
+    from rpl_users.src.repositories.models.rpl_file import RPLFile
+    from rpl_users.src.repositories.models.activity_submission import ActivitySubmission
+    from rpl_users.src.repositories.models.io_test import IoTest
+    from rpl_users.src.repositories.models.unit_test import UnitTest
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship

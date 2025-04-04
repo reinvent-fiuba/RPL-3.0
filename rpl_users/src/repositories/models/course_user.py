@@ -1,9 +1,9 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.repositories.models.course import Course
-    from src.repositories.models.role import Role
-    from src.repositories.models.user import User
+    from rpl_users.src.repositories.models.course import Course
+    from rpl_users.src.repositories.models.role import Role
+    from rpl_users.src.repositories.models.user import User
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship

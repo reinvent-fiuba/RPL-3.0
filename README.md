@@ -71,6 +71,8 @@ python -m pytest
 
 #### Running the APIs
 
+First make sure that the MySQL container is running. Additionally, the RabbitMQ container is required for the activities API.
+
 ```shell
 # Run the users API
 fastapi run rpl_users/src/main.py --reload --port 9000

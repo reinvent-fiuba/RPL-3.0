@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Annotated
-from sqlalchemy import BigInteger, String
+from sqlalchemy import BigInteger, Integer, String
 from sqlalchemy.orm import DeclarativeBase, mapped_column
 
 
@@ -19,7 +19,9 @@ class Base(DeclarativeBase):
     }
 
 
-IntPK = Annotated[int, mapped_column(BigInteger, primary_key=True)]
+IntPK = Annotated[
+    int, mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
+]
 DateTime = Annotated[datetime, mapped_column(insert_default=datetime.now)]
 
 

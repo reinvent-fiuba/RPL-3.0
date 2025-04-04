@@ -2,7 +2,7 @@ from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.repositories.models.course_user import CourseUser
+    from rpl_users.src.repositories.models.course_user import CourseUser
 
 from sqlalchemy.orm import Mapped, relationship
 import datetime
