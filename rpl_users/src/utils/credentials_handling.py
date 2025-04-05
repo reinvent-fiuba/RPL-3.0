@@ -1,5 +1,4 @@
-from email.utils import parseaddr
-from typing import Tuple
+import re
 from pwdlib import PasswordHash
 from pwdlib.hashers.bcrypt import BcryptHasher
 
@@ -25,10 +24,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # =============================================================================
 
 
-def create_access_token(user_id: str) -> str:
+def create_access_token(user_id: int) -> str:
     payload = {
-        "sub": user_id,
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=JWT_EXPIRE_MINUTES),
+        "sub": str(user_id),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=int(JWT_EXPIRE_MINUTES)),
     }
     token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
     return token
@@ -51,8 +50,7 @@ def decode_access_token(token: str) -> str:
 
 
 def is_login_via_email(username_or_email: str) -> bool:
-    parsed_email = parseaddr(username_or_email)[1]
-    if parsed_email:
-        return True
-    else:
+    email_regex = r"[^@]+@[^@]+\.[^@]+"
+    if not re.match(email_regex, username_or_email):
         return False
+    return True

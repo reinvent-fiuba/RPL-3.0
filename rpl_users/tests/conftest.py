@@ -52,7 +52,7 @@ def example_users_fixture(session: Session):
         student_id="50000",
         username="adminUsername",
         email="admin@mail.com",
-        password="secret",
+        password="$2a$10$cQQj.LWxHGB/gaoZwH2ilOAgJabst84IMgJ363F.lmLNjh0D43ZhG",  # hashed "secret"
         university="UBA",
         degree="Ing. Informatica",
         email_validated=True,
@@ -67,7 +67,7 @@ def example_users_fixture(session: Session):
         student_id="50001",
         username="regularUsername",
         email="regular@mail.com",
-        password="secret",
+        password="$2a$10$cQQj.LWxHGB/gaoZwH2ilOAgJabst84IMgJ363F.lmLNjh0D43ZhG",
         university="UBA",
         degree="Ing. Informatica",
         email_validated=True,

@@ -34,7 +34,7 @@ def get_user_profile(
     return UsersService(db).get_user_profile(auth_header.credentials)
 
 
-@router.put("/auth/profile", response_model=UserProfileResponseDTO)
+@router.patch("/auth/profile", response_model=UserProfileResponseDTO)
 def update_user_profile(
     profile_data: UserProfileUpdateDTO,
     auth_header: HTTPAuthorizationCredentials = Depends(bearer_header),

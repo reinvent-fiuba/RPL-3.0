@@ -53,6 +53,7 @@ class UsersService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
             )
+        logging.debug(f">>> User {user.username} logged in successfully")
         return user
 
     # =============================================================================
