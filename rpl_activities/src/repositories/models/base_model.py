@@ -19,7 +19,7 @@ class Base(DeclarativeBase):
 
 IntPK = Annotated[int, mapped_column(BigInteger, primary_key=True)]
 TextStr = Annotated[str, mapped_column(Text)]
-DateTime = Annotated[datetime, mapped_column(insert_default=datetime.now)]
+AutoDateTime = Annotated[datetime, mapped_column(insert_default=datetime.now)]
 
 
 # Note: To allow distribution of classes across multiple files and avoid circular imports due to relationship definitions, we use the TYPE_CHECKING constant to avoid importing classes directly at runtime. This is a common pattern.

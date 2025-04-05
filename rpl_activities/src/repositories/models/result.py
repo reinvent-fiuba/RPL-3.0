@@ -1,13 +1,15 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from rpl_users.src.repositories.models.activity_submission import ActivitySubmission
+    from rpl_activities.src.repositories.models.activity_submission import (
+        ActivitySubmission,
+    )
 
 from sqlalchemy import ForeignKey
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base_model import Base, BigInt, IntPK, Str, DateTime
+from .base_model import Base, BigInt, IntPK, Str, AutoDateTime
 
 
 class Result(Base):
@@ -18,8 +20,8 @@ class Result(Base):
         ForeignKey("activity_submissions.id")
     )
     score: Mapped[Str]
-    date_created: Mapped[DateTime]
-    last_updated: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
+    last_updated: Mapped[AutoDateTime]
 
     activity_submission: Mapped["ActivitySubmission"] = relationship(
         back_populates="results"

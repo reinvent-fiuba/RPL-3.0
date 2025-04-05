@@ -2,12 +2,12 @@ from typing import Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from rpl_users.src.repositories.models.test_run import TestRun
+    from rpl_activities.src.repositories.models.test_run import TestRun
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base_model import Base, IntPK, BigInt, Str, TextStr, DateTime
+from .base_model import Base, IntPK, BigInt, Str, TextStr, AutoDateTime
 
 
 class UnitTestRun(Base):
@@ -18,6 +18,6 @@ class UnitTestRun(Base):
     name: Mapped[Str]
     passed: Mapped[bool]
     error_messages: Mapped[Optional[TextStr]]
-    date_created: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
 
     test_run: Mapped["TestRun"] = relationship(back_populates="unit_test_run")

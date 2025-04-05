@@ -2,11 +2,11 @@ from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from rpl_users.src.repositories.models.activity import Activity
+    from rpl_activities.src.repositories.models.activity import Activity
 
 from sqlalchemy.orm import Mapped, relationship
 
-from .base_model import Base, BigInt, DateTime, IntPK, Str
+from .base_model import Base, BigInt, AutoDateTime, IntPK, Str
 
 
 class ActivityCategory(Base):
@@ -17,8 +17,8 @@ class ActivityCategory(Base):
     name: Mapped[Str]
     description: Mapped[Optional[Str]]
     active: Mapped[bool]
-    date_created: Mapped[DateTime]
-    last_updated: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
+    last_updated: Mapped[AutoDateTime]
 
     activities: Mapped[List["Activity"]] = relationship(
         back_populates="activity_category"

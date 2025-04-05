@@ -2,16 +2,16 @@ from typing import List
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from rpl_users.src.repositories.models.activity import Activity
-    from rpl_users.src.repositories.models.rpl_file import RPLFile
-    from rpl_users.src.repositories.models.result import Result
-    from rpl_users.src.repositories.models.test_run import TestRun
+    from rpl_activities.src.repositories.models.activity import Activity
+    from rpl_activities.src.repositories.models.rpl_file import RPLFile
+    from rpl_activities.src.repositories.models.result import Result
+    from rpl_activities.src.repositories.models.test_run import TestRun
 
 from sqlalchemy import ForeignKey
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base_model import Base, BigInt, DateTime, IntPK, Str
+from .base_model import Base, BigInt, AutoDateTime, IntPK, Str
 
 
 class ActivitySubmission(Base):
@@ -23,8 +23,8 @@ class ActivitySubmission(Base):
     user_id: Mapped[BigInt]
     response_files_id: Mapped[BigInt] = mapped_column(ForeignKey("rpl_files.id"))
     status: Mapped[Str]
-    date_created: Mapped[DateTime]
-    last_updated: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
+    last_updated: Mapped[AutoDateTime]
 
     activity: Mapped["Activity"] = relationship(back_populates="activity_submissions")
     response_files: Mapped["RPLFile"] = relationship(

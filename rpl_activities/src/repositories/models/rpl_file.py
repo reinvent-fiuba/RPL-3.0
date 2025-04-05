@@ -2,15 +2,17 @@ from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from rpl_users.src.repositories.models.activity import Activity
-    from rpl_users.src.repositories.models.activity_submission import ActivitySubmission
-    from rpl_users.src.repositories.models.unit_test import UnitTest
+    from rpl_activities.src.repositories.models.activity import Activity
+    from rpl_activities.src.repositories.models.activity_submission import (
+        ActivitySubmission,
+    )
+    from rpl_activities.src.repositories.models.unit_test import UnitTest
 
 
 from sqlalchemy.orm import Mapped, relationship
 
 
-from .base_model import Base, DateTime, IntPK, Str
+from .base_model import Base, AutoDateTime, IntPK, Str
 
 
 class RPLFile(Base):
@@ -20,8 +22,8 @@ class RPLFile(Base):
     file_name: Mapped[Str]
     file_type: Mapped[Str]
     data: Mapped[Optional[bytes]]
-    date_created: Mapped[DateTime]
-    last_updated: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
+    last_updated: Mapped[AutoDateTime]
 
     activities: Mapped[List["Activity"]] = relationship(back_populates="starting_files")
     activity_submissions: Mapped[List["ActivitySubmission"]] = relationship(

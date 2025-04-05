@@ -2,16 +2,20 @@ from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from rpl_users.src.repositories.models.activity_category import ActivityCategory
-    from rpl_users.src.repositories.models.rpl_file import RPLFile
-    from rpl_users.src.repositories.models.activity_submission import ActivitySubmission
-    from rpl_users.src.repositories.models.io_test import IoTest
-    from rpl_users.src.repositories.models.unit_test import UnitTest
+    from rpl_activities.src.repositories.models.activity_category import (
+        ActivityCategory,
+    )
+    from rpl_activities.src.repositories.models.rpl_file import RPLFile
+    from rpl_activities.src.repositories.models.activity_submission import (
+        ActivitySubmission,
+    )
+    from rpl_activities.src.repositories.models.io_test import IOTest
+    from rpl_activities.src.repositories.models.unit_test import UnitTest
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base_model import Base, BigInt, DateTime, IntPK, Str, LargeStr, TextStr
+from .base_model import Base, BigInt, AutoDateTime, IntPK, Str, LargeStr, TextStr
 
 
 class Activity(Base):
@@ -31,8 +35,8 @@ class Activity(Base):
     starting_files_id: Mapped[BigInt] = mapped_column(ForeignKey("rpl_files.id"))
     points: Mapped[int]
     compilation_flags: Mapped[LargeStr] = mapped_column(insert_default="")
-    date_created: Mapped[DateTime]
-    last_updated: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
+    last_updated: Mapped[AutoDateTime]
 
     activity_category: Mapped["ActivityCategory"] = relationship(
         back_populates="activities"
@@ -41,5 +45,5 @@ class Activity(Base):
     activity_submissions: Mapped[List["ActivitySubmission"]] = relationship(
         back_populates="activity"
     )
-    io_tests: Mapped[List["IoTest"]] = relationship(back_populates="activity")
+    io_tests: Mapped[List["IOTest"]] = relationship(back_populates="activity")
     unit_tests: Mapped[List["UnitTest"]] = relationship(back_populates="activity")

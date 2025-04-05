@@ -22,7 +22,7 @@ def session_fixture():
         poolclass=StaticPool,
     )
     Base.metadata.create_all(engine)
-    logging.getLogger().debug(">>> [DB Tables]: %s", Base.metadata.tables.keys())
+    logging.debug("[tests:conftest] DB tables: %s", Base.metadata.tables.keys())
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     with TestingSessionLocal() as session:
         yield session

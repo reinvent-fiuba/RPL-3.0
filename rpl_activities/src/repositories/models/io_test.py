@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from rpl_users.src.repositories.models.activity import Activity
+    from rpl_activities.src.repositories.models.activity import Activity
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base_model import Base, BigInt, DateTime, IntPK, LargeStr, TextStr
+from .base_model import Base, BigInt, AutoDateTime, IntPK, LargeStr, TextStr
 
 
 class IOTest(Base):
@@ -17,7 +17,7 @@ class IOTest(Base):
     name: Mapped[LargeStr]
     test_in: Mapped[TextStr]
     test_out: Mapped[TextStr]
-    date_created: Mapped[DateTime]
-    last_updated: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
+    last_updated: Mapped[AutoDateTime]
 
     activity: Mapped["Activity"] = relationship(back_populates="io_tests")

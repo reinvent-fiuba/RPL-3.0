@@ -2,14 +2,16 @@ from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from rpl_users.src.repositories.models.activity_submission import ActivitySubmission
-    from rpl_users.src.repositories.models.io_test_run import IOTestRun
-    from rpl_users.src.repositories.models.unit_test_run import UnitTestRun
+    from rpl_activities.src.repositories.models.activity_submission import (
+        ActivitySubmission,
+    )
+    from rpl_activities.src.repositories.models.io_test_run import IOTestRun
+    from rpl_activities.src.repositories.models.unit_test_run import UnitTestRun
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base_model import Base, BigInt, DateTime, IntPK, Str, TextStr
+from .base_model import Base, BigInt, AutoDateTime, IntPK, Str, TextStr
 
 
 class TestRun(Base):
@@ -23,8 +25,8 @@ class TestRun(Base):
     exit_message: Mapped[Str]
     stderr: Mapped[Optional[TextStr]]
     stdout: Mapped[Optional[TextStr]]
-    date_created: Mapped[DateTime]
-    last_updated: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
+    last_updated: Mapped[AutoDateTime]
 
     activity_submission: Mapped["ActivitySubmission"] = relationship(
         back_populates="test_run"
