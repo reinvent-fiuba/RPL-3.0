@@ -50,7 +50,7 @@ def decode_access_token(token: str) -> str:
 
 
 def is_login_via_email(username_or_email: str) -> bool:
-    email_regex = r"[^@]+@[^@]+\.[^@]+"
+    email_regex = r"^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$"
     if not re.match(email_regex, username_or_email):
         return False
     return True

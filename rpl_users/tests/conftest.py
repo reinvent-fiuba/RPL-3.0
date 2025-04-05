@@ -14,6 +14,7 @@ from rpl_users.src.repositories.models import models_metadata
 from rpl_users.src.repositories.models.user import User
 
 DB_URL = "sqlite:///:memory:"
+# DB_URL = os.getenv("DB_URL", DB_URL)
 
 
 @pytest.fixture(name="session")
