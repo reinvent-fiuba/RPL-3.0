@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped
 
-from .base_model import Base, DateTime, IntPK, SmallStr
+from .base_model import Base, AutoDateTime, IntPK, SmallStr
 
 
 class Permission(Base):
@@ -8,4 +8,4 @@ class Permission(Base):
 
     id: Mapped[IntPK]
     name: Mapped[SmallStr]
-    date_created: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]

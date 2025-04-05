@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 from sqlalchemy.orm import Mapped, relationship
 import datetime
 
-from .base_model import Base, DateTime, IntPK, Str
+from .base_model import Base, AutoDateTime, IntPK, Str
 
 
 class Course(Base):
@@ -16,15 +16,15 @@ class Course(Base):
     id: Mapped[IntPK]
     name: Mapped[Str]
     university: Mapped[Str]
-    university_course_id: Mapped[Optional[Str]]
+    subject_id: Mapped[Optional[Str]]
     description: Mapped[Optional[Str]]
     active: Mapped[bool]
     deleted: Mapped[bool]
     semester: Mapped[Str]
     semester_start_date: Mapped[datetime.datetime]
-    semester_END_date: Mapped[datetime.datetime]
+    semester_end_date: Mapped[datetime.datetime]
     img_uri: Mapped[Optional[Str]]
-    date_created: Mapped[DateTime]
-    last_updated: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
+    last_updated: Mapped[AutoDateTime]
 
     course_users: Mapped[List["CourseUser"]] = relationship(back_populates="course")

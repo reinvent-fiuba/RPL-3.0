@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base_model import Base, DateTime, IntPK, LargeStr, SmallStr
+from .base_model import Base, AutoDateTime, IntPK, LargeStr, SmallStr
 
 
 class Role(Base):
@@ -16,7 +16,7 @@ class Role(Base):
     id: Mapped[IntPK]
     name: Mapped[SmallStr]
     permissions: Mapped[LargeStr]
-    date_created: Mapped[DateTime]
-    last_updated: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
+    last_updated: Mapped[AutoDateTime]
 
     course_users: Mapped[List["CourseUser"]] = relationship(back_populates="role")

@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base_model import Base, BigInt, DateTime, IntPK
+from .base_model import Base, BigInt, AutoDateTime, IntPK
 
 
 class ValidationToken(Base):
@@ -15,6 +15,6 @@ class ValidationToken(Base):
     id: Mapped[IntPK]
     user_id: Mapped[BigInt] = mapped_column(ForeignKey("users.id"))
     token: Mapped[str]
-    expiry_date: Mapped[DateTime]
+    expiry_date: Mapped[AutoDateTime]
 
     user: Mapped["User"] = relationship(back_populates="validation_token")

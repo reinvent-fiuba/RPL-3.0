@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base_model import Base, BigInt, DateTime, IntPK
+from .base_model import Base, BigInt, AutoDateTime, IntPK
 
 
 class CourseUser(Base):
@@ -19,8 +19,8 @@ class CourseUser(Base):
     user_id: Mapped[BigInt] = mapped_column(ForeignKey("users.id"))
     role_id: Mapped[BigInt] = mapped_column(ForeignKey("roles.id"))
     accepted: Mapped[bool]
-    date_created: Mapped[DateTime]
-    last_updated: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
+    last_updated: Mapped[AutoDateTime]
 
     course: Mapped["Course"] = relationship(back_populates="course_users")
     role: Mapped["Role"] = relationship(back_populates="course_users")

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base_model import Base, DateTime, IntPK, Str
+from .base_model import Base, AutoDateTime, IntPK, Str
 
 
 class User(Base):
@@ -27,8 +27,8 @@ class User(Base):
     is_admin: Mapped[bool]
     degree: Mapped[Str]
     university: Mapped[Str]
-    date_created: Mapped[DateTime]
-    last_updated: Mapped[DateTime]
+    date_created: Mapped[AutoDateTime]
+    last_updated: Mapped[AutoDateTime]
     img_uri: Mapped[Optional[Str]]
 
     course_users: Mapped[List["CourseUser"]] = relationship(back_populates="user")
