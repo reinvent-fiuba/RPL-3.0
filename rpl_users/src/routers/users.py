@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials
+from rpl_users.src.deps.auth import auth_handler
 from sqlalchemy.orm import Session
 from rpl_users.src.dtos.user import (
     UserCreateDTO,
@@ -8,11 +9,10 @@ from rpl_users.src.dtos.user import (
     UserProfileResponseDTO,
     UserProfileUpdateDTO,
 )
-from rpl_users.src.config.database import get_db_session
+from rpl_users.src.deps.database import get_db_session
 from rpl_users.src.services.users import UsersService
 
 
-bearer_header = HTTPBearer()
 router = APIRouter(prefix="/api/v2", tags=["Users"])
 
 
@@ -28,7 +28,7 @@ def login_user(user_data: UserLoginDTO, db: Session = Depends(get_db_session)):
 
 @router.get("/auth/profile", response_model=UserProfileResponseDTO)
 def get_user_profile(
-    auth_header: HTTPAuthorizationCredentials = Depends(bearer_header),
+    auth_header: HTTPAuthorizationCredentials = Depends(auth_handler),
     db: Session = Depends(get_db_session),
 ):
     return UsersService(db).get_user_profile(auth_header.credentials)
@@ -37,7 +37,7 @@ def get_user_profile(
 @router.patch("/auth/profile", response_model=UserProfileResponseDTO)
 def update_user_profile(
     profile_data: UserProfileUpdateDTO,
-    auth_header: HTTPAuthorizationCredentials = Depends(bearer_header),
+    auth_header: HTTPAuthorizationCredentials = Depends(auth_handler),
     db: Session = Depends(get_db_session),
 ):
     return UsersService(db).update_user_profile(auth_header.credentials, profile_data)

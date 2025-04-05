@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from .env import DB_URL
+from rpl_users.src.config.env import DB_URL
 
 
 engine = create_engine(DB_URL, echo=True, pool_recycle=3600)

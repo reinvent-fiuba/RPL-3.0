@@ -1,4 +1,4 @@
-from rpl_users.src.config.database import DBSessionContext
+from rpl_users.src.deps.database import DBSessionContext
 
 
 class BaseRepository(DBSessionContext):

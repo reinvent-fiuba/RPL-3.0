@@ -10,7 +10,7 @@ from rpl_users.src.dtos.user import (
     UserProfileUpdateDTO,
 )
 from rpl_users.src.repositories.users import UsersRepository
-import rpl_users.src.utils.credentials_handling as cred
+import rpl_users.src.deps.security as security
 
 
 class UsersService:
@@ -32,7 +32,7 @@ class UsersService:
             )
 
     def __validate_user_login(self, user_data: UserLoginDTO) -> User:
-        if cred.is_login_via_email(user_data.username_or_email):
+        if security.is_login_via_email(user_data.username_or_email):
             user = self.users_repo.get_user_by_email(user_data.username_or_email)
         else:
             user = self.users_repo.get_user_by_username(user_data.username_or_email)
@@ -47,13 +47,13 @@ class UsersService:
                 detail="Email not validated",
             )
 
-        valid = cred.verify_password(user_data.password, user.password)
+        valid = security.verify_password(user_data.password, user.password)
         if not valid:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
             )
-        logging.debug(f">>> User {user.username} logged in successfully")
+        logging.info(f"[users:services] User {user.username} logged in successfully")
         return user
 
     # =============================================================================
@@ -61,7 +61,7 @@ class UsersService:
     def create_user(self, user_data: UserCreateDTO) -> UserCreateResponseDTO:
         self.__validate_username_email_availability(user_data.username, user_data.email)
 
-        hashed_password = cred.hash_password(user_data.password)
+        hashed_password = security.hash_password(user_data.password)
 
         new_user = self.users_repo.create_user(
             user_data,
@@ -83,14 +83,14 @@ class UsersService:
 
     def login_user(self, user_data: UserLoginDTO) -> UserLoginResponseDTO:
         user = self.__validate_user_login(user_data)
-        access_token = cred.create_access_token(user.id)
+        access_token = security.create_access_token(user.id)
         return UserLoginResponseDTO(
             access_token=access_token,
             token_type="Bearer",
         )
 
     def __get_current_user(self, token: str) -> User:
-        user_id = cred.decode_access_token(token)
+        user_id = security.decode_access_token(token)
         user = self.users_repo.get_user_by_id(user_id)
         if not user:
             raise HTTPException(
