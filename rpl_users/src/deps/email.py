@@ -2,6 +2,9 @@ import logging
 import smtplib
 import ssl
 from email.message import EmailMessage
+from typing import Annotated
+
+from fastapi import Depends
 
 from rpl_users.src.config.env import SMTP_PASSWORD, SMTP_PORT, SMTP_SERVER, SMTP_USER
 
@@ -21,6 +24,8 @@ class EmailHandler:
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.send_message(msg)
             logging.info(f"Email sent to {to_address} with subject: {subject}")
+
+    # ==============================================================================
 
     def send_validation_email(self, to_address, validation_link):
         subject = "RPL: Validación de e-mail"
@@ -77,7 +82,14 @@ class EmailHandler:
         self.__send_email(to_address, subject, body)
 
 
-# ==============================================================================
+# Dependency =============================
 
-# For dependency injection
-default_email_handler = EmailHandler()
+
+def get_email_handler():
+    return EmailHandler()
+
+
+EmailHandlerDependency = Annotated[EmailHandler, Depends(get_email_handler)]
+
+
+# ==========================================

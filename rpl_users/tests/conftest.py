@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 
 from rpl_users.src.deps.database import get_db_session
+from rpl_users.src.deps.email import get_email_handler
 from rpl_users.src.main import app
 from rpl_users.src.repositories.models.base_model import Base
 from rpl_users.src.repositories.models import models_metadata
@@ -45,11 +46,9 @@ def email_handler_fixture():
 
 
 @pytest.fixture(name="client")
-def client_fixture(session):
-    def override_get_db():
-        return session
-
-    app.dependency_overrides[get_db_session] = override_get_db
+def client_fixture(session, email_handler):
+    app.dependency_overrides[get_db_session] = lambda: session
+    app.dependency_overrides[get_email_handler] = lambda: email_handler
 
     client = TestClient(app)
     yield client

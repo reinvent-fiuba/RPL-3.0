@@ -1,7 +1,5 @@
-from fastapi import APIRouter, Depends, status
-from fastapi.security import HTTPAuthorizationCredentials
-from rpl_users.src.deps.auth import auth_handler
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, status
+from rpl_users.src.deps.auth import AuthDependency
 from rpl_users.src.dtos.user import (
     UserCreateDTO,
     UserLoginDTO,
@@ -9,7 +7,7 @@ from rpl_users.src.dtos.user import (
     UserProfileResponseDTO,
     UserProfileUpdateDTO,
 )
-from rpl_users.src.deps.database import get_db_session
+from rpl_users.src.deps.database import DBSessionDependency
 from rpl_users.src.services.users import UsersService
 
 
@@ -17,27 +15,24 @@ router = APIRouter(prefix="/api/v2", tags=["Users"])
 
 
 @router.post("/auth/signup", status_code=status.HTTP_201_CREATED)
-def register_user(user_data: UserCreateDTO, db: Session = Depends(get_db_session)):
+def register_user(user_data: UserCreateDTO, db: DBSessionDependency):
     return UsersService(db).create_user(user_data)
 
 
 @router.post("/auth/login", response_model=UserLoginResponseDTO)
-def login_user(user_data: UserLoginDTO, db: Session = Depends(get_db_session)):
+def login_user(user_data: UserLoginDTO, db: DBSessionDependency):
     return UsersService(db).login_user(user_data)
 
 
 @router.get("/auth/profile", response_model=UserProfileResponseDTO)
-def get_user_profile(
-    auth_header: HTTPAuthorizationCredentials = Depends(auth_handler),
-    db: Session = Depends(get_db_session),
-):
+def get_user_profile(auth_header: AuthDependency, db: DBSessionDependency):
     return UsersService(db).get_user_profile(auth_header.credentials)
 
 
 @router.patch("/auth/profile", response_model=UserProfileResponseDTO)
 def update_user_profile(
     profile_data: UserProfileUpdateDTO,
-    auth_header: HTTPAuthorizationCredentials = Depends(auth_handler),
-    db: Session = Depends(get_db_session),
+    auth_header: AuthDependency,
+    db: DBSessionDependency,
 ):
     return UsersService(db).update_user_profile(auth_header.credentials, profile_data)
