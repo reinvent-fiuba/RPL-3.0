@@ -103,7 +103,7 @@ def example_users_fixture(session: Session):
 @pytest.fixture(name="regular_auth_headers")
 def regular_auth_headers_fixture(client: TestClient, example_users) -> dict[str, str]:
     response = client.post(
-        "/api/v2/auth/login",
+        "/api/v3/auth/login",
         json={"username_or_email": "regularUsername", "password": "secret"},
     )
     response_data = response.json()
@@ -119,7 +119,7 @@ def regular_auth_headers_fixture(client: TestClient, example_users) -> dict[str,
 @pytest.fixture(name="admin_auth_headers")
 def admin_auth_headers_fixture(client: TestClient, example_users) -> dict[str, str]:
     response = client.post(
-        "/api/v2/auth/login",
+        "/api/v3/auth/login",
         json={"username_or_email": "adminUsername", "password": "secret"},
     )
     response_data = response.json()

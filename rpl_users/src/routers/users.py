@@ -11,7 +11,7 @@ from rpl_users.src.deps.database import DBSessionDependency
 from rpl_users.src.services.users import UsersService
 
 
-router = APIRouter(prefix="/api/v2", tags=["Users"])
+router = APIRouter(prefix="/api/v3", tags=["Users"])
 
 
 @router.post("/auth/signup", status_code=status.HTTP_201_CREATED)
