@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status
-from rpl_users.src.deps.auth import AuthDependency
+from rpl_users.src.deps.auth import CurrentUserDependency
 from rpl_users.src.dtos.user import (
     UserCreateDTO,
     UserLoginDTO,
@@ -25,14 +25,17 @@ def login_user(user_data: UserLoginDTO, db: DBSessionDependency):
 
 
 @router.get("/auth/profile", response_model=UserProfileResponseDTO)
-def get_user_profile(auth_header: AuthDependency, db: DBSessionDependency):
-    return UsersService(db).get_user_profile(auth_header.credentials)
+def get_user_profile(current_user: CurrentUserDependency, db: DBSessionDependency):
+    return UsersService(db).get_user_profile(current_user)
 
 
 @router.patch("/auth/profile", response_model=UserProfileResponseDTO)
 def update_user_profile(
-    profile_data: UserProfileUpdateDTO,
-    auth_header: AuthDependency,
+    new_profile_info: UserProfileUpdateDTO,
+    current_user: CurrentUserDependency,
     db: DBSessionDependency,
 ):
-    return UsersService(db).update_user_profile(auth_header.credentials, profile_data)
+    return UsersService(db).update_user_profile(current_user, new_profile_info)
+
+
+# ==============================================================================

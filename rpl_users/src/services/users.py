@@ -89,18 +89,7 @@ class UsersService:
             token_type="Bearer",
         )
 
-    def __get_current_user(self, token: str) -> User:
-        user_id = security.decode_access_token(token)
-        user = self.users_repo.get_user_by_id(user_id)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found",
-            )
-        return user
-
-    def get_user_profile(self, token: str) -> UserProfileResponseDTO:
-        user = self.__get_current_user(token)
+    def get_user_profile(self, user: User) -> UserProfileResponseDTO:
         return UserProfileResponseDTO(
             username=user.username,
             name=user.name,
@@ -112,10 +101,9 @@ class UsersService:
         )
 
     def update_user_profile(
-        self, token: str, profile_data: UserProfileUpdateDTO
+        self, user: User, new_profile_info: UserProfileUpdateDTO
     ) -> UserProfileResponseDTO:
-        user = self.__get_current_user(token)
-        for key, value in profile_data.model_dump().items():
+        for key, value in new_profile_info.model_dump().items():
             if value is not None:
                 setattr(user, key, value)
 
