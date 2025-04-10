@@ -14,15 +14,13 @@ from rpl_users.src.repositories.models import models_metadata  # NEEDED
 from rpl_users.src.repositories.models.user import User
 from rpl_users.src.config import env
 
-DB_URL = "sqlite:///:memory:"
-# DB_URL = env.DB_URL
 
 
 @pytest.fixture(name="session", scope="module")
 def session_fixture():
     engine = create_engine(
-        DB_URL,
-        connect_args={"check_same_thread": False},
+        env.DB_URL,
+        # connect_args={"check_same_thread": False}, # Use if sqlite is active
         echo=False,
         poolclass=StaticPool,
     )

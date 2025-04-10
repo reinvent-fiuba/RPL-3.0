@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+load_dotenv(override=True)
 
 DB_URL = os.getenv("DB_URL")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
