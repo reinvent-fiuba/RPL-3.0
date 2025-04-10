@@ -1,4 +1,4 @@
-from rpl_users.src.dtos.user import UserCreateDTO
+from rpl_users.src.dtos.user import UserCreationDTO
 from .base import BaseRepository
 
 from .models.user import User
@@ -7,7 +7,7 @@ import sqlalchemy as sa
 
 class UsersRepository(BaseRepository):
 
-    def create_user(self, user_data: UserCreateDTO, hashed_password: str) -> User:
+    def save_new_user(self, user_data: UserCreationDTO, hashed_password: str) -> User:
         new_user = User(
             username=user_data.username,
             email=user_data.email,
@@ -25,20 +25,45 @@ class UsersRepository(BaseRepository):
         self.db_session.refresh(new_user)
         return new_user
 
-    def get_user_by_username(self, username: str) -> User:
+    def get_by_username(self, username: str) -> User:
         return self.db_session.execute(
             sa.select(User).where(User.username == username)
         ).scalar_one_or_none()
 
-    def get_user_by_email(self, email: str) -> User:
+    def get_by_email(self, email: str) -> User:
         return self.db_session.execute(
             sa.select(User).where(User.email == email)
         ).scalar_one_or_none()
 
-    def get_user_by_id(self, user_id: str) -> User:
+    def get_by_id(self, user_id: str) -> User:
         return self.db_session.execute(
             sa.select(User).where(User.id == user_id)
         ).scalar_one_or_none()
+
+    def __select_matching_username_or_fullname(
+        self, username_or_fullname: str
+    ) -> sa.sql.expression.Select:
+        return sa.select(User).where(
+            sa.or_(
+                User.username.ilike(f"%{username_or_fullname}%"),
+                User.name.ilike(f"%{username_or_fullname}%"),
+                User.surname.ilike(f"%{username_or_fullname}%"),
+            )
+        )
+
+    def get_all_by_username_or_fullname(self, username_or_fullname: str) -> list[User]:
+        if not username_or_fullname:
+            return []
+        else:
+            return (
+                self.db_session.execute(
+                    self.__select_matching_username_or_fullname(username_or_fullname)
+                    .limit(30)
+                    .order_by(User.id.desc())
+                )
+                .scalars()
+                .all()
+            )
 
     def update_user(self, user: User) -> User:
         self.db_session.commit()

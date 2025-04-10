@@ -10,23 +10,23 @@ from rpl_users.src.deps.database import get_db_session
 from rpl_users.src.deps.email import get_email_handler
 from rpl_users.src.main import app
 from rpl_users.src.repositories.models.base_model import Base
-from rpl_users.src.repositories.models import models_metadata
+from rpl_users.src.repositories.models import models_metadata  # NEEDED
 from rpl_users.src.repositories.models.user import User
-
-DB_URL = "sqlite:///:memory:"
-# DB_URL = os.getenv("DB_URL", DB_URL)
+from rpl_users.src.config import env
 
 
-@pytest.fixture(name="session")
+
+@pytest.fixture(name="session", scope="module")
 def session_fixture():
     engine = create_engine(
-        DB_URL,
-        connect_args={"check_same_thread": False},
+        env.DB_URL,
+        # connect_args={"check_same_thread": False}, # Use if sqlite is active
+        echo=False,
         poolclass=StaticPool,
     )
     Base.metadata.create_all(engine)
     logging.debug("[tests:conftest] DB tables: %s", Base.metadata.tables.keys())
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    TestingSessionLocal = sessionmaker(autoflush=False, bind=engine)
     with TestingSessionLocal() as session:
         yield session
 
@@ -35,10 +35,10 @@ def session_fixture():
 def email_handler_fixture():
     class TestEmailHandler:
         def send_validation_email(self, user):
-            pass
+            return "fake_token"
 
         def send_password_reset_email(self, user):
-            pass
+            return "fake_token"
 
         def send_course_acceptance_email(self, user):
             pass
@@ -68,7 +68,7 @@ def example_users_fixture(session: Session):
         username="adminUsername",
         email="admin@mail.com",
         password="$2a$10$cQQj.LWxHGB/gaoZwH2ilOAgJabst84IMgJ363F.lmLNjh0D43ZhG",  # hashed "secret"
-        university="UBA",
+        university="FIUBA",
         degree="Ing. Informatica",
         email_validated=True,
         is_admin=True,
@@ -83,7 +83,7 @@ def example_users_fixture(session: Session):
         username="regularUsername",
         email="regular@mail.com",
         password="$2a$10$cQQj.LWxHGB/gaoZwH2ilOAgJabst84IMgJ363F.lmLNjh0D43ZhG",
-        university="UBA",
+        university="FIUBA",
         degree="Ing. Informatica",
         email_validated=True,
         is_admin=False,
@@ -103,7 +103,7 @@ def example_users_fixture(session: Session):
 @pytest.fixture(name="regular_auth_headers")
 def regular_auth_headers_fixture(client: TestClient, example_users) -> dict[str, str]:
     response = client.post(
-        "/api/v2/auth/login",
+        "/api/v3/auth/login",
         json={"username_or_email": "regularUsername", "password": "secret"},
     )
     response_data = response.json()
@@ -119,7 +119,7 @@ def regular_auth_headers_fixture(client: TestClient, example_users) -> dict[str,
 @pytest.fixture(name="admin_auth_headers")
 def admin_auth_headers_fixture(client: TestClient, example_users) -> dict[str, str]:
     response = client.post(
-        "/api/v2/auth/login",
+        "/api/v3/auth/login",
         json={"username_or_email": "adminUsername", "password": "secret"},
     )
     response_data = response.json()

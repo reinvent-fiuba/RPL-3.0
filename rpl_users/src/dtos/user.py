@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 
 
-class UserCreateDTO(BaseModel):
+class UserCreationDTO(BaseModel):
     username: str = Field(min_length=3, max_length=50)
     email: EmailStr
     password: str = Field(min_length=5)
@@ -52,3 +52,30 @@ class UserProfileUpdateDTO(BaseModel):
     degree: Optional[str] = None
     university: Optional[str] = None
     img_uri: Optional[str] = None
+
+
+class UserEmailValidationDTO(BaseModel):
+    token: str
+
+
+class ResendEmailValidationDTO(BaseModel):
+    username_or_email: str
+
+
+class UserForgotPasswordDTO(BaseModel):
+    email: EmailStr
+
+
+class UserPasswordResetDTO(BaseModel):
+    token: str
+    new_password: str = Field(min_length=5)
+
+
+class FindUsersResponseDTO(BaseModel):
+    username: str
+    email: EmailStr
+    name: str
+    surname: str
+    student_id: str
+    degree: str
+    university: str

@@ -23,6 +23,6 @@ def root_docs_redirect():
     return RedirectResponse(url="/docs")
 
 
-@app.get("/api/v2/health")
+@app.get("/api/v3/health")
 def health_ping():
     return "pong"

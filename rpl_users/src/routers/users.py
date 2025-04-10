@@ -1,22 +1,65 @@
+from typing import Annotated, Optional
 from fastapi import APIRouter, status
-from rpl_users.src.deps.auth import AuthDependency
+from rpl_users.src.deps.auth import CurrentUserDependency
+from rpl_users.src.deps.email import EmailHandlerDependency
 from rpl_users.src.dtos.user import (
-    UserCreateDTO,
+    FindUsersResponseDTO,
+    ResendEmailValidationDTO,
+    UserCreationDTO,
+    UserForgotPasswordDTO,
     UserLoginDTO,
     UserLoginResponseDTO,
+    UserPasswordResetDTO,
     UserProfileResponseDTO,
     UserProfileUpdateDTO,
+    UserEmailValidationDTO,
 )
 from rpl_users.src.deps.database import DBSessionDependency
 from rpl_users.src.services.users import UsersService
 
 
-router = APIRouter(prefix="/api/v2", tags=["Users"])
+router = APIRouter(prefix="/api/v3", tags=["Users"])
 
 
 @router.post("/auth/signup", status_code=status.HTTP_201_CREATED)
-def register_user(user_data: UserCreateDTO, db: DBSessionDependency):
-    return UsersService(db).create_user(user_data)
+def register_user(
+    user_data: UserCreationDTO,
+    email_handler: EmailHandlerDependency,
+    db: DBSessionDependency,
+):
+    return UsersService(db).create_user(user_data, email_handler)
+
+
+@router.post("/auth/resendValidationEmail", status_code=status.HTTP_200_OK)
+def resend_validation_email(
+    user_data: ResendEmailValidationDTO,
+    email_handler: EmailHandlerDependency,
+    db: DBSessionDependency,
+):
+    return UsersService(db).resend_validation_email(user_data, email_handler)
+
+
+@router.post("/auth/validateEmail", status_code=status.HTTP_200_OK)
+def validate_email(
+    validation_data: UserEmailValidationDTO,
+    email_handler: EmailHandlerDependency,
+    db: DBSessionDependency,
+):
+    return UsersService(db).validate_email(validation_data, email_handler)
+
+
+@router.post("/auth/forgotPassword", response_model=UserForgotPasswordDTO)
+def forgot_password(
+    user_data: UserForgotPasswordDTO,
+    email_handler: EmailHandlerDependency,
+    db: DBSessionDependency,
+):
+    return UsersService(db).forgot_password(user_data, email_handler)
+
+
+@router.post("/auth/resetPassword", status_code=UserProfileResponseDTO)
+def reset_password(user_data: UserPasswordResetDTO, db: DBSessionDependency):
+    return UsersService(db).reset_password(user_data)
 
 
 @router.post("/auth/login", response_model=UserLoginResponseDTO)
@@ -24,15 +67,34 @@ def login_user(user_data: UserLoginDTO, db: DBSessionDependency):
     return UsersService(db).login_user(user_data)
 
 
+# ==============================================================================
+
+
 @router.get("/auth/profile", response_model=UserProfileResponseDTO)
-def get_user_profile(auth_header: AuthDependency, db: DBSessionDependency):
-    return UsersService(db).get_user_profile(auth_header.credentials)
+def get_user_profile(current_user: CurrentUserDependency, db: DBSessionDependency):
+    return UsersService(db).get_user_profile(current_user)
 
 
 @router.patch("/auth/profile", response_model=UserProfileResponseDTO)
 def update_user_profile(
-    profile_data: UserProfileUpdateDTO,
-    auth_header: AuthDependency,
+    new_profile_info: UserProfileUpdateDTO,
+    current_user: CurrentUserDependency,
     db: DBSessionDependency,
 ):
-    return UsersService(db).update_user_profile(auth_header.credentials, profile_data)
+    return UsersService(db).update_user_profile(current_user, new_profile_info)
+
+
+@router.get("/users", response_model=FindUsersResponseDTO)
+def find_users(
+    username: Optional[str],
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+):
+    return UsersService(db).find_users(username, current_user)
+
+
+# @router.get("/auth/roles") # TODO: Check later (front) where was this used in the old app
+
+# @router.get("/auth/universities") # TODO: Check later (front) where was this used in the old app
+
+# ==============================================================================

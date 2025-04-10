@@ -33,7 +33,7 @@ def create_access_token(user_id: int) -> str:
     return token
 
 
-def decode_access_token(token: str) -> str:
+def verify_access_token(token: str) -> str:
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         return payload["sub"]
