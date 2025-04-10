@@ -15,6 +15,6 @@ class ValidationToken(Base):
     id: Mapped[IntPK]
     user_id: Mapped[BigInt] = mapped_column(ForeignKey("users.id"))
     token: Mapped[str]
-    expiry_date: Mapped[AutoDateTime]
+    expiration_date: Mapped[AutoDateTime]
 
-    user: Mapped["User"] = relationship(back_populates="validation_token")
+    user: Mapped["User"] = relationship(back_populates="validation_tokens")

@@ -6,7 +6,7 @@ from fastapi import Depends
 
 
 engine = create_engine(DB_URL, echo=True, pool_recycle=3600)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autoflush=False, bind=engine)
 
 # Dependency =============================
 

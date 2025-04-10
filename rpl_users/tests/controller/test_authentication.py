@@ -16,7 +16,7 @@ def test_create_user_success(client: TestClient):
         "surname": "AsdAsd",
         "student_id": "107378",
         "degree": "Ing. Informatica",
-        "university": "UBA",
+        "university": "FIUBA",
     }
 
     response = client.post("/api/v3/auth/signup", json=new_user_data)
@@ -51,7 +51,7 @@ def test_create_user_missing_fields(client: TestClient, test_name, missing_field
         "surname": "AsdAsd",
         "student_id": "107378",
         "degree": "Ing. Informatica",
-        "university": "UBA",
+        "university": "FIUBA",
     }
 
     del new_user_data[missing_field]
@@ -83,7 +83,7 @@ def test_create_user_validation_errors(
         "surname": "AsdAsd",
         "student_id": "107378",
         "degree": "Ing. Informatica",
-        "university": "UBA",
+        "university": "FIUBA",
     }
 
     response = client.post("/api/v3/auth/signup", json=new_user_data)

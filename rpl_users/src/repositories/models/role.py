@@ -18,4 +18,6 @@ class Role(Base):
     date_created: Mapped[AutoDateTime]
     last_updated: Mapped[AutoDateTime]
 
-    course_users: Mapped[List["CourseUser"]] = relationship(back_populates="role")
+    course_users: Mapped[List["CourseUser"]] = relationship(
+        back_populates="role", lazy="raise"
+    )

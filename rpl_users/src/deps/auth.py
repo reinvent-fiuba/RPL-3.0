@@ -20,7 +20,7 @@ def get_current_user(
 ) -> User:
     user_id = security.verify_access_token(auth_header.credentials)
     users_repo = UsersRepository(db_session)
-    user = users_repo.get_user_by_id(user_id)
+    user = users_repo.get_by_id(user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

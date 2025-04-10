@@ -4,11 +4,11 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: test_db
       MYSQL_USER: test_user
       MYSQL_PASSWORD: test_password
     volumes:
       - ./mysql_test_data:/var/lib/mysql
+      - ./db_test_config/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - dev_network
     ports:

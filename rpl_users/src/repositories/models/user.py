@@ -31,9 +31,11 @@ class User(Base):
     last_updated: Mapped[AutoDateTime]
     img_uri: Mapped[Optional[Str]]
 
-    course_users: Mapped[List["CourseUser"]] = relationship(back_populates="user")
-    validation_token: Mapped[List["ValidationToken"]] = relationship(
-        back_populates="user"
+    course_users: Mapped[List["CourseUser"]] = relationship(
+        back_populates="user", lazy="raise"
+    )
+    validation_tokens: Mapped[List["ValidationToken"]] = relationship(
+        back_populates="user", lazy="raise"
     )
 
     @validates("username")

@@ -1,4 +1,5 @@
 import logging
+import secrets
 import smtplib
 import ssl
 from email.message import EmailMessage
@@ -6,7 +7,13 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from rpl_users.src.config.env import SMTP_PASSWORD, SMTP_PORT, SMTP_SERVER, SMTP_USER
+from rpl_users.src.config.env import (
+    FRONTEND_URL,
+    SMTP_PASSWORD,
+    SMTP_PORT,
+    SMTP_SERVER,
+    SMTP_USER,
+)
 
 
 class EmailHandler:
@@ -27,7 +34,9 @@ class EmailHandler:
 
     # ==============================================================================
 
-    def send_validation_email(self, to_address, validation_link):
+    def send_validation_email(self, to_address) -> str:
+        token = secrets.token_urlsafe()
+        validation_link = f"{FRONTEND_URL}/user/validateEmail?token={token}"
         subject = "RPL: Validación de e-mail"
         body = f"""
                 <!DOCTYPE html>
@@ -36,14 +45,17 @@ class EmailHandler:
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <body>
-                    <p>Para validar tu e-mail, hacé click en el siguiente link: <a href="${validation_link}">VALIDAR E-MAIL</a></p>
+                    <p>Para validar tu e-mail, hacé click en el siguiente link: <a href="{validation_link}">VALIDAR E-MAIL</a></p>
                     <p>Esperamos que te guste la plataforma!</p>
                 </body>
                 </html>
         """
         self.__send_email(to_address, subject, body)
+        return token
 
-    def send_password_reset_email(self, to_address, reset_link):
+    def send_password_reset_email(self, to_address) -> str:
+        token = secrets.token_urlsafe(32)
+        reset_link = f"{FRONTEND_URL}/user/resetPassword?token={token}"
         subject = "RPL: Reseteo de contraseña"
         body = f"""
                 <!DOCTYPE html>
@@ -59,8 +71,11 @@ class EmailHandler:
                 </html>
             """
         self.__send_email(to_address, subject, body)
+        return token
 
-    def send_course_acceptance_email(self, to_address, user_data, course_data, link):
+    def send_course_acceptance_email(self, to_address, user_data, course_data):
+        # TODO: Add type hints
+        link = f"{FRONTEND_URL}/course/{course_data.id}"
         subject = "RPL: Aceptación de curso"
         body = f"""
                 <!DOCTYPE html>
