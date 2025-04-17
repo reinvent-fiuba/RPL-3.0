@@ -30,3 +30,15 @@ class CourseResponseDTO(BaseModel):
     img_uri: Optional[str]
     enrolled: bool = False
     accepted: bool = False
+
+class CourseCreationDTO(BaseModel):
+    name: str
+    university: str
+    subject_id: str
+    description: Optional[str]
+    active: bool
+    semester: str
+    semester_start_date: datetime.datetime  
+    semester_end_date: datetime.datetime
+    img_uri: Optional[str] 
+    course_admin_id: int 

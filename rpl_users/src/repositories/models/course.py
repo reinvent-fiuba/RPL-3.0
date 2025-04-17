@@ -19,7 +19,7 @@ class Course(Base):
     subject_id: Mapped[Optional[Str]]
     description: Mapped[Optional[Str]]
     active: Mapped[bool]
-    deleted: Mapped[bool]
+    deleted: Mapped[bool] = False
     semester: Mapped[Str]
     semester_start_date: Mapped[datetime.datetime]
     semester_end_date: Mapped[datetime.datetime]

@@ -1,9 +1,10 @@
 from .base import BaseRepository
 
 from .models.course import Course
+from .models.user import User
 import sqlalchemy as sa
 
-from ..dtos.course_dtos import CourseResponseDTO
+from ..dtos.course_dtos import CourseResponseDTO, CourseCreationDTO
 
 class CoursesRepository(BaseRepository):
     def get_all_courses_dict(self) -> dict[int, CourseResponseDTO]:
@@ -30,5 +31,27 @@ class CoursesRepository(BaseRepository):
             )
             for course in courses
         }
+    
+    def create_course(self, course_data: CourseCreationDTO, current_user: User) -> Course:
+        if current_user.is_admin != True:
+            raise ValueError("Only admins can create courses")
+        
+        # Create the new course
+        course = Course(
+            name=course_data.name,
+            university=course_data.university,
+            subject_id=course_data.subject_id,
+            description=course_data.description,
+            active=course_data.active,
+            semester=course_data.semester,
+            semester_start_date=course_data.semester_start_date,
+            semester_end_date=course_data.semester_end_date,
+            img_uri=course_data.img_uri,
+        )
+
+        self.db_session.add(course)
+        self.db_session.commit()
+        self.db_session.refresh(course)
+        return course
             
     

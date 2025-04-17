@@ -7,6 +7,7 @@ from rpl_users.src.dtos.course_dtos import (
     CourseResponseDTO,
     CurrentCourseUserDTO,
     ExternalCourseUserRequestDTO,
+    CourseCreationDTO
 )
 from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
@@ -24,6 +25,14 @@ def get_courses(
     db: DBSessionDependency,
 ):
     return CoursesService(db).get_courses(current_user)
+
+@router.post("/courses", response_model=CourseResponseDTO, status_code=status.HTTP_201_CREATED)
+def create_course(
+    course_data: CourseCreationDTO,
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+):
+    return CoursesService(db).create_course(course_data, current_user)
 
 # ==============================================================================
 

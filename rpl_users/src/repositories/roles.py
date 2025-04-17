@@ -19,3 +19,8 @@ class RolesRepository(BaseRepository):
             )
             for role in roles
         ]
+    
+    def get_by_name(self, name: str) -> Role:
+        return self.db_session.execute(
+            sa.select(Role).where(Role.name == name)
+        ).scalar_one_or_none()
