@@ -10,7 +10,7 @@ from rpl_users.src.repositories.models.user import User
 # =============================================================================
 
 
-def test_create_user_success(client: TestClient):
+def test_create_user_success(users_api_client: TestClient):
     new_user_data = {
         "username": "asd1234",
         "email": "asd@asd.com",
@@ -22,7 +22,7 @@ def test_create_user_success(client: TestClient):
         "university": "FIUBA",
     }
 
-    response = client.post("/api/v3/auth/signup", json=new_user_data)
+    response = users_api_client.post("/api/v3/auth/signup", json=new_user_data)
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -45,7 +45,9 @@ def test_create_user_success(client: TestClient):
         ("missing_password", "password"),
     ],
 )
-def test_create_user_missing_fields(client: TestClient, test_name, missing_field):
+def test_create_user_missing_fields(
+    users_api_client: TestClient, test_name, missing_field
+):
     new_user_data = {
         "username": "asd1234",
         "email": "asd@asd.com",
@@ -59,7 +61,7 @@ def test_create_user_missing_fields(client: TestClient, test_name, missing_field
 
     del new_user_data[missing_field]
 
-    response = client.post("/api/v3/auth/signup", json=new_user_data)
+    response = users_api_client.post("/api/v3/auth/signup", json=new_user_data)
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -76,7 +78,7 @@ def test_create_user_missing_fields(client: TestClient, test_name, missing_field
     ],
 )
 def test_create_user_validation_errors(
-    client: TestClient, test_name, username, email, password
+    users_api_client: TestClient, test_name, username, email, password
 ):
     new_user_data = {
         "username": username,
@@ -89,7 +91,7 @@ def test_create_user_validation_errors(
         "university": "FIUBA",
     }
 
-    response = client.post("/api/v3/auth/signup", json=new_user_data)
+    response = users_api_client.post("/api/v3/auth/signup", json=new_user_data)
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -97,10 +99,12 @@ def test_create_user_validation_errors(
     assert "too_short" or "value_error" in result["detail"][0]["type"]
 
 
-def test_login_wrong_credentials(client: TestClient, example_users: dict[str, User]):
+def test_login_wrong_credentials(
+    users_api_client: TestClient, example_users: dict[str, User]
+):
     login_data = {"username_or_email": "regularUsername", "password": "1"}
 
-    response = client.post("/api/v3/auth/login", json=login_data)
+    response = users_api_client.post("/api/v3/auth/login", json=login_data)
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -110,11 +114,11 @@ def test_login_wrong_credentials(client: TestClient, example_users: dict[str, Us
 
 @pytest.mark.parametrize("username_or_email", ["regularUsername", "regular@mail.com"])
 def test_login_success(
-    client: TestClient, example_users: dict[str, User], username_or_email
+    users_api_client: TestClient, example_users: dict[str, User], username_or_email
 ):
     login_data = {"username_or_email": username_or_email, "password": "secret"}
 
-    response = client.post("/api/v3/auth/login", json=login_data)
+    response = users_api_client.post("/api/v3/auth/login", json=login_data)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -124,9 +128,11 @@ def test_login_success(
 
 
 def test_get_profile(
-    client: TestClient, example_users: dict[str, User], regular_auth_headers
+    users_api_client: TestClient, example_users: dict[str, User], regular_auth_headers
 ):
-    response = client.get("/api/v3/auth/profile", headers=regular_auth_headers)
+    response = users_api_client.get(
+        "/api/v3/auth/profile", headers=regular_auth_headers
+    )
 
     assert response.status_code == 200
 
@@ -146,12 +152,12 @@ def test_get_profile(
     ],
 )
 def test_update_profile(
-    client: TestClient,
+    users_api_client: TestClient,
     example_users: dict[str, User],
     regular_auth_headers,
     fields_to_update,
 ):
-    response = client.patch(
+    response = users_api_client.patch(
         "/api/v3/auth/profile", json=fields_to_update, headers=regular_auth_headers
     )
 
@@ -166,12 +172,12 @@ def test_update_profile(
 
 
 def test_update_immutable_fields(
-    client: TestClient,
+    users_api_client: TestClient,
     example_users: dict[str, User],
     regular_auth_headers,
 ):
     immutable_fields = {"username": "regularUsername"}
-    response = client.patch(
+    response = users_api_client.patch(
         "/api/v3/auth/profile", json=immutable_fields, headers=regular_auth_headers
     )
 
@@ -183,8 +189,8 @@ def test_update_immutable_fields(
         assert result[key] == getattr(example_users["regular"], key)
 
 
-def test_course_roles_getter(client: TestClient):
-    response = client.get("/api/v3/auth/roles")
+def test_course_roles_getter(users_api_client: TestClient):
+    response = users_api_client.get("/api/v3/auth/roles")
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -194,8 +200,8 @@ def test_course_roles_getter(client: TestClient):
         assert role["name"] in expected_roles_names
 
 
-def test_course_universities_getter(client: TestClient):
-    response = client.get("/api/v3/auth/universities")
+def test_course_universities_getter(users_api_client: TestClient):
+    response = users_api_client.get("/api/v3/auth/universities")
 
     assert response.status_code == status.HTTP_200_OK
 

@@ -15,8 +15,8 @@ from rpl_users.src.repositories.models.user import User
 from rpl_users.src.config import env
 
 
-@pytest.fixture(name="session", scope="module")
-def session_fixture():
+@pytest.fixture(name="users_api_dbsession", scope="module")
+def users_api_dbsession_fixture():
     engine = create_engine(
         env.DB_URL,
         # connect_args={"check_same_thread": False}, # Use if sqlite is active
@@ -26,13 +26,13 @@ def session_fixture():
     Base.metadata.create_all(engine)
     logging.debug("[tests:conftest] DB tables: %s", Base.metadata.tables.keys())
     TestingSessionLocal = sessionmaker(autoflush=False, bind=engine)
-    with TestingSessionLocal() as session:
-        yield session
+    with TestingSessionLocal() as users_api_dbsession:
+        yield users_api_dbsession
     Base.metadata.drop_all(engine)
     logging.debug("[tests:conftest] DB tables dropped")
 
 
-@pytest.fixture(name="email_handler")
+@pytest.fixture(name="email_handler", scope="package")
 def email_handler_fixture():
     class TestEmailHandler:
         def send_validation_email(self, user):
@@ -47,21 +47,21 @@ def email_handler_fixture():
     return TestEmailHandler()
 
 
-@pytest.fixture(name="client")
-def client_fixture(session, email_handler):
-    app.dependency_overrides[get_db_session] = lambda: session
+@pytest.fixture(name="users_api_client", scope="function")
+def users_api_http_client_fixture(users_api_dbsession, email_handler):
+    app.dependency_overrides[get_db_session] = lambda: users_api_dbsession
     app.dependency_overrides[get_email_handler] = lambda: email_handler
 
-    client = TestClient(app)
-    yield client
+    users_api_client = TestClient(app)
+    yield users_api_client
     app.dependency_overrides.clear()
 
 
 # ==========================================================================
 
 
-@pytest.fixture(name="example_users")
-def example_users_fixture(session: Session):
+@pytest.fixture(name="example_users", scope="function")
+def example_users_fixture(users_api_dbsession: Session):
     admin_user = User(
         name="adminName",
         surname="adminSurname",
@@ -74,8 +74,8 @@ def example_users_fixture(session: Session):
         email_validated=True,
         is_admin=True,
     )
-    session.add(admin_user)
-    session.commit()
+    users_api_dbsession.add(admin_user)
+    users_api_dbsession.commit()
 
     regular_user = User(
         name="regularName",
@@ -89,21 +89,23 @@ def example_users_fixture(session: Session):
         email_validated=True,
         is_admin=False,
     )
-    session.add(regular_user)
-    session.commit()
+    users_api_dbsession.add(regular_user)
+    users_api_dbsession.commit()
 
-    session.refresh(admin_user)
-    session.refresh(regular_user)
+    users_api_dbsession.refresh(admin_user)
+    users_api_dbsession.refresh(regular_user)
     yield {"admin": admin_user, "regular": regular_user}
 
-    session.delete(admin_user)
-    session.delete(regular_user)
-    session.commit()
+    users_api_dbsession.delete(admin_user)
+    users_api_dbsession.delete(regular_user)
+    users_api_dbsession.commit()
 
 
-@pytest.fixture(name="regular_auth_headers")
-def regular_auth_headers_fixture(client: TestClient, example_users) -> dict[str, str]:
-    response = client.post(
+@pytest.fixture(name="regular_auth_headers", scope="function")
+def regular_auth_headers_fixture(
+    users_api_client: TestClient, example_users
+) -> dict[str, str]:
+    response = users_api_client.post(
         "/api/v3/auth/login",
         json={"username_or_email": "regularUsername", "password": "secret"},
     )
@@ -117,9 +119,11 @@ def regular_auth_headers_fixture(client: TestClient, example_users) -> dict[str,
     }
 
 
-@pytest.fixture(name="admin_auth_headers")
-def admin_auth_headers_fixture(client: TestClient, example_users) -> dict[str, str]:
-    response = client.post(
+@pytest.fixture(name="admin_auth_headers", scope="function")
+def admin_auth_headers_fixture(
+    users_api_client: TestClient, example_users
+) -> dict[str, str]:
+    response = users_api_client.post(
         "/api/v3/auth/login",
         json={"username_or_email": "adminUsername", "password": "secret"},
     )
