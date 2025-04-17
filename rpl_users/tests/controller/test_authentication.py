@@ -1,6 +1,9 @@
+import logging
 import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
+from sqlalchemy.orm import Session
+import sqlalchemy as sa
 
 from rpl_users.src.repositories.models.user import User
 
@@ -178,3 +181,25 @@ def test_update_immutable_fields(
 
     for key in immutable_fields:
         assert result[key] == getattr(example_users["regular"], key)
+
+
+def test_course_roles_getter(client: TestClient):
+    response = client.get("/api/v3/auth/roles")
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    expected_roles_names = ["course_admin", "student"]
+    for role in result:
+        assert role["name"] in expected_roles_names
+
+
+def test_course_universities_getter(client: TestClient):
+    response = client.get("/api/v3/auth/universities")
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    expected_universities_names = ["FIUBA"]
+    for university in result:
+        assert university["name"] in expected_universities_names

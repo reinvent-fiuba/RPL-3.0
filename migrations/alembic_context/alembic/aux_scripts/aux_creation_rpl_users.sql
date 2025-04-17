@@ -1,10 +1,4 @@
 
--- CREATE TABLE alembic_version (
---     version_num VARCHAR(32) NOT NULL, 
-    -- CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
--- );
-
-
 
 CREATE TABLE courses (
     id BIGINT NOT NULL AUTO_INCREMENT, 
@@ -82,4 +76,10 @@ CREATE TABLE validation_token (
     FOREIGN KEY(user_id) REFERENCES users (id)
 );
 
--- INSERT INTO alembic_version (version_num) VALUES ('7a171565597e');
+
+CREATE TABLE universities (
+    id BIGINT NOT NULL AUTO_INCREMENT, 
+    name VARCHAR(255), 
+    degrees VARCHAR(1000),
+    PRIMARY KEY (id)
+);

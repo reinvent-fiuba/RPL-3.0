@@ -4,6 +4,8 @@ from typing import List
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from rpl_users.src.deps.email import EmailHandler
+from rpl_users.src.dtos.role import RoleResponseDTO
+from rpl_users.src.dtos.university import UniversityResponseDTO
 from rpl_users.src.repositories.models.user import User
 from rpl_users.src.dtos.user import (
     FindUsersResponseDTO,
@@ -18,6 +20,8 @@ from rpl_users.src.dtos.user import (
     UserCreateResponseDTO,
     UserProfileUpdateDTO,
 )
+from rpl_users.src.repositories.roles import RolesRepository
+from rpl_users.src.repositories.universities import UniversitiesRepository
 from rpl_users.src.repositories.users import UsersRepository
 from rpl_users.src.repositories.validation_tokens import ValidationTokensRepository
 import rpl_users.src.deps.security as security

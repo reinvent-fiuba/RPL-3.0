@@ -15,7 +15,6 @@ from rpl_users.src.repositories.models.user import User
 from rpl_users.src.config import env
 
 
-
 @pytest.fixture(name="session", scope="module")
 def session_fixture():
     engine = create_engine(
@@ -29,6 +28,8 @@ def session_fixture():
     TestingSessionLocal = sessionmaker(autoflush=False, bind=engine)
     with TestingSessionLocal() as session:
         yield session
+    Base.metadata.drop_all(engine)
+    logging.debug("[tests:conftest] DB tables dropped")
 
 
 @pytest.fixture(name="email_handler")

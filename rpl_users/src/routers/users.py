@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Optional
 from fastapi import APIRouter, status
 from rpl_users.src.deps.auth import CurrentUserDependency
 from rpl_users.src.deps.email import EmailHandlerDependency
@@ -19,6 +19,9 @@ from rpl_users.src.services.users import UsersService
 
 
 router = APIRouter(prefix="/api/v3", tags=["Users"])
+
+
+# ==============================================================================
 
 
 @router.post("/auth/signup", status_code=status.HTTP_201_CREATED)
@@ -92,9 +95,5 @@ def find_users(
 ):
     return UsersService(db).find_users(username, current_user)
 
-
-# @router.get("/auth/roles") # TODO: Check later (front) where was this used in the old app
-
-# @router.get("/auth/universities") # TODO: Check later (front) where was this used in the old app
 
 # ==============================================================================
