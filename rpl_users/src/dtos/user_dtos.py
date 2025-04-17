@@ -79,3 +79,15 @@ class FindUsersResponseDTO(BaseModel):
     student_id: str
     degree: str
     university: str
+
+
+class CurrentUserDTO(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    name: str
+    surname: str
+    student_id: str
+    degree: str
+    university: str
+    img_uri: Optional[str] = None

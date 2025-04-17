@@ -1,4 +1,4 @@
-from rpl_users.src.dtos.university import UniversityResponseDTO
+from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
 from .base import BaseRepository
 
 from .models.university import University

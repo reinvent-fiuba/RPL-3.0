@@ -4,10 +4,11 @@ from typing import List
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from rpl_users.src.deps.email import EmailHandler
-from rpl_users.src.dtos.role import RoleResponseDTO
-from rpl_users.src.dtos.university import UniversityResponseDTO
+from rpl_users.src.dtos.role_dtos import RoleResponseDTO
+from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
 from rpl_users.src.repositories.models.user import User
-from rpl_users.src.dtos.user import (
+from rpl_users.src.dtos.user_dtos import (
+    CurrentUserDTO,
     FindUsersResponseDTO,
     ResendEmailValidationDTO,
     UserCreationDTO,
@@ -213,8 +214,6 @@ class UsersService:
             img_uri=user.img_uri,
         )
 
-    # =============================================================================
-
     def find_users(
         self, username_or_fullname: str, current_user: User
     ) -> List[FindUsersResponseDTO]:
@@ -236,3 +235,17 @@ class UsersService:
             )
             for user in users
         ]
+
+    # =============================================================================
+
+    def get_user_for_ext_service(current_user: User) -> CurrentUserDTO:
+        return CurrentUserDTO(
+            id=current_user.id,
+            username=current_user.username,
+            name=current_user.name,
+            surname=current_user.surname,
+            student_id=current_user.student_id,
+            degree=current_user.degree,
+            university=current_user.university,
+            img_uri=current_user.img_uri,
+        )

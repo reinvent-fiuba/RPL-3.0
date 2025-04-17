@@ -1,4 +1,4 @@
-from rpl_users.src.dtos.user import UserCreationDTO
+from rpl_users.src.dtos.user_dtos import UserCreationDTO
 from .base import BaseRepository
 
 from .models.user import User

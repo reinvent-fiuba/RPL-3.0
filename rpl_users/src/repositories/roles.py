@@ -1,4 +1,4 @@
-from rpl_users.src.dtos.role import RoleResponseDTO
+from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from .base import BaseRepository
 
 from .models.role import Role
