@@ -5,10 +5,12 @@ from rpl_users.src.dtos.course_dtos import (
 )
 from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
+from rpl_users.src.dtos.course_dtos import CourseResponseDTO
 from rpl_users.src.repositories.course_users import CourseUsersRepository
 from rpl_users.src.repositories.models.user import User
 from rpl_users.src.repositories.roles import RolesRepository
 from rpl_users.src.repositories.universities import UniversitiesRepository
+from rpl_users.src.repositories.courses import CoursesRepository
 from sqlalchemy.orm import Session
 
 
@@ -19,10 +21,20 @@ class CoursesService:
         self.course_users_repo = CourseUsersRepository(db_session)
         self.roles_repo = RolesRepository(db_session)
         self.universities_repo = UniversitiesRepository(db_session)
+        self.courses_repo = CoursesRepository(db_session)
+        
 
     # =============================================================================
 
-    # def __
+    def get_courses(self, current_user: User) -> list[CourseResponseDTO]:
+        courses_users = self.course_users_repo.get_course_by_user_id(current_user.id)
+        courses = self.courses_repo.get_all_courses_dict()
+        for courses_user in courses_users:
+            enrolled_course_id = courses.get(courses_user.course_id)
+            courses[enrolled_course_id].enrolled = True
+            courses[enrolled_course_id].accepted = courses_user.accepted
+        return courses.values()          
+ 
 
     # =============================================================================
 

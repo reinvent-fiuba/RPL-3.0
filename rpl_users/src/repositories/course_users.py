@@ -16,3 +16,14 @@ class CourseUsersRepository(BaseRepository):
             .scalars()
             .one_or_none()
         )
+    
+    def get_course_by_user_id(self, user_id: int) -> list[CourseUser]:
+        return (
+            self.db_session.execute(
+                sa.select(CourseUser).where(
+                    CourseUser.user_id == user_id,
+                )
+            )
+            .scalars()
+            .all()
+        )
