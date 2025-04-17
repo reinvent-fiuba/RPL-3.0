@@ -25,10 +25,8 @@ class CourseResponseDTO(BaseModel):
     description: Optional[str]
     active: bool
     semester: str
-    semester_start_date: str
-    semester_end_date: str
+    semester_start_date: datetime.datetime
+    semester_end_date: datetime.datetime
     img_uri: Optional[str]
-    date_created: datetime
-    last_updated: datetime
     enrolled: bool = False
     accepted: bool = False

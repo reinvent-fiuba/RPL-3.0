@@ -4,6 +4,7 @@ from rpl_users.src.deps.auth import CurrentUserDependency
 from rpl_users.src.deps.email import EmailHandlerDependency
 from rpl_users.src.deps.database import DBSessionDependency
 from rpl_users.src.dtos.course_dtos import (
+    CourseResponseDTO,
     CurrentCourseUserDTO,
     ExternalCourseUserRequestDTO,
 )
@@ -17,6 +18,12 @@ router = APIRouter(prefix="/api/v3", tags=["Courses"])
 
 # ==============================================================================
 
+@router.get("/courses", response_model=list[CourseResponseDTO])
+def get_courses(
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+):
+    return CoursesService(db).get_courses(current_user)
 
 # ==============================================================================
 

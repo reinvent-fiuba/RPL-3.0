@@ -22,11 +22,9 @@ class CoursesRepository(BaseRepository):
                 description=course.description,
                 active=course.active,
                 semester=course.semester,
-                semester_start_date=course.semester_start_date,
+                semester_start_date= course.semester_start_date,
                 semester_end_date=course.semester_end_date,
                 img_uri=course.img_uri,
-                date_created=course.date_created,
-                last_updated=course.last_updated,
                 enrolled=False,
                 accepted=False,
             )

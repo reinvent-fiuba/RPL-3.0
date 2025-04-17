@@ -3,14 +3,20 @@ import json
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine, select
-from sqlmodel.pool import StaticPool
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.pool import StaticPool
 
-from src.deps.database import get_db_session
-from src.main import app
-from src.repositories.models.course import Course
-from src.repositories.models.user import User, Role
-from src.repositories.models.course_user import CourseUser
+
+from rpl_users.src.deps.database import get_db_session
+from rpl_users.src.main import app
+from rpl_users.src.repositories.models.course import Course
+from rpl_users.src.repositories.models.user import User
+from rpl_users.src.repositories.models.base_model import Base
+from rpl_users.src.repositories.models.course_user import CourseUser
+
+from pwdlib import PasswordHash
+from pwdlib.hashers.bcrypt import BcryptHasher
 
 
 @pytest.fixture(name="session")
@@ -18,7 +24,7 @@ def session_fixture():
     engine = create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
     )
-    SQLModel.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
     with Session(engine) as session:
         yield session
 
@@ -36,6 +42,7 @@ def client_fixture(session: Session):
 @pytest.fixture(name="users")
 def users_fixture(session: Session):
     # Create an admin user
+    hasher = PasswordHash((BcryptHasher(rounds=10),))
     admin_user = User(
         id=1,
         name="some-name",
@@ -43,10 +50,10 @@ def users_fixture(session: Session):
         student_id="some-student-id",
         username="username",
         email="some@mail.com",
-        password="supersecret",  # In a real test, this would be hashed
+        password=hasher.hash("supersecret"),
         university="some-university",
         degree="some-hard-degree",
-        is_validated=True,
+        email_validated=True,
         is_admin=True
     )
     
@@ -58,10 +65,10 @@ def users_fixture(session: Session):
         student_id="other-student-id",
         username="otheruser",
         email="other@mail.com",
-        password="supersecret",  # In a real test, this would be hashed
+        password=hasher.hash("supersecret"), 
         university="other-university",
         degree="other-hard-degree",
-        is_validated=True,
+        email_validated=True,
         is_admin=False
     )
     
@@ -77,13 +84,16 @@ def course_fixture(session: Session):
         id=1,
         name="some-course",
         university="fiuba",
-        university_course_id="some-university-id",
+        subject_id="some-university-id",
         description="some-description",
         active=True,
         semester="2019-2c",
+        semester_start_date=datetime.now() - timedelta(days=60),
+        semester_end_date=datetime.now() + timedelta(days=60),
         date_created=datetime.now(),
         last_updated=datetime.now(),
-        image_uri="/some/uri"
+        img_uri="/some/uri",
+        deleted=False,
     )
     session.add(course)
     session.commit()
@@ -107,7 +117,7 @@ def course_user_fixture(session: Session, course: Course, users: dict, roles: di
 @pytest.fixture(name="auth_token")
 def auth_token_fixture(client: TestClient, users: dict):
     login_data = {
-        "username_or_email": users["admin"].username,
+        "username_or_email": "some@mail.com",
         "password": "supersecret"
     }
     response = client.post("/api/v3/auth/login", json=login_data)
@@ -119,10 +129,13 @@ def auth_token_fixture(client: TestClient, users: dict):
 
 
 def test_get_all_courses(client: TestClient, course: Course, auth_token: str):
-    response = client.get(
-        "/api/v2/courses",
-        headers={"Authorization": auth_token}
-    )
+    login_data = {
+        "username_or_email": "some@mail.com",
+        "password": "supersecret"
+    }
+    client.post("/api/v3/auth/login", json=login_data)
+    response = client.get("/api/v3/courses", headers={"Authorization": auth_token})
+    print(response.json())
     
     assert response.status_code == 200
     courses = response.json()
