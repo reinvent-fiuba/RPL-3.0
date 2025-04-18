@@ -2,40 +2,19 @@ from .base import BaseRepository
 
 from .models.course import Course
 from .models.user import User
-import sqlalchemy as sa
 
-from ..dtos.course_dtos import CourseResponseDTO, CourseCreationDTO
+from fastapi import HTTPException, status
+
+import sqlalchemy as sa
+from sqlalchemy.exc import IntegrityError
+
+from ..dtos.course_dtos import CourseCreationResponseDTO, CourseCreationDTO
 
 
 class CoursesRepository(BaseRepository):
-    def get_all_courses_dict(self) -> dict[int, CourseResponseDTO]:
-        # Get all courses from the database
-        courses = self.db_session.execute(sa.select(Course)).scalars().all()
-        return {
-            course.id: CourseResponseDTO(
-                id=course.id,
-                name=course.name,
-                university=course.university,
-                subject_id=course.subject_id,
-                description=course.description,
-                active=course.active,
-                semester=course.semester,
-                semester_start_date=course.semester_start_date,
-                semester_end_date=course.semester_end_date,
-                img_uri=course.img_uri,
-                enrolled=False,
-                accepted=False,
-            )
-            for course in courses
-        }
 
-    def create_course(
-        self, course_data: CourseCreationDTO, current_user: User
-    ) -> Course:
-        if current_user.is_admin is not True:
-            raise ValueError("Only admins can create courses")
-
-        course = Course(
+    def save_new_course(self, course_data: CourseCreationDTO) -> Course:
+        new_course = Course(
             name=course_data.name,
             university=course_data.university,
             subject_id=course_data.subject_id,
@@ -47,7 +26,14 @@ class CoursesRepository(BaseRepository):
             img_uri=course_data.img_uri,
         )
 
-        self.db_session.add(course)
-        self.db_session.commit()
-        self.db_session.refresh(course)
-        return course
+        try:
+            self.db_session.add(new_course)
+            self.db_session.commit()
+            self.db_session.refresh(new_course)
+            return new_course
+        except IntegrityError:
+            self.db_session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Course already exists with this name, university, and semester",
+            )
