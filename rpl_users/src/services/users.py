@@ -18,7 +18,7 @@ from rpl_users.src.dtos.user_dtos import (
     UserLoginResponseDTO,
     UserPasswordResetDTO,
     UserProfileResponseDTO,
-    UserCreateResponseDTO,
+    UserCreationResponseDTO,
     UserProfileUpdateDTO,
 )
 from rpl_users.src.repositories.roles import RolesRepository
@@ -98,7 +98,7 @@ class UsersService:
 
     def create_user(
         self, user_data: UserCreationDTO, email_handler: EmailHandler
-    ) -> UserCreateResponseDTO:
+    ) -> UserCreationResponseDTO:
         self.__verify_username_and_email_availability(
             user_data.username, user_data.email
         )
@@ -108,7 +108,7 @@ class UsersService:
             hashed_password,
         )
         self.__send_validation_email(new_user.id, user_data.email, email_handler)
-        return UserCreateResponseDTO(
+        return UserCreationResponseDTO(
             id=new_user.id,
             username=new_user.username,
             email=new_user.email,

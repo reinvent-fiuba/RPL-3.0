@@ -14,7 +14,7 @@ class UserCreationDTO(BaseModel):
     university: str
 
 
-class UserCreateResponseDTO(BaseModel):
+class UserCreationResponseDTO(BaseModel):
     id: int
     username: str
     email: EmailStr
