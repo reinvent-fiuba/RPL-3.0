@@ -146,7 +146,7 @@ def admin_auth_headers_fixture(
 
 
 @pytest.fixture(name="example_course")
-def course_fixture(session: Session):
+def course_fixture(users_api_dbsession: Session):
     course = Course(
         id=1,
         name="some-course",
@@ -162,18 +162,18 @@ def course_fixture(session: Session):
         img_uri=None,
         deleted=False,
     )
-    session.add(course)
-    session.commit()
-    session.refresh(course)
+    users_api_dbsession.add(course)
+    users_api_dbsession.commit()
+    users_api_dbsession.refresh(course)
     yield course
 
-    session.delete(course)
-    session.commit()
+    users_api_dbsession.delete(course)
+    users_api_dbsession.commit()
 
 
 @pytest.fixture(name="example_course_user")
 def course_user_fixture(
-    session: Session, course: Course, example_users: dict[str, User]
+    users_api_dbsession: Session, course: Course, example_users: dict[str, User]
 ):
     course_user = CourseUser(
         id=1,
@@ -184,36 +184,36 @@ def course_user_fixture(
         date_created=datetime.now(),
         last_updated=datetime.now(),
     )
-    session.add(course_user)
-    session.commit()
-    session.refresh(course_user)
+    users_api_dbsession.add(course_user)
+    users_api_dbsession.commit()
+    users_api_dbsession.refresh(course_user)
     yield course_user
-    session.delete(course_user)
-    session.commit()
+    users_api_dbsession.delete(course_user)
+    users_api_dbsession.commit()
 
 
 @pytest.fixture(name="base_roles", autouse=True)
-def insert_base_roles_fixture(session: Session):
+def insert_base_roles_fixture(users_api_dbsession: Session):
     course_admin_role = Role(
         id=1,
         name="course_admin",
         permissions="course_delete,course_view,course_edit,activity_view,activity_manage,activity_submit,user_view,user_manage",
     )
-    session.add(course_admin_role)
-    session.commit()
+    users_api_dbsession.add(course_admin_role)
+    users_api_dbsession.commit()
 
     student_role = Role(
         id=2,
         name="student",
         permissions="course_view,activity_view,activity_submit,user_view",
     )
-    session.add(student_role)
-    session.commit()
+    users_api_dbsession.add(student_role)
+    users_api_dbsession.commit()
 
-    session.refresh(course_admin_role)
-    session.refresh(student_role)
+    users_api_dbsession.refresh(course_admin_role)
+    users_api_dbsession.refresh(student_role)
     yield {"course_admin": course_admin_role, "student": student_role}
 
-    session.delete(course_admin_role)
-    session.delete(student_role)
-    session.commit()
+    users_api_dbsession.delete(course_admin_role)
+    users_api_dbsession.delete(student_role)
+    users_api_dbsession.commit()
