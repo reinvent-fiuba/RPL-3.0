@@ -21,5 +21,5 @@ class ActivityCategory(Base):
     last_updated: Mapped[AutoDateTime]
 
     activities: Mapped[List["Activity"]] = relationship(
-        back_populates="activity_category"
+        back_populates="activity_category", lazy="raise"
     )
