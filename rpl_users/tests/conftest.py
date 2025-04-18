@@ -20,7 +20,7 @@ from rpl_users.src.repositories.models.role import Role
 from rpl_users.src.config import env
 
 
-@pytest.fixture(name="users_api_dbsession", scope="module")
+@pytest.fixture(name="users_api_dbsession", scope="function")
 def users_api_dbsession_fixture():
     engine = create_engine(
         env.DB_URL,
@@ -37,7 +37,7 @@ def users_api_dbsession_fixture():
     logging.debug("[tests:conftest] DB tables dropped")
 
 
-@pytest.fixture(name="email_handler", scope="package")
+@pytest.fixture(name="email_handler", scope="function")
 def email_handler_fixture():
     class TestEmailHandler:
         def send_validation_email(self, user):
@@ -101,10 +101,6 @@ def example_users_fixture(users_api_dbsession: Session):
     users_api_dbsession.refresh(regular_user)
     yield {"admin": admin_user, "regular": regular_user}
 
-    users_api_dbsession.delete(admin_user)
-    users_api_dbsession.delete(regular_user)
-    users_api_dbsession.commit()
-
 
 @pytest.fixture(name="regular_auth_headers", scope="function")
 def regular_auth_headers_fixture(
@@ -167,9 +163,6 @@ def course_fixture(users_api_dbsession: Session):
     users_api_dbsession.refresh(course)
     yield course
 
-    users_api_dbsession.delete(course)
-    users_api_dbsession.commit()
-
 
 @pytest.fixture(name="example_course_user")
 def course_user_fixture(
@@ -188,8 +181,6 @@ def course_user_fixture(
     users_api_dbsession.commit()
     users_api_dbsession.refresh(course_user)
     yield course_user
-    users_api_dbsession.delete(course_user)
-    users_api_dbsession.commit()
 
 
 @pytest.fixture(name="base_roles", autouse=True)
@@ -213,7 +204,3 @@ def insert_base_roles_fixture(users_api_dbsession: Session):
     users_api_dbsession.refresh(course_admin_role)
     users_api_dbsession.refresh(student_role)
     yield {"course_admin": course_admin_role, "student": student_role}
-
-    users_api_dbsession.delete(course_admin_role)
-    users_api_dbsession.delete(student_role)
-    users_api_dbsession.commit()

@@ -10,13 +10,6 @@ from rpl_users.src.repositories.models.course_user import CourseUser
 from rpl_users.src.repositories.models.role import Role
 
 
-@pytest.fixture(scope="function", autouse=True)
-def cleanup_trash_data(users_api_dbsession: Session):
-    yield
-    users_api_dbsession.query(Course).delete()
-    users_api_dbsession.commit()
-
-
 def test_create_course_with_admin_user_without_optional_fields(
     users_api_client: TestClient, admin_auth_headers, example_users
 ):
@@ -219,3 +212,40 @@ def test_cannot_create_the_same_course_twice(
         "Course already exists with this name, university, and semester"
         in result["detail"]
     )
+
+
+def test_student_can_enroll_to_a_valid_course(
+    users_api_client: TestClient,
+    admin_auth_headers,
+    regular_auth_headers,
+    example_users,
+):
+    course_data = {
+        "name": "new course",
+        "university": "fiuba",
+        "subject_id": "8001",
+        "active": True,
+        "semester": "2019-2c",
+        "semester_start_date": "2019-03-01T00:00:00",
+        "semester_end_date": "2019-07-01T00:00:00",
+        "course_user_admin_user_id": example_users["regular"].id,
+    }
+
+    course_created_response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    )
+    example_course = course_created_response.json()
+
+    response = users_api_client.post(
+        f"/api/v3/courses/{example_course["id"]}/enroll",
+        headers=regular_auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+
+    print("debug flag", result)
+
+    assert result["id"] is not None
+    assert result["name"] == "student"

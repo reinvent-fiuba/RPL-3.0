@@ -53,6 +53,19 @@ def get_universities(
 # ==============================================================================
 
 
+@router.post("/courses/{course_id}/enroll", response_model=RoleResponseDTO)
+def enroll_user_in_course(
+    course_id: str,
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+):
+    print(f"Enrolling user {current_user.id} in course {course_id}")
+    return CoursesService(db).enroll_user_in_course(course_id, current_user)
+
+
+# ==============================================================================
+
+
 @router.post("/auth/externalCourseUserAuth", response_model=CurrentCourseUserDTO)
 def course_user_auth_from_activities_api(
     requested_access_info: ExternalCourseUserRequestDTO,

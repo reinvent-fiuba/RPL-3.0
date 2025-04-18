@@ -37,3 +37,10 @@ class CoursesRepository(BaseRepository):
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Course already exists with this name, university, and semester",
             )
+
+    def get_by_id(self, course_id: str) -> Course:
+        return (
+            self.db_session.execute(sa.select(Course).where(Course.id == course_id))
+            .scalars()
+            .one_or_none()
+        )

@@ -72,6 +72,44 @@ class CoursesService:
 
     # =============================================================================
 
+    def enroll_user_in_course(
+        self, course_id: str, current_user: User
+    ) -> RoleResponseDTO:
+        course_user = self.course_users_repo.get_by_course_id_and_user_id(
+            course_id, current_user.id
+        )
+        if course_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User already enrolled in the course",
+            )
+
+        course = self.courses_repo.get_by_id(course_id)
+        if not course:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Course not found"
+            )
+
+        role = self.roles_repo.get_by_name("student")
+        if not role:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Role not found"
+            )
+
+        new_course_user = self.course_users_repo.create_course_user(
+            course_id=course.id,
+            user_id=current_user.id,
+            role_id=role.id,
+        )
+
+        return RoleResponseDTO(
+            id=new_course_user.role.id,
+            name=new_course_user.role.name,
+            permissions=new_course_user.role.get_permissions(),
+        )
+
+    # =============================================================================
+
     def get_course_user_for_ext_service(
         self, requested_access_info: ExternalCourseUserRequestDTO, current_user: User
     ) -> CurrentCourseUserDTO:
