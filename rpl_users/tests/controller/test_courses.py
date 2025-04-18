@@ -38,6 +38,7 @@ def test_create_course_with_admin_user_without_optional_fields(
     assert response.status_code == status.HTTP_201_CREATED
 
     result = response.json()
+    assert result["id"] is not None
     assert result["name"] == course_data["name"]
     assert result["university"] == course_data["university"]
     assert result["active"] == course_data["active"]
@@ -69,6 +70,7 @@ def test_create_course_with_admin_user_with_all_fields(
     assert response.status_code == status.HTTP_201_CREATED
 
     result = response.json()
+    assert result["id"] is not None
     assert result["name"] == course_data["name"]
     assert result["university"] == course_data["university"]
     assert result["description"] == course_data["description"]
@@ -149,6 +151,7 @@ def test_create_course_with_admin_user_using_admin_user_as_admin(
     assert response.status_code == status.HTTP_201_CREATED
 
     result = response.json()
+    assert result["id"] is not None
     assert result["name"] == course_data["name"]
     assert result["university"] == course_data["university"]
     assert result["active"] == course_data["active"]
@@ -178,6 +181,7 @@ def test_create_course_with_admin_user_using_regular_user_as_admin(
     assert response.status_code == status.HTTP_201_CREATED
 
     result = response.json()
+    assert result["id"] is not None
     assert result["name"] == course_data["name"]
     assert result["university"] == course_data["university"]
     assert result["active"] == course_data["active"]

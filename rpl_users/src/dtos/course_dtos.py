@@ -19,6 +19,7 @@ class ExternalCourseUserRequestDTO(BaseModel):
 
 
 class CourseCreationResponseDTO(BaseModel):
+    id: int
     name: str
     university: str
     subject_id: Optional[str] = None

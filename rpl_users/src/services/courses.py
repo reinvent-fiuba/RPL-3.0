@@ -50,6 +50,7 @@ class CoursesService:
         new_course = self.courses_repo.save_new_course(course_data)
 
         return CourseCreationResponseDTO(
+            id=new_course.id,
             name=new_course.name,
             university=new_course.university,
             subject_id=new_course.subject_id,

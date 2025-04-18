@@ -5,28 +5,18 @@ if TYPE_CHECKING:
     from rpl_users.src.repositories.models.role import Role
     from rpl_users.src.repositories.models.user import User
 
-from sqlalchemy import ForeignKey, ForeignKeyConstraint
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base_model import Base, BigInt, AutoDateTime, IntPK, Str
+from .base_model import Base, BigInt, AutoDateTime, IntPK
 
 
 class CourseUser(Base):
     __tablename__ = "course_users"
 
-    __table_args__ = (
-        ForeignKeyConstraint(
-            ["course_name", "course_university", "course_semester"],
-            ["courses.name", "courses.university", "courses.semester"],
-            ondelete="CASCADE",
-        ),
-    )
-
     id: Mapped[IntPK]
 
-    course_name: Mapped[Str] = mapped_column()
-    course_university: Mapped[Str] = mapped_column()
-    course_semester: Mapped[Str] = mapped_column()
+    course_id: Mapped[BigInt] = mapped_column(ForeignKey("courses.id"))
     user_id: Mapped[BigInt] = mapped_column(ForeignKey("users.id"))
     role_id: Mapped[BigInt] = mapped_column(ForeignKey("roles.id"))
     accepted: Mapped[bool]
@@ -36,3 +26,5 @@ class CourseUser(Base):
     course: Mapped["Course"] = relationship(back_populates="course_users")
     role: Mapped["Role"] = relationship(back_populates="course_users")
     user: Mapped["User"] = relationship(back_populates="course_users")
+
+    __table_args__ = (UniqueConstraint("course_id", "user_id", name="uq_course_user"),)
