@@ -17,28 +17,30 @@ class ExternalCourseUserRequestDTO(BaseModel):
     course_id: int
     required_permission: str
 
+
 class CourseResponseDTO(BaseModel):
     id: int
     name: str
     university: str
-    subject_id: Optional[str]
-    description: Optional[str]
+    subject_id: Optional[str] = None
+    description: Optional[str] = None
     active: bool
     semester: str
     semester_start_date: datetime.datetime
     semester_end_date: datetime.datetime
-    img_uri: Optional[str]
+    img_uri: Optional[str] = None
     enrolled: bool = False
     accepted: bool = False
+
 
 class CourseCreationDTO(BaseModel):
     name: str
     university: str
     subject_id: str
-    description: Optional[str]
+    description: Optional[str] = None
     active: bool
     semester: str
-    semester_start_date: datetime.datetime  
+    semester_start_date: datetime.datetime
     semester_end_date: datetime.datetime
-    img_uri: Optional[str] 
-    course_admin_id: int 
+    img_uri: Optional[str] = None
+    course_user_admin_user_id: int

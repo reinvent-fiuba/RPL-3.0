@@ -6,14 +6,11 @@ import sqlalchemy as sa
 
 from ..dtos.course_dtos import CourseResponseDTO, CourseCreationDTO
 
+
 class CoursesRepository(BaseRepository):
     def get_all_courses_dict(self) -> dict[int, CourseResponseDTO]:
         # Get all courses from the database
-        courses = (
-            self.db_session.execute(sa.select(Course))
-            .scalars()
-            .all()
-        )
+        courses = self.db_session.execute(sa.select(Course)).scalars().all()
         return {
             course.id: CourseResponseDTO(
                 id=course.id,
@@ -23,7 +20,7 @@ class CoursesRepository(BaseRepository):
                 description=course.description,
                 active=course.active,
                 semester=course.semester,
-                semester_start_date= course.semester_start_date,
+                semester_start_date=course.semester_start_date,
                 semester_end_date=course.semester_end_date,
                 img_uri=course.img_uri,
                 enrolled=False,
@@ -31,12 +28,13 @@ class CoursesRepository(BaseRepository):
             )
             for course in courses
         }
-    
-    def create_course(self, course_data: CourseCreationDTO, current_user: User) -> Course:
-        if current_user.is_admin != True:
+
+    def create_course(
+        self, course_data: CourseCreationDTO, current_user: User
+    ) -> Course:
+        if current_user.is_admin is not True:
             raise ValueError("Only admins can create courses")
-        
-        # Create the new course
+
         course = Course(
             name=course_data.name,
             university=course_data.university,
@@ -53,5 +51,3 @@ class CoursesRepository(BaseRepository):
         self.db_session.commit()
         self.db_session.refresh(course)
         return course
-            
-    

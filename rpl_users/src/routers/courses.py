@@ -7,7 +7,7 @@ from rpl_users.src.dtos.course_dtos import (
     CourseResponseDTO,
     CurrentCourseUserDTO,
     ExternalCourseUserRequestDTO,
-    CourseCreationDTO
+    CourseCreationDTO,
 )
 from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
@@ -19,20 +19,25 @@ router = APIRouter(prefix="/api/v3", tags=["Courses"])
 
 # ==============================================================================
 
+
 @router.get("/courses", response_model=list[CourseResponseDTO])
-def get_courses(
+def get_courses_for_user(
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
 ):
-    return CoursesService(db).get_courses(current_user)
+    return CoursesService(db).get_courses_for_user(current_user)
 
-@router.post("/courses", response_model=CourseResponseDTO, status_code=status.HTTP_201_CREATED)
+
+@router.post(
+    "/courses", response_model=CourseResponseDTO, status_code=status.HTTP_201_CREATED
+)
 def create_course(
     course_data: CourseCreationDTO,
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
 ):
     return CoursesService(db).create_course(course_data, current_user)
+
 
 # ==============================================================================
 
@@ -54,7 +59,7 @@ def get_universities(
 # ==============================================================================
 
 
-@router.get("/auth/externalCourseUserAuth", response_model=CurrentCourseUserDTO)
+@router.post("/auth/externalCourseUserAuth", response_model=CurrentCourseUserDTO)
 def course_user_auth_from_activities_api(
     requested_access_info: ExternalCourseUserRequestDTO,
     current_user: CurrentUserDependency,
