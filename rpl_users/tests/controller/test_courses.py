@@ -554,13 +554,10 @@ def test_cannot_update_course_with_user_that_doest_have_course_edit_permission(
         f"/api/v3/courses/{course_id}", json=course_data, headers=regular_auth_headers
     )
 
-    assert response.status_code == status.HTTP_409_CONFLICT
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     result = response.json()
-    assert (
-        "Course already exists with this name, university, and semester"
-        in result["detail"]
-    )
+    assert "User does not have permission to edit the course" in result["detail"]
 
 
 def test_update_course_with_user_that_has_course_edit_permission(
@@ -667,7 +664,6 @@ def test_get_updated_course_of_user(
     assert result[0]["accepted"] is True
 
 
-@pytest.mark.only
 def test_cannot_update_course_to_an_existing_one(
     users_api_client: TestClient,
     example_users,
@@ -761,6 +757,56 @@ def test_enroll_regular_user_into_course(
     assert result["date_created"] is not None
     assert result["last_updated"] is not None
 
-# cannot enroll non existing user
-# cannot enroll user that is already enrolled
-# cannot enroll user to non existing course
+
+def test_cannot_enroll_an_user_twice(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+    regular_auth_headers,
+):
+    course_data = {
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "active": True,
+        "semester": "2019-1c",
+        "semester_start_date": "2019-03-01T00:00:00",
+        "semester_end_date": "2019-07-01T00:00:00",
+        "course_user_admin_user_id": example_users["admin"].id,
+    }
+
+    response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    result = response.json()
+    course_id = result["id"]
+
+    users_api_client.post(
+        f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
+    )
+
+    response = users_api_client.post(
+        f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
+    )
+
+    assert response.status_code == status.HTTP_409_CONFLICT
+
+    result = response.json()
+    assert "User is already registered in the course" in result["detail"]
+
+
+def test_cannot_enroll_an_user_to_a_non_existing_course(
+    users_api_client: TestClient,
+    regular_auth_headers,
+):
+    non_existing_course_id = 99999999
+
+    response = users_api_client.post(
+        f"/api/v3/courses/{non_existing_course_id}/enroll", headers=regular_auth_headers
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    result = response.json()
+    assert "Course not found" in result["detail"]

@@ -76,7 +76,7 @@ class CoursesRepository(BaseRepository):
     def get_all_courses(self) -> list[Course]:
         return self.db_session.execute(sa.select(Course)).scalars().all()
 
-    def get_by_id(self, course_id: str) -> Course:
+    def get_course_with_id(self, course_id: str) -> Course:
         return (
             self.db_session.execute(sa.select(Course).where(Course.id == course_id))
             .scalars()

@@ -80,7 +80,6 @@ class CoursesService:
                 detail="Course user not found",
             )
 
-        logging.warning(f"Course user: {course_user.role.permissions}")
         if not self._has_course_user_permission(course_user, "course_edit"):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -121,24 +120,11 @@ class CoursesService:
     def enroll_user_in_course(
         self, course_id: str, current_user: User
     ) -> RoleResponseDTO:
-        # course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
-        # if course_user:
-        #     raise HTTPException(
-        #         status_code=status.HTTP_400_BAD_REQUEST,
-        #         detail="User already enrolled in the course",
-        #     )
-
-        # course = self.courses_repo.get_by_id(course_id)
-        # if not course:
-        #     raise HTTPException(
-        #         status_code=status.HTTP_404_NOT_FOUND, detail="Course not found"
-        #     )
-
-        # role = self.roles_repo.get_by_name("student")
-        # if not role:
-        #     raise HTTPException(
-        #         status_code=status.HTTP_404_NOT_FOUND, detail="Role not found"
-        #     )
+        course = self.courses_repo.get_course_with_id(course_id)
+        if not course:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Course not found"
+            )
 
         new_course_user = self.course_users_repo.save_new_course_user(
             course_id=course_id,
@@ -159,12 +145,21 @@ class CoursesService:
     # ====================== QUERYING - ROLES ====================== #
 
     def get_all_roles(self) -> list[RoleResponseDTO]:
-        return self.roles_repo.get_all()
+        return [
+            RoleResponseDTO.from_role(role) for role in self.roles_repo.get_all_roles()
+        ]
 
     # ====================== QUERYING - UNIVERSITIES ====================== #
 
     def get_all_universities(self) -> list[UniversityResponseDTO]:
-        return self.universities_repo.get_all()
+        return [
+            UniversityResponseDTO(
+                id=university.id,
+                name=university.name,
+                degrees=self.__parse_degrees(university.degrees),
+            )
+            for university in self.universities_repo.get_all_universities()
+        ]
 
     def get_course_user_for_ext_service(
         self, requested_access_info: ExternalCourseUserRequestDTO, current_user: User

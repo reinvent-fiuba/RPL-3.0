@@ -2,7 +2,11 @@ from .base import BaseRepository
 
 from .models.course_user import CourseUser
 from .models.course import Course
+
+from fastapi import HTTPException, status
+
 import sqlalchemy as sa
+from sqlalchemy.exc import IntegrityError
 
 
 class CourseUsersRepository(BaseRepository):
@@ -22,10 +26,17 @@ class CourseUsersRepository(BaseRepository):
             role_id=role_id,
             accepted=accepted,
         )
-        self.db_session.add(new_course_user)
-        self.db_session.commit()
-        self.db_session.refresh(new_course_user)
-        return new_course_user
+        try:
+            self.db_session.add(new_course_user)
+            self.db_session.commit()
+            self.db_session.refresh(new_course_user)
+            return new_course_user
+        except IntegrityError:
+            self.db_session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="User is already registered in the course",
+            )
 
     # ====================== QUERYING ====================== #
 
@@ -51,39 +62,3 @@ class CourseUsersRepository(BaseRepository):
             .scalars()
             .all()
         )
-
-    def exists_course_by_name_subject_id_semester_and_admin(
-        self, name: str, subject_id: str, semester: str, admin_id: int
-    ) -> bool:
-        return (
-            self.db_session.execute(
-                sa.select(Course).where(
-                    Course.name == name,
-                    Course.subject_id == subject_id,
-                    Course.semester == semester,
-                    Course.course_users.any(CourseUser.user_id == admin_id),
-                )
-            )
-            .scalars()
-            .one_or_none()
-            is not None
-        )
-
-    def enrroll_user_in_course(
-        self, course_id: int, user_id: int, role_id: int
-    ) -> CourseUser:
-        # Check if the user is already enrolled in the course
-        existing_course_user = self.get_course_user(course_id, user_id)
-        if existing_course_user:
-            raise ValueError("User is already registered in the course")
-
-        course_user = CourseUser(
-            course_id=course_id,
-            user_id=user_id,
-            role_id=role_id,
-            accepted=False,
-        )
-        self.db_session.add(course_user)
-        self.db_session.commit()
-        self.db_session.refresh(course_user)
-        return course_user
