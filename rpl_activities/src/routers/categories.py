@@ -17,11 +17,13 @@ router = APIRouter(prefix="/api/v3", tags=["ActivityCategories"])
     response_model=CategoryCreationDTO,
 )
 def create_category(
-    course_id: str,
+    course_id: int,
     category_data: CategoryCreationDTO,
     current_course_user: CurrentCourseUserDependency,
     db: DBSessionDependency,
 ) -> CategoryCreationDTO:
     return CategoriesService(db).create_category(
-        current_course_user, course_id, category_data
+        current_course_user=current_course_user,
+        course_id=course_id,
+        category_data=category_data,
     )

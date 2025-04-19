@@ -58,7 +58,7 @@ def activities_api_dbsession_fixture(users_api_dbsession):
 
 @pytest.fixture(name="activities_api_client", scope="function")
 def activities_api_http_client_fixture(
-    activities_api_dbsession, users_api_client: TestClient
+    activities_api_dbsession, users_api_client: TestClient, example_course_user
 ):
     app.dependency_overrides[get_db_session] = lambda: activities_api_dbsession
 
