@@ -12,7 +12,7 @@ class CategoriesService:
     def create_category(
         self,
         current_course_user: CurrentCourseUser,
-        course_id,
+        course_id: int,
         category_data: CategoryCreationDTO,
     ) -> CategoryCreationDTO:
         if not current_course_user.has_authority("activity_manage"):

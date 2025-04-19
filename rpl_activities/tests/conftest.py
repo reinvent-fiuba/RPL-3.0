@@ -107,7 +107,6 @@ def activities_api_http_client_fixture(
 
 @pytest.fixture(name="example_category")
 def example_category_fixture(
-    example_course_user,
     activities_api_dbsession: Session,
 ):
     category = ActivityCategory(

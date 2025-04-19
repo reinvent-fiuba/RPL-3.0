@@ -49,8 +49,8 @@ from fastapi import status
 
 
 def test_create_category(activities_api_client: TestClient, admin_auth_headers):
+    course_id = 1
     category_data = {
-        "course_id": 1,
         "name": "New Category",
         "description": "Some new description",
         "active": True,
@@ -58,16 +58,14 @@ def test_create_category(activities_api_client: TestClient, admin_auth_headers):
         "last_updated": "2023-10-01T00:00:00Z",
     }
     response = activities_api_client.post(
-        "/api/v3/courses/1/categories",
+        f"/api/v3/courses/{course_id}/categories",
         headers=admin_auth_headers,
         json=category_data,
     )
-    logging.warning(f"Response: {response.status_code}, {response.json()}")
     assert response.status_code == status.HTTP_201_CREATED
     response_category = response.json()
     assert response_category["name"] == category_data["name"]
     assert response_category["description"] == category_data["description"]
-    assert response_category["course_id"] == 1
     assert "date_created" in response_category
     assert "last_updated" in response_category
 

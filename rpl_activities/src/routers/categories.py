@@ -23,7 +23,7 @@ def create_category(
     db: DBSessionDependency,
 ) -> CategoryCreationDTO:
     return CategoriesService(db).create_category(
-        current_course_user=current_course_user,
-        course_id=course_id,
-        category_data=category_data,
+        current_course_user,
+        course_id,
+        category_data,
     )

@@ -5,9 +5,11 @@ from .models.activity_category import ActivityCategory
 
 
 class CategoriesRepository(BaseRepository):
-    def create_category(self, category_data: CategoryCreationDTO) -> ActivityCategory:
+    def create_category(
+        self, course_id: int, category_data: CategoryCreationDTO
+    ) -> ActivityCategory:
         new_category = ActivityCategory(
-            course_id=category_data.course_id,
+            course_id=course_id,
             name=category_data.name,
             description=category_data.description,
             date_created=category_data.date_created,

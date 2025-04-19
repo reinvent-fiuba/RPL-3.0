@@ -140,9 +140,6 @@ class CoursesService:
     def get_course_user_for_ext_service(
         self, course_id, current_user: User
     ) -> CurrentCourseUserResponseDTO:
-        logging.warning(
-            f"get_course_user_for_ext_service: course_id={course_id}, current_user.id={current_user.id}"
-        )
         course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
         if not course_user:
             raise HTTPException(
