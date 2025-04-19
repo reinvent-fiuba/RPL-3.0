@@ -141,8 +141,8 @@ def admin_auth_headers_fixture(
 # ==========================================================================
 
 
-@pytest.fixture(name="example_course")
-def course_fixture(users_api_dbsession: Session):
+@pytest.fixture(name="example_course", scope="function")
+def example_course_fixture(users_api_dbsession: Session):
     course = Course(
         id=1,
         name="some-course",
