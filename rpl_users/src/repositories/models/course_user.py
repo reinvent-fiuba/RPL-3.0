@@ -24,7 +24,7 @@ class CourseUser(Base):
     last_updated: Mapped[AutoDateTime]
 
     course: Mapped["Course"] = relationship(back_populates="course_users")
-    role: Mapped["Role"] = relationship(back_populates="course_users")
     user: Mapped["User"] = relationship(back_populates="course_users")
+    role: Mapped["Role"] = relationship(back_populates="course_users")
 
     __table_args__ = (UniqueConstraint("course_id", "user_id", name="uq_course_user"),)

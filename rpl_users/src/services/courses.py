@@ -1,16 +1,20 @@
+import logging
 from pkgutil import get_data
 from fastapi import HTTPException, status
 from rpl_users.src.dtos.course_dtos import (
     CourseCreationDTO,
+    CourseUptateDTO,
+    CourseUserResponseDTO,
     CurrentCourseUserDTO,
     ExternalCourseUserRequestDTO,
 )
 from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
-from rpl_users.src.dtos.course_dtos import CourseCreationResponseDTO
+from rpl_users.src.dtos.course_dtos import CourseResponseDTO
 from rpl_users.src.repositories.course_users import CourseUsersRepository
 from rpl_users.src.repositories.models.user import User
 from rpl_users.src.repositories.models.course import Course
+from rpl_users.src.repositories.models.course_user import CourseUser
 from rpl_users.src.repositories.models.role import Role
 from rpl_users.src.repositories.roles import RolesRepository
 from rpl_users.src.repositories.users import UsersRepository
@@ -22,98 +26,159 @@ from sqlalchemy.orm import Session
 class CoursesService:
     def __init__(self, db_session: Session):
         self.users_repo = UsersRepository(db_session)
-        self.course_users_repo = CourseUsersRepository(db_session)
         self.roles_repo = RolesRepository(db_session)
-        self.universities_repo = UniversitiesRepository(db_session)
         self.courses_repo = CoursesRepository(db_session)
+        self.course_users_repo = CourseUsersRepository(db_session)
+        self.universities_repo = UniversitiesRepository(db_session)
 
-    # =============================================================================
+    # ====================== PRIVATE - UTILS ====================== #
+
+    def _has_course_user_permission(
+        self, course_user: CourseUser, permission: str
+    ) -> bool:
+        if course_user.user.is_admin:
+            return True
+        else:
+            return permission in course_user.role.permissions.split(",")
+
+    # ====================== MANAGING - COURSES ====================== #
 
     def create_course(
         self, course_data: CourseCreationDTO, current_user: User
-    ) -> CourseCreationResponseDTO:
+    ) -> CourseResponseDTO:
         if not current_user.is_admin:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Only admins can create courses",
             )
 
-        course_user_admin = self.users_repo.get_by_id(
-            course_data.course_user_admin_user_id
-        )
-        if course_user_admin is None:
+        user_admin = self.users_repo.get_by_id(course_data.course_user_admin_user_id)
+        if user_admin is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User not found",
             )
 
         new_course = self.courses_repo.save_new_course(course_data)
-
-        return CourseCreationResponseDTO(
-            id=new_course.id,
-            name=new_course.name,
-            university=new_course.university,
-            subject_id=new_course.subject_id,
-            description=new_course.description,
-            active=new_course.active,
-            semester=new_course.semester,
-            semester_start_date=new_course.semester_start_date,
-            semester_end_date=new_course.semester_end_date,
-            img_uri=new_course.img_uri,
+        self.course_users_repo.save_new_course_user(
+            course_id=new_course.id,
+            user_id=user_admin.id,
+            role_id=self._get_role_named("course_admin").id,
+            accepted=True,
         )
 
-    # =============================================================================
+        return CourseResponseDTO.from_course(new_course)
 
-    def get_roles(self) -> list[RoleResponseDTO]:
-        return self.roles_repo.get_all()
+    def edit_course(
+        self, course_id: str, course_data: CourseUptateDTO, current_user: User
+    ) -> CourseResponseDTO:
 
-    def get_universities(self) -> list[UniversityResponseDTO]:
-        return self.universities_repo.get_all()
+        course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
+        if not course_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Course user not found",
+            )
 
-    # =============================================================================
+        logging.warning(f"Course user: {course_user.role.permissions}")
+        if not self._has_course_user_permission(course_user, "course_edit"):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User does not have permission to edit the course",
+            )
+
+        return CourseResponseDTO(
+            id=course_id,
+            name=course_data.name,
+            university=course_data.university,
+            subject_id=course_data.subject_id,
+            description=course_data.description,
+            active=course_data.active,
+            semester=course_data.semester,
+            semester_start_date=course_data.semester_start_date,
+            semester_end_date=course_data.semester_end_date,
+            img_uri=course_data.img_uri,
+        )
+
+    # ====================== QUERYING - COURSES ====================== #
+
+    def get_all_courses_including_their_relationship_with_user(
+        self, current_user: User
+    ) -> list[CourseUserResponseDTO]:
+        courses_with_user_info = []
+        for course in self.courses_repo.get_all_courses():
+            course_user = self.course_users_repo.get_course_user(
+                course.id,
+                current_user.id,
+            )
+            if course_user:
+                courses_with_user_info.append(
+                    CourseUserResponseDTO.from_course_and_user_info(
+                        course, True, course_user.accepted
+                    )
+                )
+            else:
+                courses_with_user_info.append(
+                    CourseUserResponseDTO.from_course_and_user_info(
+                        course, False, False
+                    )
+                )
+        return courses_with_user_info
+
+    # ====================== MANAGING - COURSE USERS ====================== #
 
     def enroll_user_in_course(
         self, course_id: str, current_user: User
     ) -> RoleResponseDTO:
-        course_user = self.course_users_repo.get_by_course_id_and_user_id(
-            course_id, current_user.id
-        )
-        if course_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User already enrolled in the course",
-            )
+        # course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
+        # if course_user:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_400_BAD_REQUEST,
+        #         detail="User already enrolled in the course",
+        #     )
 
-        course = self.courses_repo.get_by_id(course_id)
-        if not course:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Course not found"
-            )
+        # course = self.courses_repo.get_by_id(course_id)
+        # if not course:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_404_NOT_FOUND, detail="Course not found"
+        #     )
 
-        role = self.roles_repo.get_by_name("student")
-        if not role:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Role not found"
-            )
+        # role = self.roles_repo.get_by_name("student")
+        # if not role:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_404_NOT_FOUND, detail="Role not found"
+        #     )
 
-        new_course_user = self.course_users_repo.create_course_user(
-            course_id=course.id,
+        new_course_user = self.course_users_repo.save_new_course_user(
+            course_id=course_id,
             user_id=current_user.id,
-            role_id=role.id,
+            role_id=self._get_role_named("student").id,
+            accepted=False,
         )
 
-        return RoleResponseDTO(
-            id=new_course_user.role.id,
-            name=new_course_user.role.name,
-            permissions=new_course_user.role.get_permissions(),
-        )
+        return RoleResponseDTO.from_course_user(new_course_user)
 
     # =============================================================================
+
+    # ====================== PRIVATE - QUERYING - ROLES ====================== #
+
+    def _get_role_named(self, role_name: str) -> list[RoleResponseDTO]:
+        return self.roles_repo.get_role_named(role_name)
+
+    # ====================== QUERYING - ROLES ====================== #
+
+    def get_all_roles(self) -> list[RoleResponseDTO]:
+        return self.roles_repo.get_all()
+
+    # ====================== QUERYING - UNIVERSITIES ====================== #
+
+    def get_all_universities(self) -> list[UniversityResponseDTO]:
+        return self.universities_repo.get_all()
 
     def get_course_user_for_ext_service(
         self, requested_access_info: ExternalCourseUserRequestDTO, current_user: User
     ) -> CurrentCourseUserDTO:
-        course_user = self.course_users_repo.get_by_course_id_and_user_id(
+        course_user = self.course_users_repo.get_course_user(
             requested_access_info.course_id, current_user.id
         )
         if not course_user:

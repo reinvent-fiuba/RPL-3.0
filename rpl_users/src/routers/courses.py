@@ -1,13 +1,15 @@
-from typing import Optional
+from typing import List
 from fastapi import APIRouter, status
 from rpl_users.src.deps.auth import CurrentUserDependency
 from rpl_users.src.deps.email import EmailHandlerDependency
 from rpl_users.src.deps.database import DBSessionDependency
 from rpl_users.src.dtos.course_dtos import (
-    CourseCreationResponseDTO,
+    CourseCreationDTO,
+    CourseUptateDTO,
+    CourseResponseDTO,
+    CourseUserResponseDTO,
     CurrentCourseUserDTO,
     ExternalCourseUserRequestDTO,
-    CourseCreationDTO,
 )
 from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
@@ -17,12 +19,12 @@ from rpl_users.src.services.courses import CoursesService
 router = APIRouter(prefix="/api/v3", tags=["Courses"])
 
 
-# ==============================================================================
+# ====================== MANAGING - COURSES ====================== #
 
 
 @router.post(
     "/courses",
-    response_model=CourseCreationResponseDTO,
+    response_model=CourseResponseDTO,
     status_code=status.HTTP_201_CREATED,
 )
 def create_course(
@@ -33,21 +35,52 @@ def create_course(
     return CoursesService(db).create_course(course_data, current_user)
 
 
+@router.put(
+    "/courses/{course_id}",
+    response_model=CourseResponseDTO,
+    status_code=status.HTTP_200_OK,
+)
+def update_course(
+    course_id: str,
+    course_data: CourseUptateDTO,
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+):
+    return CoursesService(db).edit_course(course_id, course_data, current_user)
+
+
+# ====================== QUERYING - COURSES ====================== #
+
+
+@router.get(
+    "/courses",
+    response_model=List[CourseUserResponseDTO],
+    status_code=status.HTTP_200_OK,
+)
+def get_all_courses_including_their_relationship_with_user(
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+):
+    return CoursesService(db).get_all_courses_including_their_relationship_with_user(
+        current_user
+    )
+
+
 # ==============================================================================
 
 
 @router.get("/auth/roles", response_model=list[RoleResponseDTO])
-def get_roles(
+def get_all_roles(
     db: DBSessionDependency,
 ):
-    return CoursesService(db).get_roles()
+    return CoursesService(db).get_all_roles()
 
 
 @router.get("/auth/universities", response_model=list[UniversityResponseDTO])
-def get_universities(
+def get_all_universities(
     db: DBSessionDependency,
 ):
-    return CoursesService(db).get_universities()
+    return CoursesService(db).get_all_universities()
 
 
 # ==============================================================================
@@ -59,7 +92,6 @@ def enroll_user_in_course(
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
 ):
-    print(f"Enrolling user {current_user.id} in course {course_id}")
     return CoursesService(db).enroll_user_in_course(course_id, current_user)
 
 

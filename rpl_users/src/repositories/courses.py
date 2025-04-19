@@ -1,17 +1,19 @@
 from .base import BaseRepository
 
-from .models.course import Course
-from .models.user import User
+from rpl_users.src.repositories.models.course import Course
+from rpl_users.src.repositories.models.course_user import CourseUser
 
 from fastapi import HTTPException, status
 
 import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 
-from ..dtos.course_dtos import CourseCreationResponseDTO, CourseCreationDTO
+from ..dtos.course_dtos import CourseResponseDTO, CourseCreationDTO
 
 
 class CoursesRepository(BaseRepository):
+
+    # ====================== MANAGING ====================== #
 
     def save_new_course(self, course_data: CourseCreationDTO) -> Course:
         new_course = Course(
@@ -37,6 +39,11 @@ class CoursesRepository(BaseRepository):
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Course already exists with this name, university, and semester",
             )
+
+    # ====================== QUERYING ====================== #
+
+    def get_all_courses(self) -> list[Course]:
+        return self.db_session.execute(sa.select(Course)).scalars().all()
 
     def get_by_id(self, course_id: str) -> Course:
         return (

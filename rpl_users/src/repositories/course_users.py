@@ -6,7 +6,30 @@ import sqlalchemy as sa
 
 
 class CourseUsersRepository(BaseRepository):
-    def get_by_course_id_and_user_id(self, course_id: int, user_id: int) -> CourseUser:
+
+    # ====================== MANAGING ====================== #
+
+    def save_new_course_user(
+        self,
+        course_id: int,
+        user_id: int,
+        role_id: int,
+        accepted: bool = False,
+    ) -> CourseUser:
+        new_course_user = CourseUser(
+            course_id=course_id,
+            user_id=user_id,
+            role_id=role_id,
+            accepted=accepted,
+        )
+        self.db_session.add(new_course_user)
+        self.db_session.commit()
+        self.db_session.refresh(new_course_user)
+        return new_course_user
+
+    # ====================== QUERYING ====================== #
+
+    def get_course_user(self, course_id: int, user_id: int) -> CourseUser:
         return (
             self.db_session.execute(
                 sa.select(CourseUser).where(
@@ -46,25 +69,11 @@ class CourseUsersRepository(BaseRepository):
             is not None
         )
 
-    def create_course_user(
-        self, course_id: int, user_id: int, role_id: int
-    ) -> CourseUser:
-        course_user = CourseUser(
-            course_id=course_id,
-            user_id=user_id,
-            role_id=role_id,
-            accepted=False,
-        )
-        self.db_session.add(course_user)
-        self.db_session.commit()
-        self.db_session.refresh(course_user)
-        return course_user
-
     def enrroll_user_in_course(
         self, course_id: int, user_id: int, role_id: int
     ) -> CourseUser:
         # Check if the user is already enrolled in the course
-        existing_course_user = self.get_by_course_id_and_user_id(course_id, user_id)
+        existing_course_user = self.get_course_user(course_id, user_id)
         if existing_course_user:
             raise ValueError("User is already registered in the course")
 
