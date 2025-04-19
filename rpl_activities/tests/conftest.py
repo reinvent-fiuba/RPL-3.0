@@ -27,6 +27,7 @@ from rpl_activities.src.repositories.models import models_metadata
 from rpl_activities.src.config import env
 from rpl_activities.src.repositories.models.activity_category import ActivityCategory
 
+from rpl_activities.src.repositories.models.rpl_file import RPLFile
 from rpl_users.tests.conftest import (
     users_api_dbsession_fixture,
     users_api_http_client_fixture,

@@ -9,6 +9,7 @@ from .config import env
 from .config.api_metadata import FASTAPI_METADATA
 
 from .routers.categories import router as categories_router
+from .routers.rpl_files import router as rpl_files_router
 
 # from .routers.activities import router as activities_router
 
@@ -30,6 +31,7 @@ app.add_middleware(
 )
 
 app.include_router(categories_router)
+app.include_router(rpl_files_router)
 # app.include_router(activities_router)
 
 
