@@ -4,7 +4,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from rpl_users.src.repositories.models.course_user import CourseUser
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy import UniqueConstraint
+from sqlalchemy.orm import Mapped, relationship, mapped_column
+
 import datetime
 
 from .base_model import Base, AutoDateTime, IntPK, Str
@@ -13,13 +15,14 @@ from .base_model import Base, AutoDateTime, IntPK, Str
 class Course(Base):
     __tablename__ = "courses"
 
-    id: Mapped[IntPK]
+    id: Mapped[IntPK] = mapped_column(primary_key=True)
+
     name: Mapped[Str]
     university: Mapped[Str]
-    subject_id: Mapped[Optional[Str]]
-    description: Mapped[Optional[Str]]
-    active: Mapped[bool]
-    deleted: Mapped[bool]
+    subject_id: Mapped[Optional[Str]] = mapped_column(nullable=True)
+    description: Mapped[Optional[Str]] = mapped_column(nullable=True)
+    active: Mapped[bool] = mapped_column(default=True)
+    deleted: Mapped[bool] = mapped_column(default=False)
     semester: Mapped[Str]
     semester_start_date: Mapped[datetime.datetime]
     semester_end_date: Mapped[datetime.datetime]
@@ -28,3 +31,9 @@ class Course(Base):
     last_updated: Mapped[AutoDateTime]
 
     course_users: Mapped[List["CourseUser"]] = relationship(back_populates="course")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "name", "university", "semester", name="uq_courses_name_university_semester"
+        ),
+    )
