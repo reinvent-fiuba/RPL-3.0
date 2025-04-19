@@ -166,14 +166,14 @@ def example_course_fixture(users_api_dbsession: Session):
 
 @pytest.fixture(name="example_course_user")
 def course_user_fixture(
-    users_api_dbsession: Session, course: Course, example_users: dict[str, User]
+    users_api_dbsession: Session, example_course: Course, example_users: dict[str, User]
 ):
     course_user = CourseUser(
         id=1,
-        course_id=course.id,
+        course_id=example_course.id,
         user_id=example_users["admin"].id,
         role_id=1,
-        is_accepted=True,
+        accepted=True,
         date_created=datetime.now(),
         last_updated=datetime.now(),
     )

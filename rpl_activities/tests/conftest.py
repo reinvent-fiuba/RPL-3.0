@@ -34,11 +34,14 @@ from rpl_users.tests.conftest import (
     example_users_fixture,
     regular_auth_headers_fixture,
     admin_auth_headers_fixture,
+    example_course_fixture,
+    course_user_fixture,
+    insert_base_roles_fixture,
 )
 
 
 @pytest.fixture(name="activities_api_dbsession", scope="function")
-def activities_api_dbsession_fixture():
+def activities_api_dbsession_fixture(users_api_dbsession):
     engine = create_engine(
         env.DB_URL,
         # connect_args={"check_same_thread": False}, # Use if sqlite is active
@@ -103,7 +106,10 @@ def activities_api_http_client_fixture(
 
 
 @pytest.fixture(name="example_category")
-def example_category_fixture(activities_api_dbsession: Session):
+def example_category_fixture(
+    example_course_user,
+    activities_api_dbsession: Session,
+):
     category = ActivityCategory(
         id=1,
         course_id=1,

@@ -48,9 +48,9 @@ from fastapi import status
 #     )
 
 
-def test_create_category(activities_api_client: TestClient, regular_auth_headers):
+def test_create_category(activities_api_client: TestClient, admin_auth_headers):
     category_data = {
-        "course_id": 2,
+        "course_id": 1,
         "name": "New Category",
         "description": "Some new description",
         "active": True,
@@ -59,7 +59,7 @@ def test_create_category(activities_api_client: TestClient, regular_auth_headers
     }
     response = activities_api_client.post(
         "/api/v3/courses/1/categories",
-        headers=regular_auth_headers,
+        headers=admin_auth_headers,
         json=category_data,
     )
     logging.warning(f"Response: {response.status_code}, {response.json()}")
