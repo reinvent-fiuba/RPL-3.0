@@ -12,20 +12,5 @@ router = APIRouter(prefix="/api/v3", tags=["RPLFiles"])
 async def get_file(
     file_id: int,
     db: DBSessionDependency,
-) -> Optional[bytes]:
-    """
-    Get a file as is by its ID.
-    """
-    # response headers
-    headers = {
-        "Content-Disposition": f"attachment; filename={file_id}",
-        "Content-Type": "application/octet-stream",
-    }
-    # return file bytes with headers
-    file = RPLFilesService(db).get_file(file_id)
-    if not file:
-        return None
-    return {
-        "headers": headers,
-        "content": file,
-    }
+):
+    return RPLFilesService(db).get_file(file_id)
