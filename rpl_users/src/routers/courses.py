@@ -87,12 +87,12 @@ def get_all_universities(
 
 
 @router.post("/courses/{course_id}/enroll", response_model=RoleResponseDTO)
-def enroll_user_in_course(
+def enroll_student_in_course(
     course_id: str,
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
 ):
-    return CoursesService(db).enroll_user_in_course(course_id, current_user)
+    return CoursesService(db).enroll_student_in_course(course_id, current_user)
 
 
 # ==============================================================================

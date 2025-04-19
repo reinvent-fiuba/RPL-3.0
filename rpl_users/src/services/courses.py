@@ -31,12 +31,13 @@ class CoursesService:
         self.course_users_repo = CourseUsersRepository(db_session)
         self.universities_repo = UniversitiesRepository(db_session)
 
-    # ====================== PRIVATE - UTILS ====================== #
+    # ====================== PRIVATE - PERMISSIONS ====================== #
 
     def _has_course_user_permission(
         self, course_user: CourseUser, permission: str
     ) -> bool:
         if course_user.user.is_admin:
+            # super admin has all permissions
             return True
         else:
             return permission in course_user.role.permissions.split(",")
@@ -117,7 +118,7 @@ class CoursesService:
 
     # ====================== MANAGING - COURSE USERS ====================== #
 
-    def enroll_user_in_course(
+    def enroll_student_in_course(
         self, course_id: str, current_user: User
     ) -> RoleResponseDTO:
         course = self.courses_repo.get_course_with_id(course_id)
@@ -135,31 +136,7 @@ class CoursesService:
 
         return RoleResponseDTO.from_course_user(new_course_user)
 
-    # =============================================================================
-
-    # ====================== PRIVATE - QUERYING - ROLES ====================== #
-
-    def _get_role_named(self, role_name: str) -> list[RoleResponseDTO]:
-        return self.roles_repo.get_role_named(role_name)
-
-    # ====================== QUERYING - ROLES ====================== #
-
-    def get_all_roles(self) -> list[RoleResponseDTO]:
-        return [
-            RoleResponseDTO.from_role(role) for role in self.roles_repo.get_all_roles()
-        ]
-
-    # ====================== QUERYING - UNIVERSITIES ====================== #
-
-    def get_all_universities(self) -> list[UniversityResponseDTO]:
-        return [
-            UniversityResponseDTO(
-                id=university.id,
-                name=university.name,
-                degrees=self.__parse_degrees(university.degrees),
-            )
-            for university in self.universities_repo.get_all_universities()
-        ]
+    # ====================== QUERYING - COURSE USERS ====================== #
 
     def get_course_user_for_ext_service(
         self, requested_access_info: ExternalCourseUserRequestDTO, current_user: User
@@ -189,3 +166,23 @@ class CoursesService:
             surname=current_user.surname,
             student_id=current_user.student_id,
         )
+
+    # ====================== PRIVATE - QUERYING - ROLES ====================== #
+
+    def _get_role_named(self, role_name: str) -> list[RoleResponseDTO]:
+        return self.roles_repo.get_role_named(role_name)
+
+    # ====================== QUERYING - ROLES ====================== #
+
+    def get_all_roles(self) -> list[RoleResponseDTO]:
+        return [
+            RoleResponseDTO.from_role(role) for role in self.roles_repo.get_all_roles()
+        ]
+
+    # ====================== QUERYING - UNIVERSITIES ====================== #
+
+    def get_all_universities(self) -> list[UniversityResponseDTO]:
+        return [
+            UniversityResponseDTO.from_university(university)
+            for university in self.universities_repo.get_all_universities()
+        ]
