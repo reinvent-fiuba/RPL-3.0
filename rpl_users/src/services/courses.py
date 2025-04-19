@@ -69,7 +69,7 @@ class CoursesService:
 
         return CourseResponseDTO.from_course(new_course)
 
-    def edit_course(
+    def update_course(
         self, course_id: str, course_data: CourseUptateDTO, current_user: User
     ) -> CourseResponseDTO:
 
@@ -87,18 +87,9 @@ class CoursesService:
                 detail="User does not have permission to edit the course",
             )
 
-        return CourseResponseDTO(
-            id=course_id,
-            name=course_data.name,
-            university=course_data.university,
-            subject_id=course_data.subject_id,
-            description=course_data.description,
-            active=course_data.active,
-            semester=course_data.semester,
-            semester_start_date=course_data.semester_start_date,
-            semester_end_date=course_data.semester_end_date,
-            img_uri=course_data.img_uri,
-        )
+        updated_course = self.courses_repo.update_course(course_id, course_data)
+
+        return CourseResponseDTO.from_course(updated_course)
 
     # ====================== QUERYING - COURSES ====================== #
 

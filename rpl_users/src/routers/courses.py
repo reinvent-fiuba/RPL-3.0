@@ -46,7 +46,7 @@ def update_course(
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
 ):
-    return CoursesService(db).edit_course(course_id, course_data, current_user)
+    return CoursesService(db).update_course(course_id, course_data, current_user)
 
 
 # ====================== QUERYING - COURSES ====================== #
