@@ -1,11 +1,25 @@
+from contextlib import contextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+import httpx
+
+
+from .config import env
 from .config.api_metadata import FASTAPI_METADATA
 
-# from .routers.courses import router as courses_router
+from .routers.categories import router as categories_router
 
-app = FastAPI(**FASTAPI_METADATA)
+# from .routers.activities import router as activities_router
+
+
+@contextmanager
+def users_api_conn_lifespan(app: FastAPI):
+    with httpx.Client(base_url=env.USERS_API_URL) as client:
+        yield {"users_api_client": client}
+
+
+app = FastAPI(lifespan=users_api_conn_lifespan, **FASTAPI_METADATA)
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,7 +29,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# app.include_router(courses_router)
+app.include_router(categories_router)
+# app.include_router(activities_router)
 
 
 @app.get("/", include_in_schema=False)

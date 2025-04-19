@@ -1,7 +1,6 @@
 from fastapi import HTTPException, status
 from rpl_users.src.dtos.course_dtos import (
-    CurrentCourseUserDTO,
-    ExternalCourseUserRequestDTO,
+    CurrentCourseUserResponseDTO,
 )
 from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
@@ -35,25 +34,21 @@ class CoursesService:
     # =============================================================================
 
     def get_course_user_for_ext_service(
-        self, requested_access_info: ExternalCourseUserRequestDTO, current_user: User
-    ) -> CurrentCourseUserDTO:
+        self, course_id, current_user: User
+    ) -> CurrentCourseUserResponseDTO:
         course_user = self.course_users_repo.get_by_course_id_and_user_id(
-            requested_access_info.course_id, current_user.id
+            course_id, current_user.id
         )
         if not course_user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Course user not found"
             )
-        if (
-            requested_access_info.required_permission
-            not in course_user.role.permissions
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="User does not have the required permission",
-            )
 
-        return CurrentCourseUserDTO(
+        current_perms = course_user.role.permissions.split(",")
+        current_perms = [perm.strip() for perm in current_perms]
+        if course_user.role.name == "admin":
+            current_perms.append("superadmin")
+        return CurrentCourseUserResponseDTO(
             id=course_user.id,
             course_id=course_user.course_id,
             username=current_user.username,
@@ -61,4 +56,5 @@ class CoursesService:
             name=current_user.name,
             surname=current_user.surname,
             student_id=current_user.student_id,
+            permissions=current_perms,
         )

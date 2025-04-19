@@ -1,11 +1,9 @@
 from typing import Optional
 from fastapi import APIRouter, status
 from rpl_users.src.deps.auth import CurrentUserDependency
-from rpl_users.src.deps.email import EmailHandlerDependency
 from rpl_users.src.deps.database import DBSessionDependency
 from rpl_users.src.dtos.course_dtos import (
-    CurrentCourseUserDTO,
-    ExternalCourseUserRequestDTO,
+    CurrentCourseUserResponseDTO,
 )
 from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
@@ -38,12 +36,10 @@ def get_universities(
 # ==============================================================================
 
 
-@router.get("/auth/externalCourseUserAuth", response_model=CurrentCourseUserDTO)
+@router.get("/auth/externalCourseUserAuth", response_model=CurrentCourseUserResponseDTO)
 def course_user_auth_from_activities_api(
-    requested_access_info: ExternalCourseUserRequestDTO,
+    course_id: int,
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
 ):
-    return CoursesService(db).get_course_user_for_ext_service(
-        requested_access_info, current_user
-    )
+    return CoursesService(db).get_course_user_for_ext_service(course_id, current_user)
