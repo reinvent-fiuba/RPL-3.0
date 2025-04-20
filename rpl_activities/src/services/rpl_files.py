@@ -103,6 +103,15 @@ class RPLFilesService:
                 continue
         return filtered_files
 
+    def get_extracted_files_for_student(
+        self, file_ids: list[int]
+    ) -> list[dict[str, str]]:
+        files: list[dict[str, str]] = []
+        for file_id in file_ids:
+            file = self.extract_file_for_student(file_id)
+            files.append(file)
+        return files
+
     # =========================
     # Private methods
     # =========================
