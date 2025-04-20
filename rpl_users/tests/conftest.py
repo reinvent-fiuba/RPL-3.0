@@ -164,8 +164,8 @@ def example_course_fixture(users_api_dbsession: Session):
     yield course
 
 
-@pytest.fixture(name="example_course_user")
-def course_user_fixture(
+@pytest.fixture(name="example_teacher_course_user")
+def example_teacher_course_user_fixture(
     users_api_dbsession: Session, example_course: Course, example_users: dict[str, User]
 ):
     course_user = CourseUser(
@@ -173,6 +173,25 @@ def course_user_fixture(
         course_id=example_course.id,
         user_id=example_users["admin"].id,
         role_id=1,
+        accepted=True,
+        date_created=datetime.now(),
+        last_updated=datetime.now(),
+    )
+    users_api_dbsession.add(course_user)
+    users_api_dbsession.commit()
+    users_api_dbsession.refresh(course_user)
+    yield course_user
+
+
+@pytest.fixture(name="example_student_course_user")
+def example_student_course_user_fixture(
+    users_api_dbsession: Session, example_course: Course, example_users: dict[str, User]
+):
+    course_user = CourseUser(
+        id=2,
+        course_id=example_course.id,
+        user_id=example_users["regular"].id,
+        role_id=2,
         accepted=True,
         date_created=datetime.now(),
         last_updated=datetime.now(),
