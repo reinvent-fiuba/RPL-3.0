@@ -42,11 +42,11 @@ async def get_extracted_files(
     return RPLFilesService(db).get_extracted_files(file_ids)
 
 
-@router.get("/getExtractedFilesForStudent", status_code=status.HTTP_200_OK)
+@router.get("/getExtractedFilesForStudent/{file_ids}", status_code=status.HTTP_200_OK)
 async def get_extracted_files_for_student(
-    file_ids: list[int],
+    file_ids: str,
     db: DBSessionDependency,
 ):
     if file_ids is None:
         return []
-    return RPLFilesService(db).extract_files_for_student(file_ids)
+    return RPLFilesService(db).extract_files_for_student(file_ids.split(","))

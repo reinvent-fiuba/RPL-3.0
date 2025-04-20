@@ -1,4 +1,5 @@
 import logging
+import os
 from fastapi import HTTPException, status
 from fastapi.responses import StreamingResponse, FileResponse, Response
 import mimetypes
@@ -48,11 +49,11 @@ class RPLFilesService:
                 detail="File not found",
             )
 
-        # Check if the file is a tar.gz file
-        if not file.file_name.endswith(".tar.gz"):
+        # Check if the file is a tar.xz file
+        if not file.file_name.endswith(".tar.xz"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="File is not a tar.gz file",
+                detail="File is not a tar.xz file",
             )
 
         return self.__extract_tar_gz_to_dict(file.data)
@@ -75,8 +76,14 @@ class RPLFilesService:
         if "files_metadata" not in extracted_files:
             return extracted_files
 
+        metadata_file_data = extracted_files["files_metadata"]
+
         try:
-            metadata_dict = json.loads(extracted_files["files_metadata"])
+            if isinstance(metadata_file_data, list):
+                # If metadata is a list, take the first element
+                metadata_dict = json.loads(metadata_file_data[0])
+            else:
+                metadata_dict = json.loads(extracted_files["files_metadata"])
         except json.JSONDecodeError:
             logging.warning(
                 f"File metadata bad formated {file_id}: {extracted_files['files_metadata']}"
@@ -95,8 +102,8 @@ class RPLFilesService:
             if filename not in metadata_dict:
                 filtered_files[filename] = file_content
             try:
-                metadata = json.loads(metadata_dict[filename])
-                if not metadata.display == "hidden":
+                metadata = metadata_dict[filename]
+                if not metadata["display"] == "hidden":
                     filtered_files[filename] = file_content
             except json.JSONDecodeError:
                 logging.warning(
@@ -118,10 +125,10 @@ class RPLFilesService:
     # Private methods
     # =========================
 
-    def __extract_tar_gz_to_dict(tar_path: str) -> dict[str, str]:
+    def __extract_tar_gz_to_dict(self, data: bytes) -> dict[str, str]:
         extracted_files = {}
 
-        with tarfile.open(tar_path, "r") as tar:
+        with tarfile.open(fileobj=io.BytesIO(data), mode="r") as tar:
             for member in tar.getmembers():
                 if member.isfile():
                     file = tar.extractfile(member)
@@ -133,7 +140,9 @@ class RPLFilesService:
                                 if not chunk:
                                     break
                                 decoded_chunks.append(chunk.decode("utf-8"))
-                            extracted_files[member.name] = decoded_chunks
+                            extracted_files[os.path.basename(member.name)] = (
+                                decoded_chunks
+                            )
                         except UnicodeDecodeError:
                             logging.warning(f"Could not decode {member.name} as UTF-8.")
         return extracted_files

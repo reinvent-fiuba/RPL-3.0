@@ -1,6 +1,8 @@
+import json
 from fastapi.testclient import TestClient
 from fastapi import status
 from sqlalchemy.orm import sessionmaker, Session
+import logging
 
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
 
@@ -40,3 +42,32 @@ def test_get_file_with_non_existent_file_return_404(
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_get_extracted_files_for_student_only_return_not_hidden_files(
+    activities_api_client: TestClient,
+    activities_api_dbsession: Session,
+):
+    # Create a sample file with data
+    data = open("rpl_activities/tests/resources/la_submission.tar.xz", "rb").read()
+    example_file = RPLFile(
+        id=1,
+        file_name="la_submission.tar.xz",
+        file_type="application/x-tar",
+        data=data,
+    )
+    # Simulate saving the file to the database
+    activities_api_dbsession.add(example_file)
+    activities_api_dbsession.commit()
+    activities_api_dbsession.refresh(example_file)
+
+    # Test the endpoint
+    response = activities_api_client.get(
+        f"/api/v3/getExtractedFileForStudent/{example_file.id}",
+    )
+
+    content = json.loads(response.content)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert "assignment_main.py" in content
+    assert "main.c" not in content  # This is hidden
