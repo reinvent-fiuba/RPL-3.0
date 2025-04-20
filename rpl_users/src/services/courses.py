@@ -48,7 +48,7 @@ class CoursesService:
     ) -> CourseResponseDTO:
         if not current_user.is_admin:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only admins can create courses",
             )
 
@@ -72,17 +72,18 @@ class CoursesService:
     def update_course(
         self, course_id: str, course_data: CourseUptateDTO, current_user: User
     ) -> CourseResponseDTO:
-
-        course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
-        if not course_user:
+        course = self.courses_repo.get_course_with_id(course_id)
+        if not course:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Course user not found",
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Course not found"
             )
 
-        if not self._has_course_user_permission(course_user, "course_edit"):
+        course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
+        if (not course_user) or (
+            not self._has_course_user_permission(course_user, "course_edit")
+        ):
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=status.HTTP_403_FORBIDDEN,
                 detail="User does not have permission to edit the course",
             )
 

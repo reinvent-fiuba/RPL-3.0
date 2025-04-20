@@ -281,7 +281,7 @@ def test_get_all_courses_of_admin_course_user(
     assert result[0]["accepted"] is True
 
 
-def test_get_all_courses_of_user_that_has_not_been_enrolled_to_a_course(
+def test_get_all_courses_of_user_that_has_not_been_enrolled_to_a_course_yet(
     users_api_client: TestClient,
     example_users,
     admin_auth_headers,
@@ -695,12 +695,13 @@ def test_cannot_update_course_with_user_that_has_not_been_enrolled(
         f"/api/v3/courses/{course_id}", json=course_data, headers=regular_auth_headers
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
     result = response.json()
-    assert "Course user not found" in result["detail"]
+    assert "User does not have permission to edit the course" in result["detail"]
 
 
-def test_cannot_update_course_with_user_that_doest_have_course_edit_permission(
+def test_cannot_update_course_using_user_with_student_permissions(
     users_api_client: TestClient,
     example_users,
     admin_auth_headers,
@@ -742,13 +743,13 @@ def test_cannot_update_course_with_user_that_doest_have_course_edit_permission(
         f"/api/v3/courses/{course_id}", json=course_data, headers=regular_auth_headers
     )
 
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
     result = response.json()
     assert "User does not have permission to edit the course" in result["detail"]
 
 
-def test_update_course_with_user_that_has_course_edit_permission(
+def test_update_course_using_user_with_admin_permissions(
     users_api_client: TestClient,
     example_users,
     admin_auth_headers,
@@ -904,6 +905,33 @@ def test_cannot_update_course_to_an_existing_one(
     )
 
 
+def test_cannot_update_non_existing_course(
+    users_api_client: TestClient,
+    admin_auth_headers,
+):
+    non_existing_course_id = 99999999
+    course_data = {
+        "name": "Algo2Mendez",
+        "university": "UCA",
+        "subject_id": "3001",
+        "active": False,
+        "semester": "2019-2c",
+        "semester_start_date": "2019-07-01T00:00:00",
+        "semester_end_date": "2019-12-01T00:00:00",
+    }
+
+    response = users_api_client.put(
+        f"/api/v3/courses/{non_existing_course_id}",
+        json=course_data,
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    result = response.json()
+    assert "Course not found" in result["detail"]
+
+
 # ====================== USER ENROLLMENT ====================== #
 
 
@@ -986,15 +1014,18 @@ def test_cannot_enroll_an_user_twice(
 
 def test_cannot_enroll_an_user_to_a_non_existing_course(
     users_api_client: TestClient,
-    regular_auth_headers,
+    admin_auth_headers,
 ):
     non_existing_course_id = 99999999
 
     response = users_api_client.post(
-        f"/api/v3/courses/{non_existing_course_id}/enroll", headers=regular_auth_headers
+        f"/api/v3/courses/{non_existing_course_id}/enroll", headers=admin_auth_headers
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     result = response.json()
     assert "Course not found" in result["detail"]
+
+
+# ====================== USER UNENROLLMENT ====================== #
