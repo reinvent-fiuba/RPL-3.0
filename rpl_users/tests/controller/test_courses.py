@@ -367,7 +367,6 @@ def test_get_all_courses_of_user_that_has_been_enrolled_to_a_course(
 # ====================== GET COURSE ====================== #
 
 
-@pytest.mark.only
 def test_get_course_details_using_super_admin_user(
     users_api_client: TestClient,
     example_users,
@@ -407,7 +406,6 @@ def test_get_course_details_using_super_admin_user(
     assert result["semester_end_date"] == course_data["semester_end_date"]
 
 
-@pytest.mark.only
 def test_get_course_details_using_user_with_admin_permissions(
     users_api_client: TestClient,
     example_users,
@@ -448,7 +446,6 @@ def test_get_course_details_using_user_with_admin_permissions(
     assert result["semester_end_date"] == course_data["semester_end_date"]
 
 
-@pytest.mark.only
 def test_get_course_details_using_user_with_student_permissions(
     users_api_client: TestClient,
     example_users,
@@ -493,7 +490,6 @@ def test_get_course_details_using_user_with_student_permissions(
     assert result["semester_end_date"] == course_data["semester_end_date"]
 
 
-@pytest.mark.only
 def test_cannot_get_course_details_from_non_existing_course(
     users_api_client: TestClient,
     admin_auth_headers,
@@ -510,7 +506,6 @@ def test_cannot_get_course_details_from_non_existing_course(
     assert "Course not found" in result["detail"]
 
 
-@pytest.mark.only
 def test_cannot_get_course_details_using_user_that_has_not_been_enrolled_yet(
     users_api_client: TestClient,
     example_users,
