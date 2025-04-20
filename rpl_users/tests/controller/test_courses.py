@@ -364,6 +364,194 @@ def test_get_all_courses_of_user_that_has_been_enrolled_to_a_course(
     assert result[0]["accepted"] is False
 
 
+# ====================== GET COURSE ====================== #
+
+
+@pytest.mark.only
+def test_get_course_details_using_super_admin_user(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+):
+    course_data = {
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "active": True,
+        "semester": "2019-1c",
+        "semester_start_date": "2019-03-01T00:00:00",
+        "semester_end_date": "2019-07-01T00:00:00",
+        "course_user_admin_user_id": example_users["admin"].id,
+    }
+
+    response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    result = response.json()
+    course_id = result["id"]
+
+    response = users_api_client.get(
+        f"/api/v3/courses/{course_id}", headers=admin_auth_headers
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    assert result["id"] is not None
+    assert result["name"] == course_data["name"]
+    assert result["university"] == course_data["university"]
+    assert result["active"] == course_data["active"]
+    assert result["semester"] == course_data["semester"]
+    assert result["semester_start_date"] == course_data["semester_start_date"]
+    assert result["semester_end_date"] == course_data["semester_end_date"]
+
+
+@pytest.mark.only
+def test_get_course_details_using_user_with_admin_permissions(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+    regular_auth_headers,
+):
+    course_data = {
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "active": True,
+        "semester": "2019-1c",
+        "semester_start_date": "2019-03-01T00:00:00",
+        "semester_end_date": "2019-07-01T00:00:00",
+        "course_user_admin_user_id": example_users["regular"].id,
+    }
+
+    response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    result = response.json()
+    course_id = result["id"]
+
+    response = users_api_client.get(
+        f"/api/v3/courses/{course_id}", headers=regular_auth_headers
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    assert result["id"] is not None
+    assert result["name"] == course_data["name"]
+    assert result["university"] == course_data["university"]
+    assert result["active"] == course_data["active"]
+    assert result["semester"] == course_data["semester"]
+    assert result["semester_start_date"] == course_data["semester_start_date"]
+    assert result["semester_end_date"] == course_data["semester_end_date"]
+
+
+@pytest.mark.only
+def test_get_course_details_using_user_with_student_permissions(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+    regular_auth_headers,
+):
+    course_data = {
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "active": True,
+        "semester": "2019-1c",
+        "semester_start_date": "2019-03-01T00:00:00",
+        "semester_end_date": "2019-07-01T00:00:00",
+        "course_user_admin_user_id": example_users["admin"].id,
+    }
+
+    response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    result = response.json()
+    course_id = result["id"]
+
+    users_api_client.post(
+        f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
+    )
+
+    response = users_api_client.get(
+        f"/api/v3/courses/{course_id}", headers=regular_auth_headers
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    assert result["id"] is not None
+    assert result["name"] == course_data["name"]
+    assert result["university"] == course_data["university"]
+    assert result["active"] == course_data["active"]
+    assert result["semester"] == course_data["semester"]
+    assert result["semester_start_date"] == course_data["semester_start_date"]
+    assert result["semester_end_date"] == course_data["semester_end_date"]
+
+
+@pytest.mark.only
+def test_cannot_get_course_details_from_non_existing_course(
+    users_api_client: TestClient,
+    admin_auth_headers,
+):
+    non_existing_course_id = 99999999
+
+    response = users_api_client.get(
+        f"/api/v3/courses/{non_existing_course_id}", headers=admin_auth_headers
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    result = response.json()
+    assert "Course not found" in result["detail"]
+
+
+@pytest.mark.only
+def test_cannot_get_course_details_using_user_that_has_not_been_enrolled_yet(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+    regular_auth_headers,
+):
+    course_data = {
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "active": True,
+        "semester": "2019-1c",
+        "semester_start_date": "2019-03-01T00:00:00",
+        "semester_end_date": "2019-07-01T00:00:00",
+        "course_user_admin_user_id": example_users["admin"].id,
+    }
+
+    response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    result = response.json()
+    course_id = result["id"]
+
+    response = users_api_client.get(
+        f"/api/v3/courses/{course_id}", headers=regular_auth_headers
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    result = response.json()
+    assert "User does not have permission to view course details" in result["detail"]
+
+
+# ====================== GET PERMISSIONS ====================== #
+
+# regular user
+# admin user
+# non existing course
+# user not enrolled
+
 # ====================== EDIT COURSE ====================== #
 
 

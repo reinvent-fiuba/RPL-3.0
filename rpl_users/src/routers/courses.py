@@ -64,6 +64,19 @@ def get_all_courses_including_their_relationship_with_user(
     )
 
 
+@router.get(
+    "/courses/{course_id}",
+    response_model=CourseResponseDTO,
+    status_code=status.HTTP_200_OK,
+)
+def get_course_details(
+    course_id: str,
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+):
+    return CoursesService(db).get_course_details(course_id, current_user)
+
+
 # ==============================================================================
 
 

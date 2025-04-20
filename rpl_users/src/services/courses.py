@@ -115,6 +115,26 @@ class CoursesService:
                 )
         return courses_with_user_info
 
+    def get_course_details(
+        self, course_id: str, current_user: User
+    ) -> CourseResponseDTO:
+        course = self.courses_repo.get_course_with_id(course_id)
+        if not course:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Course not found"
+            )
+
+        course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
+        if (not course_user) or (
+            not self._has_course_user_permission(course_user, "course_view")
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User does not have permission to view course details",
+            )
+
+        return CourseResponseDTO.from_course(course)
+
     # ====================== MANAGING - COURSE USERS ====================== #
 
     def enroll_student_in_course(
