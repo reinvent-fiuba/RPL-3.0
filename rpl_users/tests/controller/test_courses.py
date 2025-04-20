@@ -100,7 +100,7 @@ def test_cannot_create_course_with_regular_user(
         "/api/v3/courses", json=course_data, headers=regular_auth_headers
     )
 
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
     result = response.json()
     assert "Only admins can create courses" in result["detail"]
