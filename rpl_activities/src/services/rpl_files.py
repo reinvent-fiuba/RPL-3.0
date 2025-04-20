@@ -75,13 +75,15 @@ class RPLFilesService:
         if "files_metadata" not in extracted_files:
             return extracted_files
 
-        filtered_files: dict[str, str] = {}
+        try:
+            metadata_dict = json.loads(extracted_files["files_metadata"])
+        except json.JSONDecodeError:
+            logging.warning(
+                f"File metadata bad formated {file_id}: {extracted_files['files_metadata']}"
+            )
+            return extracted_files
 
-        for filename, file_content in extracted_files.items():
-            if filename == "files_metadata":
-                continue
-            if filename not in extracted_files:
-                filtered_files[filename] = file_content
+        filtered_files: dict[str, str] = {}
 
         # Extracts the tar.gz and returns the files as a Map where the key is the filename and the
         # value is the file content. Only returns files with metadata {"display": "read"} or
@@ -90,11 +92,11 @@ class RPLFilesService:
         for filename, file_content in extracted_files.items():
             if filename == "files_metadata":
                 continue
-            if filename not in extracted_files:
+            if filename not in metadata_dict:
                 filtered_files[filename] = file_content
             try:
-                metadata = json.loads(file_content)
-                if not metadata.get("display") == "hidden":
+                metadata = json.loads(metadata_dict[filename])
+                if not metadata.display == "hidden":
                     filtered_files[filename] = file_content
             except json.JSONDecodeError:
                 logging.warning(
