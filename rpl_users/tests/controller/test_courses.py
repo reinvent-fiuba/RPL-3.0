@@ -406,7 +406,7 @@ def test_get_course_details_using_super_admin_user(
     assert result["semester_end_date"] == course_data["semester_end_date"]
 
 
-def test_get_course_details_using_user_with_admin_permissions(
+def test_get_course_details_using_user_with_admin_role_permissions(
     users_api_client: TestClient,
     example_users,
     admin_auth_headers,
@@ -446,7 +446,7 @@ def test_get_course_details_using_user_with_admin_permissions(
     assert result["semester_end_date"] == course_data["semester_end_date"]
 
 
-def test_get_course_details_using_user_with_student_permissions(
+def test_get_course_details_using_user_with_student_role_permissions(
     users_api_client: TestClient,
     example_users,
     admin_auth_headers,
@@ -820,7 +820,7 @@ def test_cannot_update_course_with_user_that_has_not_been_enrolled(
     assert "User does not have permission to edit the course" in result["detail"]
 
 
-def test_cannot_update_course_using_user_with_student_permissions(
+def test_cannot_update_course_using_user_with_student_role_permissions(
     users_api_client: TestClient,
     example_users,
     admin_auth_headers,
@@ -868,7 +868,7 @@ def test_cannot_update_course_using_user_with_student_permissions(
     assert "User does not have permission to edit the course" in result["detail"]
 
 
-def test_update_course_using_user_with_admin_permissions(
+def test_update_course_using_user_with_admin_role_permissions(
     users_api_client: TestClient,
     example_users,
     admin_auth_headers,
