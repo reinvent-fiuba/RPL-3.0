@@ -14,3 +14,19 @@ async def get_file(
     db: DBSessionDependency,
 ):
     return RPLFilesService(db).get_file(file_id)
+
+
+@router.get("/getExtractedFile/{file_id}", status_code=status.HTTP_200_OK)
+async def get_extracted_file(
+    file_id: int,
+    db: DBSessionDependency,
+):
+    return RPLFilesService(db).get_extracted_file(file_id)
+
+
+@router.get("/getExtractedFileForStudent/{file_id}", status_code=status.HTTP_200_OK)
+async def get_extracted_file_for_student(
+    file_id: int,
+    db: DBSessionDependency,
+):
+    return RPLFilesService(db).extract_file_for_student(file_id)

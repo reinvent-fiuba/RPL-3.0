@@ -1,7 +1,10 @@
+import logging
 from fastapi import HTTPException, status
 from fastapi.responses import StreamingResponse, FileResponse, Response
 import mimetypes
-from tempfile import NamedTemporaryFile
+import io
+import tarfile
+import json
 
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
 from rpl_activities.src.deps.database import DBSessionDependency
@@ -35,3 +38,84 @@ class RPLFilesService:
                 "Content-Type": mime_type,
             },
         )
+
+    def get_extracted_file(self, file_id: int) -> dict[str, str]:
+        file = self.rpl_files_repo.get_by_id(file_id)
+
+        if not file:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="File not found",
+            )
+
+        # Check if the file is a tar.gz file
+        if not file.file_name.endswith(".tar.gz"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File is not a tar.gz file",
+            )
+
+        return self.__extract_tar_gz_to_dict(file.data)
+
+    def extract_file_for_student(self, file_id: int) -> dict[str, str]:
+        extracted_files = self.get_extracted_file(file_id)
+        if not extracted_files:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No files extracted",
+            )
+
+        if "files_metadata" not in extracted_files:
+            return extracted_files
+
+        filtered_files: dict[str, str] = {}
+
+        for filename, file_content in extracted_files.items():
+            if filename == "files_metadata":
+                continue
+            if filename not in extracted_files:
+                filtered_files[filename] = file_content
+
+        # Extracts the tar.gz and returns the files as a Map where the key is the filename and the
+        # value is the file content. Only returns files with metadata {"display": "read"} or
+        # {"display": "read_write"}. Doesn't return files with metadata {display: "hidden"}
+
+        for filename, file_content in extracted_files.items():
+            if filename == "files_metadata":
+                continue
+            if filename not in extracted_files:
+                filtered_files[filename] = file_content
+            try:
+                metadata = json.loads(file_content)
+                if not metadata.get("display") == "hidden":
+                    filtered_files[filename] = file_content
+            except json.JSONDecodeError:
+                logging.warning(
+                    f"File metadata bad formated {filename}: {file_content}"
+                )
+                continue
+        return filtered_files
+
+    # =========================
+    # Private methods
+    # =========================
+
+    def __extract_tar_gz_to_dict(tar_path: str) -> dict[str, str]:
+        extracted_files = {}
+
+        with tarfile.open(tar_path, "r") as tar:
+            for member in tar.getmembers():
+                if member.isfile():
+                    file = tar.extractfile(member)
+                    if file:
+                        try:
+                            decoded_chunks = []
+                            while True:
+                                chunk = file.read(8192)
+                                if not chunk:
+                                    break
+                                decoded_chunks.append(chunk.decode("utf-8"))
+                            extracted_files[member.name] = decoded_chunks
+                        except UnicodeDecodeError:
+                            logging.warning(f"Could not decode {member.name} as UTF-8.")
+        return extracted_files
