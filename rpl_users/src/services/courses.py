@@ -41,6 +41,23 @@ class CoursesService:
         else:
             return permission in course_user.role.permissions.split(",")
 
+    # ====================== PRIVATE - ASSERTIONS ====================== #
+
+    def _assert_or_else_raise_http_exception(
+        self, assertion: bool, status_code: int, detail: str = ""
+    ) -> Course:
+        if not assertion:
+            raise HTTPException(status_code, detail)
+
+    def _assert_course_exists(self, course_id: str) -> Course:
+        course = self.courses_repo.get_course_with_id(course_id)
+        self._assert_or_else_raise_http_exception(
+            course is not None,
+            status.HTTP_400_BAD_REQUEST,
+            "Course not found",
+        )
+        return course
+
     # ====================== MANAGING - COURSES ====================== #
 
     def create_course(
@@ -72,11 +89,7 @@ class CoursesService:
     def update_course(
         self, course_id: str, course_data: CourseUptateDTO, current_user: User
     ) -> CourseResponseDTO:
-        course = self.courses_repo.get_course_with_id(course_id)
-        if not course:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Course not found"
-            )
+        self._assert_course_exists(course_id)
 
         course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
         if (not course_user) or (
@@ -119,11 +132,7 @@ class CoursesService:
     def get_course_details(
         self, course_id: str, current_user: User
     ) -> CourseResponseDTO:
-        course = self.courses_repo.get_course_with_id(course_id)
-        if not course:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Course not found"
-            )
+        course = self._assert_course_exists(course_id)
 
         course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
         if (not course_user) or (
@@ -141,11 +150,7 @@ class CoursesService:
     def enroll_student_in_course(
         self, course_id: str, current_user: User
     ) -> RoleResponseDTO:
-        course = self.courses_repo.get_course_with_id(course_id)
-        if not course:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Course not found"
-            )
+        self._assert_course_exists(course_id)
 
         new_course_user = self.course_users_repo.save_new_course_user(
             course_id=course_id,
@@ -156,7 +161,41 @@ class CoursesService:
 
         return RoleResponseDTO.from_course_user(new_course_user)
 
-    # ====================== QUERYING - COURSE USERS ====================== #
+    # ====================== MANAGING - COURSE USERS ====================== #
+
+    def get_user_permissions(self, course_id: str, current_user: User) -> list[str]:
+        self._assert_course_exists(course_id)
+
+        course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
+        if not course_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User is not enrolled in the course",
+            )
+
+        return course_user.get_permissions()
+
+    # ====================== PRIVATE - QUERYING - ROLES ====================== #
+
+    def _get_role_named(self, role_name: str) -> Role:
+        return self.roles_repo.get_role_named(role_name)
+
+    # ====================== QUERYING - ROLES ====================== #
+
+    def get_all_roles(self) -> list[RoleResponseDTO]:
+        return [
+            RoleResponseDTO.from_role(role) for role in self.roles_repo.get_all_roles()
+        ]
+
+    # ====================== QUERYING - UNIVERSITIES ====================== #
+
+    def get_all_universities(self) -> list[UniversityResponseDTO]:
+        return [
+            UniversityResponseDTO.from_university(university)
+            for university in self.universities_repo.get_all_universities()
+        ]
+
+    # ====================== QUERYING - EXTERNAL COURSE USER AUTH ====================== #
 
     def get_course_user_for_ext_service(
         self, course_id, current_user: User
@@ -181,23 +220,3 @@ class CoursesService:
             student_id=current_user.student_id,
             permissions=current_perms,
         )
-
-    # ====================== PRIVATE - QUERYING - ROLES ====================== #
-
-    def _get_role_named(self, role_name: str) -> list[RoleResponseDTO]:
-        return self.roles_repo.get_role_named(role_name)
-
-    # ====================== QUERYING - ROLES ====================== #
-
-    def get_all_roles(self) -> list[RoleResponseDTO]:
-        return [
-            RoleResponseDTO.from_role(role) for role in self.roles_repo.get_all_roles()
-        ]
-
-    # ====================== QUERYING - UNIVERSITIES ====================== #
-
-    def get_all_universities(self) -> list[UniversityResponseDTO]:
-        return [
-            UniversityResponseDTO.from_university(university)
-            for university in self.universities_repo.get_all_universities()
-        ]

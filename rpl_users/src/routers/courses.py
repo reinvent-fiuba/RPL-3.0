@@ -77,24 +77,19 @@ def get_course_details(
     return CoursesService(db).get_course_details(course_id, current_user)
 
 
-# ==============================================================================
+# ====================== QUERYING - COURSES ====================== #
 
 
-@router.get("/auth/roles", response_model=list[RoleResponseDTO])
-def get_all_roles(
+@router.get("/courses/{course_id}/permissions", response_model=List[str])
+def get_user_permissions(
+    course_id: str,
+    current_user: CurrentUserDependency,
     db: DBSessionDependency,
 ):
-    return CoursesService(db).get_all_roles()
+    return CoursesService(db).get_user_permissions(course_id, current_user)
 
 
-@router.get("/auth/universities", response_model=list[UniversityResponseDTO])
-def get_all_universities(
-    db: DBSessionDependency,
-):
-    return CoursesService(db).get_all_universities()
-
-
-# ==============================================================================
+# ====================== MANAGING - COURSE USERS ====================== #
 
 
 @router.post("/courses/{course_id}/enroll", response_model=RoleResponseDTO)
@@ -106,7 +101,29 @@ def enroll_student_in_course(
     return CoursesService(db).enroll_student_in_course(course_id, current_user)
 
 
+# ====================== QUERYING - ROLES ====================== #
+
+
+@router.get("/auth/roles", response_model=list[RoleResponseDTO])
+def get_all_roles(
+    db: DBSessionDependency,
+):
+    return CoursesService(db).get_all_roles()
+
+
+# ====================== QUERYING - UNIVERSITIES ====================== #
+
+
+@router.get("/auth/universities", response_model=list[UniversityResponseDTO])
+def get_all_universities(
+    db: DBSessionDependency,
+):
+    return CoursesService(db).get_all_universities()
+
+
 # ==============================================================================
+
+# ====================== QUERYING - EXTERNAL COURSE USER AUTH ====================== #
 
 
 @router.get("/auth/externalCourseUserAuth", response_model=CurrentCourseUserResponseDTO)
