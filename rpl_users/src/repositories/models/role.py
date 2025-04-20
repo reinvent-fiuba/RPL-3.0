@@ -26,4 +26,7 @@ class Role(Base):
 
     def get_permissions(self) -> List[str]:
         """Get the permissions as a list of strings."""
-        return self.permissions.split(PERMISSION_DELIMITER)
+        return [
+            permission.strip()
+            for permission in self.permissions.split(PERMISSION_DELIMITER)
+        ]
