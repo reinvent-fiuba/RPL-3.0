@@ -57,6 +57,13 @@ class RPLFilesService:
 
         return self.__extract_tar_gz_to_dict(file.data)
 
+    def get_extracted_files(self, file_ids: list[int]) -> list[dict[str, str]]:
+        files: list[dict[str, str]] = []
+        for file_id in file_ids:
+            file = self.get_extracted_file(file_id)
+            files.append(file)
+        return files
+
     def extract_file_for_student(self, file_id: int) -> dict[str, str]:
         extracted_files = self.get_extracted_file(file_id)
         if not extracted_files:
