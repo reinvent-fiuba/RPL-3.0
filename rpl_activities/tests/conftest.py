@@ -36,13 +36,14 @@ from rpl_users.tests.conftest import (
     regular_auth_headers_fixture,
     admin_auth_headers_fixture,
     example_course_fixture,
-    course_user_fixture,
+    example_teacher_course_user_fixture,
+    example_student_course_user_fixture,
     insert_base_roles_fixture,
 )
 
 
 @pytest.fixture(name="activities_api_dbsession", scope="function")
-def activities_api_dbsession_fixture(users_api_dbsession):
+def activities_api_dbsession_fixture():
     engine = create_engine(
         env.DB_URL,
         # connect_args={"check_same_thread": False}, # Use if sqlite is active
@@ -59,7 +60,10 @@ def activities_api_dbsession_fixture(users_api_dbsession):
 
 @pytest.fixture(name="activities_api_client", scope="function")
 def activities_api_http_client_fixture(
-    activities_api_dbsession, users_api_client: TestClient, example_course_user
+    activities_api_dbsession,
+    users_api_client: TestClient,
+    example_teacher_course_user,
+    example_student_course_user,
 ):
     app.dependency_overrides[get_db_session] = lambda: activities_api_dbsession
 
@@ -114,8 +118,27 @@ def example_category_fixture(
         id=1,
         course_id=1,
         name="Example Category",
-        description="This is an example category for testing purposes.",
+        description="This is an example category",
         active=True,
+        date_created=datetime.now(timezone.utc),
+        last_updated=datetime.now(timezone.utc),
+    )
+    activities_api_dbsession.add(category)
+    activities_api_dbsession.commit()
+    activities_api_dbsession.refresh(category)
+    yield category
+
+
+@pytest.fixture(name="example_inactive_category")
+def example_inactive_category_fixture(
+    activities_api_dbsession: Session,
+):
+    category = ActivityCategory(
+        id=2,
+        course_id=1,
+        name="Inactive Category",
+        description="This is an example inactive category",
+        active=False,
         date_created=datetime.now(timezone.utc),
         last_updated=datetime.now(timezone.utc),
     )
