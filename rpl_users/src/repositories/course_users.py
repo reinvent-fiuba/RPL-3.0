@@ -34,9 +34,19 @@ class CourseUsersRepository(BaseRepository):
         except IntegrityError:
             self.db_session.rollback()
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
+                status_code=status.HTTP_403_FORBIDDEN,
                 detail="User is already registered in the course",
             )
+
+    def update_course_user(
+        self, course_id: int, user_id: int, role_id: int, accepted: bool
+    ):
+        course_user = self.get_course_user(course_id=course_id, user_id=user_id)
+        course_user.role_id = role_id
+        course_user.accepted = accepted
+        self.db_session.commit()
+        self.db_session.refresh(course_user)
+        return course_user
 
     # ====================== QUERYING ====================== #
 

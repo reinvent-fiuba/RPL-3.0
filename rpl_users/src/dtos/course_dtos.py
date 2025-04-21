@@ -46,6 +46,11 @@ class CourseUptateDTO(BaseModel):
     img_uri: Optional[str] = None
 
 
+class CourseUserUptateDTO(BaseModel):
+    accepted: bool
+    role: str
+
+
 # ====================== RESPONSES ====================== #
 
 

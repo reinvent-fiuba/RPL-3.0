@@ -13,6 +13,14 @@ from ..dtos.course_dtos import CourseCreationDTO, CourseUptateDTO
 
 class CoursesRepository(BaseRepository):
 
+    # ====================== PRIVATE - EXCEPTIONS  ====================== #
+
+    def _raise_http_conflict_exception(self):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Course already exists with this name, university and semester",
+        )
+
     # ====================== MANAGING ====================== #
 
     def save_new_course(self, course_data: CourseCreationDTO) -> Course:
@@ -35,23 +43,11 @@ class CoursesRepository(BaseRepository):
             return new_course
         except IntegrityError:
             self.db_session.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Course already exists with this name, university, and semester",
-            )
+            self._raise_http_conflict_exception()
 
     def update_course(self, course_id: str, course_data: CourseUptateDTO) -> Course:
         try:
-            updated_course = (
-                self.db_session.execute(sa.select(Course).where(Course.id == course_id))
-                .scalars()
-                .one_or_none()
-            )
-            if not updated_course:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Course not found",
-                )
+            updated_course = self.get_course_with_id(course_id)
             updated_course.name = course_data.name
             updated_course.university = course_data.university
             updated_course.subject_id = course_data.subject_id
@@ -66,10 +62,7 @@ class CoursesRepository(BaseRepository):
             return updated_course
         except IntegrityError:
             self.db_session.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Course already exists with this name, university, and semester",
-            )
+            self._raise_http_conflict_exception()
 
     # ====================== QUERYING ====================== #
 

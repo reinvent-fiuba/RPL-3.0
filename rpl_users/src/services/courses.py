@@ -1,10 +1,12 @@
 import logging
 from pkgutil import get_data
 from fastapi import HTTPException, status
+from rpl_users.src.deps.email import EmailHandler
 from rpl_users.src.dtos.course_dtos import (
     CurrentCourseUserResponseDTO,
     CourseCreationDTO,
     CourseUptateDTO,
+    CourseUserUptateDTO,
     CourseWithUserInformationResponseDTO,
     CourseUserResponseDTO,
 )
@@ -53,6 +55,15 @@ class CoursesService:
         if not assertion:
             raise HTTPException(status_code, detail)
 
+    def _assert_role_exists(self, role_name: str) -> Role:
+        role = self._get_role_named(role_name)
+        self._assert_or_else_raise_http_exception(
+            role is not None,
+            status.HTTP_400_BAD_REQUEST,
+            "Role not found",
+        )
+        return role
+
     def _assert_course_exists(self, course_id: str) -> Course:
         course = self.courses_repo.get_course_with_id(course_id)
         self._assert_or_else_raise_http_exception(
@@ -63,7 +74,7 @@ class CoursesService:
         return course
 
     def _assert_course_user_exists_and_has_permissions(
-        self, course_id: str, user_id: str, permissions: list[str]
+        self, course_id: str, user_id: str, permissions: list[str] = []
     ) -> CourseUser:
         course_user = self.course_users_repo.get_course_user(course_id, user_id)
         self._assert_or_else_raise_http_exception(
@@ -165,7 +176,40 @@ class CoursesService:
 
         return RoleResponseDTO.from_course_user(new_course_user)
 
-    # ====================== MANAGING - COURSE USERS ====================== #
+    def update_course_user(
+        self,
+        course_id: str,
+        user_id: str,
+        course_data: CourseUserUptateDTO,
+        current_user: User,
+        email_handler: EmailHandler,
+    ) -> CourseUserResponseDTO:
+        self._assert_course_exists(course_id)
+        role = self._assert_role_exists(course_data.role)
+        self._assert_course_user_exists_and_has_permissions(
+            course_id, current_user.id, ["user_manage"]
+        )
+        course_user = self._assert_course_user_exists_and_has_permissions(
+            course_id, user_id
+        )
+
+        self.course_users_repo.update_course_user(
+            course_id,
+            user_id,
+            role.id,
+            course_data.accepted,
+        )
+
+        if course_data.accepted:
+            email_handler.send_course_acceptance_email(
+                course_user.user.email,
+                course_user.user,
+                course_user.course,
+            )
+
+        return CourseUserResponseDTO.from_course_user(course_user)
+
+    # ====================== QUERYING - COURSE USERS ====================== #
 
     def get_user_permissions(self, course_id: str, current_user: User) -> list[str]:
         self._assert_course_exists(course_id)

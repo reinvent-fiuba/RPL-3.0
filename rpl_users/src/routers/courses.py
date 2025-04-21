@@ -6,6 +6,7 @@ from rpl_users.src.dtos.course_dtos import (
     CurrentCourseUserResponseDTO,
     CourseCreationDTO,
     CourseUptateDTO,
+    CourseUserUptateDTO,
     CourseResponseDTO,
     CourseWithUserInformationResponseDTO,
     CourseUserResponseDTO,
@@ -88,6 +89,22 @@ def enroll_student_in_course(
     db: DBSessionDependency,
 ):
     return CoursesService(db).enroll_student_in_course(course_id, current_user)
+
+
+@router.patch(
+    "/courses/{course_id}/users/{user_id}", response_model=CourseUserResponseDTO
+)
+def update_course_user(
+    course_id: str,
+    user_id: str,
+    course_data: CourseUserUptateDTO,
+    current_user: CurrentUserDependency,
+    email_handler: EmailHandlerDependency,
+    db: DBSessionDependency,
+):
+    return CoursesService(db).update_course_user(
+        course_id, user_id, course_data, current_user, email_handler
+    )
 
 
 # ====================== QUERYING - COURSE USERS ====================== #

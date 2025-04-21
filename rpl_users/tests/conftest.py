@@ -40,14 +40,39 @@ def users_api_dbsession_fixture():
 @pytest.fixture(name="email_handler", scope="function")
 def email_handler_fixture():
     class TestEmailHandler:
-        def send_validation_email(self, user):
+        def __init__(self):
+            self._emails_sent = []
+
+        def send_validation_email(self, to_address):
+            self._emails_sent.append(
+                {
+                    "type": "validation",
+                    "to_address": to_address,
+                }
+            )
             return "fake_token"
 
-        def send_password_reset_email(self, user):
+        def send_password_reset_email(self, to_address):
+            self._emails_sent.append(
+                {
+                    "type": "password_reset",
+                    "to_address": to_address,
+                }
+            )
             return "fake_token"
 
-        def send_course_acceptance_email(self, user):
-            pass
+        def send_course_acceptance_email(self, to_address, user_data, course_data):
+            self._emails_sent.append(
+                {
+                    "type": "course_acceptance",
+                    "to_address": to_address,
+                    "user_data": user_data,
+                    "course_data": course_data,
+                }
+            )
+
+        def emails_sent(self):
+            return self._emails_sent
 
     return TestEmailHandler()
 
