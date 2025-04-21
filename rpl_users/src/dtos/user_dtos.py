@@ -14,7 +14,7 @@ class UserCreationDTO(BaseModel):
     university: str
 
 
-class UserCreateResponseDTO(BaseModel):
+class UserCreationResponseDTO(BaseModel):
     id: int
     username: str
     email: EmailStr
@@ -81,7 +81,7 @@ class FindUsersResponseDTO(BaseModel):
     university: str
 
 
-class CurrentUserDTO(BaseModel):
+class CurrentMainUserResponseDTO(BaseModel):
     id: int
     username: str
     email: EmailStr
@@ -90,4 +90,5 @@ class CurrentUserDTO(BaseModel):
     student_id: str
     degree: str
     university: str
+    is_admin: bool
     img_uri: Optional[str] = None

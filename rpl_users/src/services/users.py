@@ -8,7 +8,7 @@ from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
 from rpl_users.src.repositories.models.user import User
 from rpl_users.src.dtos.user_dtos import (
-    CurrentUserDTO,
+    CurrentMainUserResponseDTO,
     FindUsersResponseDTO,
     ResendEmailValidationDTO,
     UserCreationDTO,
@@ -18,7 +18,7 @@ from rpl_users.src.dtos.user_dtos import (
     UserLoginResponseDTO,
     UserPasswordResetDTO,
     UserProfileResponseDTO,
-    UserCreateResponseDTO,
+    UserCreationResponseDTO,
     UserProfileUpdateDTO,
 )
 from rpl_users.src.repositories.roles import RolesRepository
@@ -98,7 +98,7 @@ class UsersService:
 
     def create_user(
         self, user_data: UserCreationDTO, email_handler: EmailHandler
-    ) -> UserCreateResponseDTO:
+    ) -> UserCreationResponseDTO:
         self.__verify_username_and_email_availability(
             user_data.username, user_data.email
         )
@@ -108,7 +108,7 @@ class UsersService:
             hashed_password,
         )
         self.__send_validation_email(new_user.id, user_data.email, email_handler)
-        return UserCreateResponseDTO(
+        return UserCreationResponseDTO(
             id=new_user.id,
             username=new_user.username,
             email=new_user.email,
@@ -238,8 +238,8 @@ class UsersService:
 
     # =============================================================================
 
-    def get_user_for_ext_service(current_user: User) -> CurrentUserDTO:
-        return CurrentUserDTO(
+    def get_user_for_ext_service(current_user: User) -> CurrentMainUserResponseDTO:
+        return CurrentMainUserResponseDTO(
             id=current_user.id,
             username=current_user.username,
             name=current_user.name,
@@ -247,5 +247,6 @@ class UsersService:
             student_id=current_user.student_id,
             degree=current_user.degree,
             university=current_user.university,
+            is_admin=current_user.is_admin,
             img_uri=current_user.img_uri,
         )
