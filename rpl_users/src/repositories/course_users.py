@@ -52,12 +52,10 @@ class CourseUsersRepository(BaseRepository):
             .one_or_none()
         )
 
-    def get_course_users_by_user_id(self, user_id: int) -> list[CourseUser]:
+    def get_course_users(self, course_id: int) -> list[CourseUser]:
         return (
             self.db_session.execute(
-                sa.select(CourseUser).where(
-                    CourseUser.user_id == user_id,
-                )
+                sa.select(CourseUser).where(CourseUser.course_id == course_id)
             )
             .scalars()
             .all()

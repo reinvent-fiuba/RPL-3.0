@@ -7,6 +7,7 @@ from rpl_users.src.dtos.course_dtos import (
     CourseCreationDTO,
     CourseUptateDTO,
     CourseResponseDTO,
+    CourseWithUserInformationResponseDTO,
     CourseUserResponseDTO,
 )
 from rpl_users.src.dtos.role_dtos import RoleResponseDTO
@@ -52,7 +53,7 @@ def update_course(
 
 @router.get(
     "/courses",
-    response_model=List[CourseUserResponseDTO],
+    response_model=List[CourseWithUserInformationResponseDTO],
     status_code=status.HTTP_200_OK,
 )
 def get_all_courses_including_their_relationship_with_user(
@@ -77,7 +78,19 @@ def get_course_details(
     return CoursesService(db).get_course_details(course_id, current_user)
 
 
-# ====================== QUERYING - COURSES ====================== #
+# ====================== MANAGING - COURSE USERS ====================== #
+
+
+@router.post("/courses/{course_id}/enroll", response_model=RoleResponseDTO)
+def enroll_student_in_course(
+    course_id: str,
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+):
+    return CoursesService(db).enroll_student_in_course(course_id, current_user)
+
+
+# ====================== QUERYING - COURSE USERS ====================== #
 
 
 @router.get("/courses/{course_id}/permissions", response_model=List[str])
@@ -89,16 +102,13 @@ def get_user_permissions(
     return CoursesService(db).get_user_permissions(course_id, current_user)
 
 
-# ====================== MANAGING - COURSE USERS ====================== #
-
-
-@router.post("/courses/{course_id}/enroll", response_model=RoleResponseDTO)
-def enroll_student_in_course(
+@router.get("/courses/{course_id}/users", response_model=list[CourseUserResponseDTO])
+def get_all_course_users_from_course(
     course_id: str,
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
 ):
-    return CoursesService(db).enroll_student_in_course(course_id, current_user)
+    return CoursesService(db).get_all_course_users_from_course(course_id, current_user)
 
 
 # ====================== QUERYING - ROLES ====================== #
@@ -120,8 +130,6 @@ def get_all_universities(
 ):
     return CoursesService(db).get_all_universities()
 
-
-# ==============================================================================
 
 # ====================== QUERYING - EXTERNAL COURSE USER AUTH ====================== #
 

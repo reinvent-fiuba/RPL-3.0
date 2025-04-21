@@ -5,6 +5,7 @@ from rpl_users.src.dtos.course_dtos import (
     CurrentCourseUserResponseDTO,
     CourseCreationDTO,
     CourseUptateDTO,
+    CourseWithUserInformationResponseDTO,
     CourseUserResponseDTO,
 )
 from rpl_users.src.dtos.role_dtos import RoleResponseDTO
@@ -32,14 +33,17 @@ class CoursesService:
 
     # ====================== PRIVATE - PERMISSIONS ====================== #
 
-    def _has_course_user_permission(
-        self, course_user: CourseUser, permission: str
+    def _has_course_user_permissions(
+        self, course_user: CourseUser, permissions: list[str]
     ) -> bool:
         if course_user.user.is_admin:
             # super admin has all permissions
             return True
         else:
-            return permission in course_user.role.permissions.split(",")
+            return all(
+                permission in course_user.role.get_permissions()
+                for permission in permissions
+            )
 
     # ====================== PRIVATE - ASSERTIONS ====================== #
 
@@ -57,6 +61,18 @@ class CoursesService:
             "Course not found",
         )
         return course
+
+    def _assert_course_user_exists_and_has_permissions(
+        self, course_id: str, user_id: str, permissions: list[str]
+    ) -> CourseUser:
+        course_user = self.course_users_repo.get_course_user(course_id, user_id)
+        self._assert_or_else_raise_http_exception(
+            (course_user is not None)
+            and self._has_course_user_permissions(course_user, permissions),
+            status.HTTP_403_FORBIDDEN,
+            "User does not have permission to perform this action",
+        )
+        return course_user
 
     # ====================== MANAGING - COURSES ====================== #
 
@@ -90,15 +106,9 @@ class CoursesService:
         self, course_id: str, course_data: CourseUptateDTO, current_user: User
     ) -> CourseResponseDTO:
         self._assert_course_exists(course_id)
-
-        course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
-        if (not course_user) or (
-            not self._has_course_user_permission(course_user, "course_edit")
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="User does not have permission to edit the course",
-            )
+        self._assert_course_user_exists_and_has_permissions(
+            course_id, current_user.id, ["course_edit"]
+        )
 
         updated_course = self.courses_repo.update_course(course_id, course_data)
 
@@ -108,7 +118,7 @@ class CoursesService:
 
     def get_all_courses_including_their_relationship_with_user(
         self, current_user: User
-    ) -> list[CourseUserResponseDTO]:
+    ) -> list[CourseWithUserInformationResponseDTO]:
         courses_with_user_info = []
         for course in self.courses_repo.get_all_courses():
             course_user = self.course_users_repo.get_course_user(
@@ -117,13 +127,13 @@ class CoursesService:
             )
             if course_user:
                 courses_with_user_info.append(
-                    CourseUserResponseDTO.from_course_and_user_info(
+                    CourseWithUserInformationResponseDTO.from_course_and_user_info(
                         course, True, course_user.accepted
                     )
                 )
             else:
                 courses_with_user_info.append(
-                    CourseUserResponseDTO.from_course_and_user_info(
+                    CourseWithUserInformationResponseDTO.from_course_and_user_info(
                         course, False, False
                     )
                 )
@@ -133,15 +143,9 @@ class CoursesService:
         self, course_id: str, current_user: User
     ) -> CourseResponseDTO:
         course = self._assert_course_exists(course_id)
-
-        course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
-        if (not course_user) or (
-            not self._has_course_user_permission(course_user, "course_view")
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="User does not have permission to view course details",
-            )
+        self._assert_course_user_exists_and_has_permissions(
+            course_id, current_user.id, ["course_view"]
+        )
 
         return CourseResponseDTO.from_course(course)
 
@@ -165,15 +169,24 @@ class CoursesService:
 
     def get_user_permissions(self, course_id: str, current_user: User) -> list[str]:
         self._assert_course_exists(course_id)
-
-        course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
-        if not course_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User is not enrolled in the course",
-            )
+        course_user = self._assert_course_user_exists_and_has_permissions(
+            course_id, current_user.id, []
+        )
 
         return course_user.get_permissions()
+
+    def get_all_course_users_from_course(
+        self, course_id: str, current_user: User
+    ) -> list[CourseUserResponseDTO]:
+        self._assert_course_exists(course_id)
+        self._assert_course_user_exists_and_has_permissions(
+            course_id, current_user.id, ["user_view"]
+        )
+
+        return [
+            CourseUserResponseDTO.from_course_user(course_user)
+            for course_user in self.course_users_repo.get_course_users(course_id)
+        ]
 
     # ====================== PRIVATE - QUERYING - ROLES ====================== #
 

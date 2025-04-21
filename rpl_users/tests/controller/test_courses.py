@@ -537,13 +537,12 @@ def test_cannot_get_course_details_using_user_that_has_not_been_enrolled_yet(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
     result = response.json()
-    assert "User does not have permission to view course details" in result["detail"]
+    assert "User does not have permission to perform this action" in result["detail"]
 
 
 # ====================== GET PERMISSIONS ====================== #
 
 
-@pytest.mark.only
 def test_get_couse_user_permissions_of_user_with_admin_role(
     users_api_client: TestClient,
     example_users,
@@ -578,7 +577,6 @@ def test_get_couse_user_permissions_of_user_with_admin_role(
     assert result == base_roles["course_admin"].get_permissions()
 
 
-@pytest.mark.only
 def test_get_couse_user_permissions_of_user_with_student_role(
     users_api_client: TestClient,
     example_users,
@@ -618,7 +616,6 @@ def test_get_couse_user_permissions_of_user_with_student_role(
     assert result == base_roles["student"].get_permissions()
 
 
-@pytest.mark.only
 def test_cannot_get_couse_user_permissions_using_non_existing_course(
     users_api_client: TestClient,
     admin_auth_headers,
@@ -636,7 +633,6 @@ def test_cannot_get_couse_user_permissions_using_non_existing_course(
     assert "Course not found" in result["detail"]
 
 
-@pytest.mark.only
 def test_cannot_get_couse_user_permissions_using_user_that_has_not_been_enrolled_yet(
     users_api_client: TestClient,
     example_users,
@@ -665,13 +661,13 @@ def test_cannot_get_couse_user_permissions_using_user_that_has_not_been_enrolled
         f"/api/v3/courses/{course_id}/permissions", headers=regular_auth_headers
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
     result = response.json()
-    assert "User is not enrolled in the course" in result["detail"]
+    assert "User does not have permission to perform this action" in result["detail"]
 
 
-# ====================== EDIT COURSE ====================== #
+# ====================== UPDATE COURSE ====================== #
 
 
 def test_update_course_with_super_admin_user_without_optional_fields(
@@ -817,7 +813,7 @@ def test_cannot_update_course_with_user_that_has_not_been_enrolled(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
     result = response.json()
-    assert "User does not have permission to edit the course" in result["detail"]
+    assert "User does not have permission to perform this action" in result["detail"]
 
 
 def test_cannot_update_course_using_user_with_student_role_permissions(
@@ -865,7 +861,7 @@ def test_cannot_update_course_using_user_with_student_role_permissions(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
     result = response.json()
-    assert "User does not have permission to edit the course" in result["detail"]
+    assert "User does not have permission to perform this action" in result["detail"]
 
 
 def test_update_course_using_user_with_admin_role_permissions(
@@ -1131,7 +1127,7 @@ def test_cannot_enroll_an_user_twice(
     assert "User is already registered in the course" in result["detail"]
 
 
-def test_cannot_enroll_an_user_to_a_non_existing_course(
+def test_cannot_enroll_an_user_to_non_existing_course(
     users_api_client: TestClient,
     admin_auth_headers,
 ):
@@ -1148,3 +1144,190 @@ def test_cannot_enroll_an_user_to_a_non_existing_course(
 
 
 # ====================== USER UNENROLLMENT ====================== #
+
+# ====================== GET COURSE USERS ====================== #
+
+
+def test_get_all_course_users_from_course_when_only_admin_user(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+    regular_auth_headers,
+    base_roles,
+):
+    course_data = {
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "active": True,
+        "semester": "2019-1c",
+        "semester_start_date": "2019-03-01T00:00:00",
+        "semester_end_date": "2019-07-01T00:00:00",
+        "course_user_admin_user_id": example_users["admin"].id,
+    }
+
+    response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    result = response.json()
+    course_id = result["id"]
+
+    response = users_api_client.get(
+        f"/api/v3/courses/{course_id}/users",
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    assert len(result) == 1
+
+    result_admin_user = next(
+        (r for r in result if r["id"] == example_users["admin"].id)
+    )
+    assert result_admin_user["id"] == example_users["admin"].id
+    assert result_admin_user["course_user_id"] is not None
+    assert result_admin_user["name"] == example_users["admin"].name
+    assert result_admin_user["surname"] == example_users["admin"].surname
+    assert result_admin_user["student_id"] == example_users["admin"].student_id
+    assert result_admin_user["username"] == example_users["admin"].username
+    assert result_admin_user["email"] == example_users["admin"].email
+    assert (
+        result_admin_user["email_validated"] == example_users["admin"].email_validated
+    )
+    assert result_admin_user["university"] == example_users["admin"].university
+    assert result_admin_user["degree"] == example_users["admin"].degree
+    assert result_admin_user["role"] == base_roles["course_admin"].name
+    assert result_admin_user["accepted"] is True
+    assert result_admin_user["date_created"] is not None
+    assert result_admin_user["last_updated"] is not None
+
+
+def test_get_all_course_users_from_course_when_multiple_users(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+    regular_auth_headers,
+    base_roles,
+):
+    course_data = {
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "active": True,
+        "semester": "2019-1c",
+        "semester_start_date": "2019-03-01T00:00:00",
+        "semester_end_date": "2019-07-01T00:00:00",
+        "course_user_admin_user_id": example_users["admin"].id,
+    }
+
+    response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    result = response.json()
+    course_id = result["id"]
+
+    users_api_client.post(
+        f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
+    )
+
+    response = users_api_client.get(
+        f"/api/v3/courses/{course_id}/users",
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    assert len(result) == 2
+
+    admin_user = next((r for r in result if r["id"] == example_users["admin"].id))
+    assert admin_user["id"] == example_users["admin"].id
+    assert admin_user["course_user_id"] is not None
+    assert admin_user["name"] == example_users["admin"].name
+    assert admin_user["surname"] == example_users["admin"].surname
+    assert admin_user["student_id"] == example_users["admin"].student_id
+    assert admin_user["username"] == example_users["admin"].username
+    assert admin_user["email"] == example_users["admin"].email
+    assert admin_user["email_validated"] == example_users["admin"].email_validated
+    assert admin_user["university"] == example_users["admin"].university
+    assert admin_user["degree"] == example_users["admin"].degree
+    assert admin_user["role"] == base_roles["course_admin"].name
+    assert admin_user["accepted"] is True
+    assert admin_user["date_created"] is not None
+    assert admin_user["last_updated"] is not None
+
+    student_user = next((r for r in result if r["id"] == example_users["regular"].id))
+    assert student_user["id"] == example_users["regular"].id
+    assert student_user["course_user_id"] is not None
+    assert student_user["name"] == example_users["regular"].name
+    assert student_user["surname"] == example_users["regular"].surname
+    assert student_user["student_id"] == example_users["regular"].student_id
+    assert student_user["username"] == example_users["regular"].username
+    assert student_user["email"] == example_users["regular"].email
+    assert student_user["email_validated"] == example_users["regular"].email_validated
+    assert student_user["university"] == example_users["regular"].university
+    assert student_user["degree"] == example_users["regular"].degree
+    assert student_user["role"] == base_roles["student"].name
+    assert student_user["accepted"] is False
+    assert student_user["date_created"] is not None
+    assert student_user["last_updated"] is not None
+
+
+def test_cannot_get_all_course_users_from_non_existing_course(
+    users_api_client: TestClient,
+    admin_auth_headers,
+):
+    non_existing_course_id = 99999999
+
+    response = users_api_client.get(
+        f"/api/v3/courses/{non_existing_course_id}/users",
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    result = response.json()
+    assert "Course not found" in result["detail"]
+
+
+def test_cannot_get_all_course_users_from_course_using_user_that_has_not_been_enrolled_yet(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+    regular_auth_headers,
+):
+    course_data = {
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "active": True,
+        "semester": "2019-1c",
+        "semester_start_date": "2019-03-01T00:00:00",
+        "semester_end_date": "2019-07-01T00:00:00",
+        "course_user_admin_user_id": example_users["admin"].id,
+    }
+
+    response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    result = response.json()
+    course_id = result["id"]
+
+    response = users_api_client.get(
+        f"/api/v3/courses/{course_id}/users", headers=regular_auth_headers
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    result = response.json()
+    assert "User does not have permission to perform this action" in result["detail"]
+
+
+# ====================== UPDATE COURSE USERS ====================== #
+
+
+# ====================== DELETE COURSE USER ====================== #

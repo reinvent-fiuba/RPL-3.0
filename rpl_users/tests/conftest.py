@@ -182,7 +182,6 @@ def course_with_superadmin_as_admin_user_fixture(
     )
     users_api_dbsession.add(course)
     users_api_dbsession.commit()
-    users_api_dbsession.refresh(course)
 
     admin_course_user = CourseUser(
         course_id=course.id,
@@ -192,8 +191,9 @@ def course_with_superadmin_as_admin_user_fixture(
     )
     users_api_dbsession.add(admin_course_user)
     users_api_dbsession.commit()
-    users_api_dbsession.refresh(admin_course_user)
 
+    users_api_dbsession.refresh(course)
+    users_api_dbsession.refresh(admin_course_user)
     yield {course, admin_course_user}
 
 
@@ -212,7 +212,6 @@ def course_with_regular_user_as_admin_user_fixture(
     )
     users_api_dbsession.add(course)
     users_api_dbsession.commit()
-    users_api_dbsession.refresh(course)
 
     admin_course_user = CourseUser(
         course_id=course.id,
@@ -222,8 +221,9 @@ def course_with_regular_user_as_admin_user_fixture(
     )
     users_api_dbsession.add(admin_course_user)
     users_api_dbsession.commit()
-    users_api_dbsession.refresh(admin_course_user)
 
+    users_api_dbsession.refresh(course)
+    users_api_dbsession.refresh(admin_course_user)
     yield {course, admin_course_user}
 
 
