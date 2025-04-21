@@ -6,18 +6,6 @@ from rpl_users.src.repositories.models.course_user import CourseUser
 
 import datetime
 
-
-class CurrentCourseUserResponseDTO(BaseModel):
-    id: int
-    course_id: int
-    username: str
-    email: EmailStr
-    name: str
-    surname: str
-    student_id: str
-    permissions: list[str]
-
-
 # ====================== REQUESTS ====================== #
 
 
@@ -121,7 +109,8 @@ class CourseWithUserInformationResponseDTO(BaseModel):
 
 
 class CourseUserResponseDTO(BaseModel):
-    id: int
+    user_id: int
+    course_id: int
     course_user_id: int
     name: str
     surname: str
@@ -132,6 +121,7 @@ class CourseUserResponseDTO(BaseModel):
     university: str
     degree: str
     role: str
+    permissions: list[str]
     accepted: bool
     date_created: datetime.datetime
     last_updated: datetime.datetime
@@ -142,7 +132,8 @@ class CourseUserResponseDTO(BaseModel):
         course_user: "CourseUser",
     ) -> "CourseUserResponseDTO":
         return cls(
-            id=course_user.user.id,
+            user_id=course_user.user.id,
+            course_id=course_user.course.id,
             course_user_id=course_user.id,
             name=course_user.user.name,
             surname=course_user.user.surname,
@@ -153,6 +144,7 @@ class CourseUserResponseDTO(BaseModel):
             university=course_user.user.university,
             degree=course_user.user.degree,
             role=course_user.role.name,
+            permissions=course_user.get_permissions(),
             accepted=course_user.accepted,
             date_created=course_user.date_created,
             last_updated=course_user.last_updated,

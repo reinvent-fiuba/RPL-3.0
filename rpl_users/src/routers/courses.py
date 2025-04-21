@@ -2,14 +2,15 @@ from typing import List
 from fastapi import APIRouter, status
 from rpl_users.src.deps.auth import CurrentUserDependency
 from rpl_users.src.deps.database import DBSessionDependency
+from rpl_users.src.deps.email import EmailHandlerDependency
 from rpl_users.src.dtos.course_dtos import (
-    CurrentCourseUserResponseDTO,
     CourseCreationDTO,
     CourseUptateDTO,
     CourseUserUptateDTO,
     CourseResponseDTO,
     CourseWithUserInformationResponseDTO,
     CourseUserResponseDTO,
+    ExternalCourseUserRequestDTO,
 )
 from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
@@ -151,7 +152,7 @@ def get_all_universities(
 # ====================== QUERYING - EXTERNAL COURSE USER AUTH ====================== #
 
 
-@router.get("/auth/externalCourseUserAuth", response_model=CurrentCourseUserResponseDTO)
+@router.get("/auth/externalCourseUserAuth", response_model=CourseUserResponseDTO)
 def course_user_auth_from_activities_api(
     course_id: int,
     current_user: CurrentUserDependency,

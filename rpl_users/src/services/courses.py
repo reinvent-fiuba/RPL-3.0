@@ -3,7 +3,6 @@ from pkgutil import get_data
 from fastapi import HTTPException, status
 from rpl_users.src.deps.email import EmailHandler
 from rpl_users.src.dtos.course_dtos import (
-    CurrentCourseUserResponseDTO,
     CourseCreationDTO,
     CourseUptateDTO,
     CourseUserUptateDTO,
@@ -256,24 +255,10 @@ class CoursesService:
 
     def get_course_user_for_ext_service(
         self, course_id, current_user: User
-    ) -> CurrentCourseUserResponseDTO:
-        course_user = self.course_users_repo.get_course_user(course_id, current_user.id)
-        if not course_user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Course user not found"
-            )
-
-        current_perms = course_user.role.permissions.split(",")
-        current_perms = [perm.strip() for perm in current_perms]
-        if course_user.role.name == "admin":
-            current_perms.append("superadmin")
-        return CurrentCourseUserResponseDTO(
-            id=course_user.id,
-            course_id=course_user.course_id,
-            username=current_user.username,
-            email=current_user.email,
-            name=current_user.name,
-            surname=current_user.surname,
-            student_id=current_user.student_id,
-            permissions=current_perms,
+    ) -> CourseUserResponseDTO:
+        course_user = self._assert_course_user_exists_and_has_permissions(
+            course_id,
+            current_user.id,
         )
+
+        return CourseUserResponseDTO.from_course_user(course_user)
