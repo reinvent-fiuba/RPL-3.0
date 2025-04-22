@@ -189,7 +189,7 @@ def base_roles_fixture(users_api_dbsession: Session):
     yield {"course_admin": course_admin_role, "student": student_role}
 
 
-# ====================== COURSE ====================== #
+# ====================== COURSES ====================== #
 
 
 @pytest.fixture(name="course_with_superadmin_as_admin_user", scope="function")
@@ -219,7 +219,7 @@ def course_with_superadmin_as_admin_user_fixture(
 
     users_api_dbsession.refresh(course)
     users_api_dbsession.refresh(admin_course_user)
-    yield {course, admin_course_user}
+    yield {"course": course, "admin_course_user": admin_course_user}
 
 
 @pytest.fixture(name="course_with_regular_user_as_admin_user", scope="function")
@@ -249,7 +249,7 @@ def course_with_regular_user_as_admin_user_fixture(
 
     users_api_dbsession.refresh(course)
     users_api_dbsession.refresh(admin_course_user)
-    yield {course, admin_course_user}
+    yield {"course": course, "admin_course_user": admin_course_user}
 
 
 @pytest.fixture(
@@ -280,6 +280,3 @@ def course_with_teacher_as_admin_user_and_student_user(
         ],
         "student_user": student_user,
     }
-
-
-# ====================== COURSE USERS ====================== #

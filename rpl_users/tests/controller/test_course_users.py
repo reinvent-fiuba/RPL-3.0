@@ -7,28 +7,11 @@ from fastapi import status
 
 def test_enroll_regular_user_into_course(
     users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
     regular_auth_headers,
     base_roles,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     response = users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
@@ -46,27 +29,10 @@ def test_enroll_regular_user_into_course(
 
 def test_cannot_enroll_an_user_twice(
     users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
     regular_auth_headers,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
@@ -107,24 +73,9 @@ def test_unenroll_course_user_from_course(
     admin_auth_headers,
     regular_auth_headers,
     base_roles,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
@@ -166,28 +117,10 @@ def test_unenroll_course_user_from_course(
 
 def test_cannot_unenroll_course_user_from_course_that_has_not_been_enrolled_yet(
     users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
     regular_auth_headers,
-    base_roles,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     response = users_api_client.post(
         f"/api/v3/courses/{course_id}/unenroll", headers=regular_auth_headers
@@ -223,27 +156,11 @@ def test_cannot_unenroll_course_user_from_non_existing_course(
 
 def test_get_couse_user_permissions_of_user_with_admin_role(
     users_api_client: TestClient,
-    example_users,
     admin_auth_headers,
     base_roles,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     response = users_api_client.get(
         f"/api/v3/courses/{course_id}/permissions", headers=admin_auth_headers
@@ -257,28 +174,11 @@ def test_get_couse_user_permissions_of_user_with_admin_role(
 
 def test_get_couse_user_permissions_of_user_with_student_role(
     users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
     regular_auth_headers,
     base_roles,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
@@ -313,27 +213,10 @@ def test_cannot_get_couse_user_permissions_using_non_existing_course(
 
 def test_cannot_get_couse_user_permissions_using_user_that_has_not_been_enrolled_yet(
     users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
     regular_auth_headers,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     response = users_api_client.get(
         f"/api/v3/courses/{course_id}/permissions", headers=regular_auth_headers
@@ -356,24 +239,9 @@ def test_get_all_course_users_from_course_when_only_admin_user(
     example_users,
     admin_auth_headers,
     base_roles,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     response = users_api_client.get(
         f"/api/v3/courses/{course_id}/users",
@@ -409,24 +277,9 @@ def test_get_all_course_users_from_course_when_multiple_users(
     admin_auth_headers,
     regular_auth_headers,
     base_roles,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
@@ -498,27 +351,10 @@ def test_cannot_get_all_course_users_from_non_existing_course(
 
 def test_cannot_get_all_course_users_from_course_using_user_that_has_not_been_enrolled_yet(
     users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
     regular_auth_headers,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     response = users_api_client.get(
         f"/api/v3/courses/{course_id}/users", headers=regular_auth_headers
@@ -539,24 +375,9 @@ def test_get_all_course_users_from_course_when_multiple_users_after_updating(
     admin_auth_headers,
     regular_auth_headers,
     base_roles,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
@@ -628,24 +449,9 @@ def test_update_course_user_using_super_admin_user(
     example_users,
     admin_auth_headers,
     base_roles,
+    course_with_regular_user_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["regular"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_regular_user_as_admin_user["course"].id
 
     response = users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers
@@ -688,24 +494,9 @@ def test_update_course_user_using_admin_user(
     admin_auth_headers,
     regular_auth_headers,
     base_roles,
+    course_with_regular_user_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["regular"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_regular_user_as_admin_user["course"].id
 
     response = users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers
@@ -749,24 +540,9 @@ def test_accept_user_should_send_course_acceptance_email(
     admin_auth_headers,
     regular_auth_headers,
     base_roles,
+    course_with_regular_user_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["regular"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_regular_user_as_admin_user["course"].id
 
     response = users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers
@@ -800,24 +576,9 @@ def test_not_accept_user_should_not_send_course_acceptance_email(
     admin_auth_headers,
     regular_auth_headers,
     base_roles,
+    course_with_regular_user_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["regular"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_regular_user_as_admin_user["course"].id
 
     response = users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers
@@ -864,24 +625,9 @@ def test_cannot_update_user_that_has_not_been_enrolled_yet(
     example_users,
     admin_auth_headers,
     base_roles,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     course_user_data = {
         "accepted": True,
@@ -909,27 +655,11 @@ def test_cannot_update_course_user_using_student_user(
     users_api_client: TestClient,
     email_handler,
     example_users,
-    admin_auth_headers,
     regular_auth_headers,
     base_roles,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     response = users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
@@ -962,24 +692,9 @@ def test_cannot_update_course_user_to_non_existing_role(
     email_handler,
     example_users,
     admin_auth_headers,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     course_user_data = {
         "accepted": True,
@@ -1031,27 +746,11 @@ def test_cannot_update_course_user_of_non_existing_course(
 def test_cannot_update_course_user_of_non_existing_user(
     users_api_client: TestClient,
     email_handler,
-    example_users,
     admin_auth_headers,
     base_roles,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
     non_existing_user = 99999999
 
     course_user_data = {
@@ -1082,24 +781,9 @@ def test_delete_course_user_from_course_using_super_admin_user(
     admin_auth_headers,
     regular_auth_headers,
     base_roles,
+    course_with_regular_user_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["regular"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_regular_user_as_admin_user["course"].id
 
     response = users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers
@@ -1148,24 +832,9 @@ def test_delete_course_user_from_course_using_admin_user(
     admin_auth_headers,
     regular_auth_headers,
     base_roles,
+    course_with_regular_user_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["regular"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_regular_user_as_admin_user["course"].id
 
     response = users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers
@@ -1211,26 +880,10 @@ def test_delete_course_user_from_course_using_admin_user(
 def test_cannot_delete_course_user_from_course_that_has_not_been_enrolled_yet(
     users_api_client: TestClient,
     example_users,
-    admin_auth_headers,
     regular_auth_headers,
+    course_with_regular_user_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["regular"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_regular_user_as_admin_user["course"].id
 
     response = users_api_client.delete(
         f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}",
@@ -1250,26 +903,10 @@ def test_cannot_delete_course_user_using_student_user(
     users_api_client: TestClient,
     email_handler,
     example_users,
-    admin_auth_headers,
     regular_auth_headers,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
 
     response = users_api_client.post(
         f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
@@ -1315,26 +952,10 @@ def test_cannot_delete_course_user_from_non_existing_course(
 def test_cannot_delete_course_user_of_non_existing_user(
     users_api_client: TestClient,
     email_handler,
-    example_users,
     admin_auth_headers,
+    course_with_superadmin_as_admin_user,
 ):
-    course_data = {
-        "name": "Algo1Mendez",
-        "university": "FIUBA",
-        "subject_id": "8001",
-        "active": True,
-        "semester": "2019-1c",
-        "semester_start_date": "2019-03-01T00:00:00",
-        "semester_end_date": "2019-07-01T00:00:00",
-        "course_user_admin_user_id": example_users["admin"].id,
-    }
-
-    response = users_api_client.post(
-        "/api/v3/courses", json=course_data, headers=admin_auth_headers
-    )
-    assert response.status_code == status.HTTP_201_CREATED
-    result = response.json()
-    course_id = result["id"]
+    course_id = course_with_superadmin_as_admin_user["course"].id
     non_existing_user = 99999999
 
     response = users_api_client.delete(
@@ -1348,3 +969,6 @@ def test_cannot_delete_course_user_of_non_existing_user(
     assert "User not found" in result["detail"]
 
     assert len(email_handler.emails_sent()) == 0
+
+
+# ====================== QUERYING COURSES OF COURSE USER ====================== #
