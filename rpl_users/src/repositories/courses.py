@@ -75,3 +75,14 @@ class CoursesRepository(BaseRepository):
             .scalars()
             .one_or_none()
         )
+
+    def get_all_courses_from_user(self, user_id: str) -> list[Course]:
+        return (
+            self.db_session.execute(
+                sa.select(Course)
+                .join(CourseUser, CourseUser.course_id == Course.id)
+                .where(CourseUser.user_id == user_id)
+            )
+            .scalars()
+            .all()
+        )

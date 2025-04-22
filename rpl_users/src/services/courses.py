@@ -1,5 +1,5 @@
 import logging
-from pkgutil import get_data
+from typing import List
 from fastapi import HTTPException, status
 from rpl_users.src.deps.email import EmailHandler
 from rpl_users.src.dtos.course_dtos import (
@@ -35,7 +35,7 @@ class CoursesService:
     # ====================== PRIVATE - PERMISSIONS ====================== #
 
     def _has_course_user_permissions(
-        self, course_user: CourseUser, permissions: list[str]
+        self, course_user: CourseUser, permissions: List[str]
     ) -> bool:
         if course_user.user.is_admin:
             # super admin has all permissions
@@ -51,7 +51,7 @@ class CoursesService:
     def _assert_or_else_raise_http_exception(
         self, assertion: bool, status_code: int, detail: str = ""
     ) -> Course:
-        if not assertion:
+        if assertion is False:
             raise HTTPException(status_code, detail)
 
     def _assert_course_exists(self, course_id: str) -> Course:
@@ -82,7 +82,7 @@ class CoursesService:
         return role
 
     def _assert_course_user_exists_and_has_permissions(
-        self, course_id: str, user_id: str, permissions: list[str] = []
+        self, course_id: str, user_id: str, permissions: List[str] = []
     ) -> CourseUser:
         course_user = self.course_users_repo.get_course_user(course_id, user_id)
         self._assert_or_else_raise_http_exception(
@@ -139,7 +139,7 @@ class CoursesService:
 
     def get_all_courses_including_their_relationship_with_user(
         self, current_user: User
-    ) -> list[CourseWithUserInformationResponseDTO]:
+    ) -> List[CourseWithUserInformationResponseDTO]:
         courses_with_user_info = []
         for course in self.courses_repo.get_all_courses():
             course_user = self.course_users_repo.get_course_user(
@@ -244,7 +244,7 @@ class CoursesService:
 
     # ====================== QUERYING - COURSE USERS ====================== #
 
-    def get_user_permissions(self, course_id: str, current_user: User) -> list[str]:
+    def get_user_permissions(self, course_id: str, current_user: User) -> List[str]:
         self._assert_course_exists(course_id)
         course_user = self._assert_course_user_exists_and_has_permissions(
             course_id, current_user.id, []
@@ -254,7 +254,7 @@ class CoursesService:
 
     def get_all_course_users_from_course(
         self, course_id: str, current_user: User
-    ) -> list[CourseUserResponseDTO]:
+    ) -> List[CourseUserResponseDTO]:
         self._assert_course_exists(course_id)
         self._assert_course_user_exists_and_has_permissions(
             course_id, current_user.id, ["user_view"]
@@ -265,6 +265,21 @@ class CoursesService:
             for course_user in self.course_users_repo.get_course_users(course_id)
         ]
 
+    def get_all_courses_from_user(
+        self, user_id: str, current_user: User
+    ) -> List[CourseResponseDTO]:
+        self._assert_user_exists(user_id)
+        self._assert_or_else_raise_http_exception(
+            user_id == str(current_user.id),
+            status.HTTP_403_FORBIDDEN,
+            "User can only view its own courses",
+        )
+
+        return [
+            CourseResponseDTO.from_course(course)
+            for course in self.courses_repo.get_all_courses_from_user(user_id)
+        ]
+
     # ====================== PRIVATE - QUERYING - ROLES ====================== #
 
     def _get_role_named(self, role_name: str) -> Role:
@@ -272,14 +287,14 @@ class CoursesService:
 
     # ====================== QUERYING - ROLES ====================== #
 
-    def get_all_roles(self) -> list[RoleResponseDTO]:
+    def get_all_roles(self) -> List[RoleResponseDTO]:
         return [
             RoleResponseDTO.from_role(role) for role in self.roles_repo.get_all_roles()
         ]
 
     # ====================== QUERYING - UNIVERSITIES ====================== #
 
-    def get_all_universities(self) -> list[UniversityResponseDTO]:
+    def get_all_universities(self) -> List[UniversityResponseDTO]:
         return [
             UniversityResponseDTO.from_university(university)
             for university in self.universities_repo.get_all_universities()

@@ -157,7 +157,7 @@ def get_user_permissions(
 
 @router.get(
     "/courses/{course_id}/users",
-    response_model=list[CourseUserResponseDTO],
+    response_model=List[CourseUserResponseDTO],
     status_code=status.HTTP_200_OK,
 )
 def get_all_course_users_from_course(
@@ -168,12 +168,25 @@ def get_all_course_users_from_course(
     return CoursesService(db).get_all_course_users_from_course(course_id, current_user)
 
 
+@router.get(
+    "/users/{user_id}/courses",
+    response_model=List[CourseResponseDTO],
+    status_code=status.HTTP_200_OK,
+)
+def get_all_courses_from_user(
+    user_id: str,
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+):
+    return CoursesService(db).get_all_courses_from_user(user_id, current_user)
+
+
 # ====================== QUERYING - ROLES ====================== #
 
 
 @router.get(
     "/auth/roles",
-    response_model=list[RoleResponseDTO],
+    response_model=List[RoleResponseDTO],
     status_code=status.HTTP_200_OK,
 )
 def get_all_roles(
@@ -187,7 +200,7 @@ def get_all_roles(
 
 @router.get(
     "/auth/universities",
-    response_model=list[UniversityResponseDTO],
+    response_model=List[UniversityResponseDTO],
     status_code=status.HTTP_200_OK,
 )
 def get_all_universities(

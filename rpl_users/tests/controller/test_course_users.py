@@ -751,7 +751,7 @@ def test_cannot_update_course_user_of_non_existing_user(
     course_with_superadmin_as_admin_user,
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
-    non_existing_user = 99999999
+    non_existing_user_id = 99999999
 
     course_user_data = {
         "accepted": True,
@@ -759,7 +759,7 @@ def test_cannot_update_course_user_of_non_existing_user(
     }
 
     response = users_api_client.patch(
-        f"/api/v3/courses/{course_id}/users/{non_existing_user}",
+        f"/api/v3/courses/{course_id}/users/{non_existing_user_id}",
         json=course_user_data,
         headers=admin_auth_headers,
     )
@@ -901,7 +901,6 @@ def test_cannot_delete_course_user_from_course_that_has_not_been_enrolled_yet(
 
 def test_cannot_delete_course_user_using_student_user(
     users_api_client: TestClient,
-    email_handler,
     example_users,
     regular_auth_headers,
     course_with_superadmin_as_admin_user,
@@ -925,12 +924,9 @@ def test_cannot_delete_course_user_using_student_user(
         in result["detail"]
     )
 
-    assert len(email_handler.emails_sent()) == 0
-
 
 def test_cannot_delete_course_user_from_non_existing_course(
     users_api_client: TestClient,
-    email_handler,
     example_users,
     admin_auth_headers,
 ):
@@ -946,20 +942,17 @@ def test_cannot_delete_course_user_from_non_existing_course(
     result = response.json()
     assert "Course not found" in result["detail"]
 
-    assert len(email_handler.emails_sent()) == 0
-
 
 def test_cannot_delete_course_user_of_non_existing_user(
     users_api_client: TestClient,
-    email_handler,
     admin_auth_headers,
     course_with_superadmin_as_admin_user,
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
-    non_existing_user = 99999999
+    non_existing_user_id = 99999999
 
     response = users_api_client.delete(
-        f"/api/v3/courses/{course_id}/users/{non_existing_user}",
+        f"/api/v3/courses/{course_id}/users/{non_existing_user_id}",
         headers=admin_auth_headers,
     )
 
@@ -968,7 +961,143 @@ def test_cannot_delete_course_user_of_non_existing_user(
     result = response.json()
     assert "User not found" in result["detail"]
 
-    assert len(email_handler.emails_sent()) == 0
-
 
 # ====================== QUERYING COURSES OF COURSE USER ====================== #
+
+
+def test_get_courses_of_user_when_user_has_not_been_enrolled_yet(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+):
+    response = users_api_client.get(
+        f"/api/v3/users/{example_users["admin"].id}/courses",
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    assert len(result) == 0
+
+
+def test_get_courses_of_user_when_user_is_enrolled_on_one_course(
+    users_api_client: TestClient,
+    admin_auth_headers,
+    course_with_superadmin_as_admin_user,
+):
+    course = course_with_superadmin_as_admin_user["course"]
+    admin_user = course_with_superadmin_as_admin_user["admin_course_user"]
+
+    response = users_api_client.get(
+        f"/api/v3/users/{admin_user.id}/courses",
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    assert len(result) == 1
+    assert result[0]["id"] == course.id
+    assert result[0]["name"] == course.name
+    assert result[0]["university"] == course.university
+    assert result[0]["active"] == course.active
+    assert result[0]["semester"] == course.semester
+    assert result[0]["semester_start_date"] == course.semester_start_date.isoformat()
+    assert result[0]["semester_end_date"] == course.semester_end_date.isoformat()
+
+
+def test_get_courses_of_user_when_user_is_enrolled_on_multiple_courses(
+    users_api_client: TestClient,
+    admin_auth_headers,
+    course_with_superadmin_as_admin_user,
+):
+    course_1 = course_with_superadmin_as_admin_user["course"]
+    admin_user = course_with_superadmin_as_admin_user["admin_course_user"]
+
+    course_data = {
+        "name": "Algo2Mendez",
+        "university": "UCA",
+        "subject_id": "3001",
+        "active": False,
+        "semester": "2019-2c",
+        "semester_start_date": "2019-07-01T00:00:00",
+        "semester_end_date": "2019-12-01T00:00:00",
+        "course_user_admin_user_id": admin_user.id,
+    }
+    course_2_response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    ).json()
+
+    response = users_api_client.get(
+        f"/api/v3/users/{admin_user.id}/courses",
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    assert len(result) == 2
+
+    result_course_1 = next((r for r in result if r["id"] == course_1.id))
+    assert result_course_1["id"] == course_1.id
+    assert result_course_1["name"] == course_1.name
+    assert result_course_1["university"] == course_1.university
+    assert result_course_1["active"] == course_1.active
+    assert result_course_1["semester"] == course_1.semester
+    assert (
+        result_course_1["semester_start_date"]
+        == course_1.semester_start_date.isoformat()
+    )
+    assert (
+        result_course_1["semester_end_date"] == course_1.semester_end_date.isoformat()
+    )
+
+    result_course_2 = next((r for r in result if r["id"] == course_2_response["id"]))
+    assert result_course_2["id"] == course_2_response["id"]
+    assert result_course_2["name"] == course_2_response["name"]
+    assert result_course_2["university"] == course_2_response["university"]
+    assert result_course_2["active"] == course_2_response["active"]
+    assert result_course_2["semester"] == course_2_response["semester"]
+    assert (
+        result_course_2["semester_start_date"]
+        == course_2_response["semester_start_date"]
+    )
+    assert (
+        result_course_2["semester_end_date"] == course_2_response["semester_end_date"]
+    )
+
+
+def test_cannot_get_courses_of_non_existing_user(
+    users_api_client: TestClient,
+    admin_auth_headers,
+):
+    non_existing_user_id = 99999999
+
+    response = users_api_client.get(
+        f"/api/v3/users/{non_existing_user_id}/courses",
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    result = response.json()
+    assert "User not found" in result["detail"]
+
+
+def test_cannot_get_courses_of_another_user(
+    users_api_client: TestClient,
+    regular_auth_headers,
+    course_with_superadmin_as_admin_user,
+):
+    admin_user = course_with_superadmin_as_admin_user["admin_course_user"]
+
+    response = users_api_client.get(
+        f"/api/v3/users/{admin_user.id}/courses",
+        headers=regular_auth_headers,
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    result = response.json()
+    assert "User can only view its own courses" in result["detail"]

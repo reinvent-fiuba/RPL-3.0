@@ -250,7 +250,7 @@ def test_get_all_courses_of_admin_course_user(
 
     result = response.json()
     assert len(result) == 1
-    assert result[0]["id"] is not None
+    assert result[0]["id"] == course.id
     assert result[0]["name"] == course.name
     assert result[0]["university"] == course.university
     assert result[0]["active"] == course.active
@@ -274,7 +274,7 @@ def test_get_all_courses_of_user_that_has_not_been_enrolled_to_a_course_yet(
 
     result = response.json()
     assert len(result) == 1
-    assert result[0]["id"] is not None
+    assert result[0]["id"] == course.id
     assert result[0]["name"] == course.name
     assert result[0]["university"] == course.university
     assert result[0]["active"] == course.active
@@ -303,7 +303,7 @@ def test_get_all_courses_of_user_that_has_been_enrolled_to_a_course(
 
     result = response.json()
     assert len(result) == 1
-    assert result[0]["id"] is not None
+    assert result[0]["id"] == course.id
     assert result[0]["name"] == course.name
     assert result[0]["university"] == course.university
     assert result[0]["active"] == course.active
@@ -346,7 +346,7 @@ def test_get_all_courses_of_admin_course_user_when_multiple_courses(
     result_superadmin_course = next(
         (r for r in result if r["id"] == superadmin_course.id)
     )
-    assert result_superadmin_course["id"] is not None
+    assert result_superadmin_course["id"] == superadmin_course.id
     assert result_superadmin_course["name"] == superadmin_course.name
     assert result_superadmin_course["university"] == superadmin_course.university
     assert result_superadmin_course["active"] == superadmin_course.active
@@ -365,7 +365,7 @@ def test_get_all_courses_of_admin_course_user_when_multiple_courses(
     result_regular_user_course = next(
         (r for r in result if r["id"] == regular_user_course_response["id"])
     )
-    assert result_regular_user_course["id"] is not None
+    assert result_regular_user_course["id"] == regular_user_course_response["id"]
     assert result_regular_user_course["name"] == regular_user_course_response["name"]
     assert (
         result_regular_user_course["university"]
@@ -408,7 +408,7 @@ def test_get_course_details_using_super_admin_user(
     assert response.status_code == status.HTTP_200_OK
 
     result = response.json()
-    assert result["id"] is not None
+    assert result["id"] == course.id
     assert result["name"] == course.name
     assert result["university"] == course.university
     assert result["active"] == course.active
@@ -432,7 +432,7 @@ def test_get_course_details_using_user_with_admin_role_permissions(
     assert response.status_code == status.HTTP_200_OK
 
     result = response.json()
-    assert result["id"] is not None
+    assert result["id"] == course.id
     assert result["name"] == course.name
     assert result["university"] == course.university
     assert result["active"] == course.active
@@ -460,7 +460,7 @@ def test_get_course_details_using_user_with_student_role_permissions(
     assert response.status_code == status.HTTP_200_OK
 
     result = response.json()
-    assert result["id"] is not None
+    assert result["id"] == course.id
     assert result["name"] == course.name
     assert result["university"] == course.university
     assert result["active"] == course.active
@@ -698,7 +698,7 @@ def test_get_updated_course_of_user(
 
     result = response.json()
     assert len(result) == 1
-    assert result[0]["id"] is not None
+    assert result[0]["id"] == course_id
     assert result[0]["name"] == course_data["name"]
     assert result[0]["university"] == course_data["university"]
     assert result[0]["active"] == course_data["active"]
