@@ -18,7 +18,6 @@ from rpl_activities.src.deps.auth import (
 )
 from rpl_activities.src.deps.database import get_db_session
 from rpl_activities.src.dtos.auth_dtos import (
-    ExternalCurrentCourseUserDTO,
     ExternalCurrentMainUserDTO,
 )
 from rpl_activities.src.main import app
@@ -28,6 +27,7 @@ from rpl_activities.src.config import env
 from rpl_activities.src.repositories.models.activity_category import ActivityCategory
 
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
+from rpl_users.src.dtos.course_dtos import CourseUserResponseDTO
 from rpl_users.tests.conftest import (
     users_api_dbsession_fixture,
     users_api_http_client_fixture,
@@ -94,7 +94,7 @@ def activities_api_http_client_fixture(
                 status_code=res.status_code,
                 detail=f"Failed to authenticate current course user: {res.text}",
             )
-        user_data = ExternalCurrentCourseUserDTO(**res.json())
+        user_data = CourseUserResponseDTO(**res.json())
         return CurrentCourseUser(user_data)
 
     app.dependency_overrides[get_current_main_user] = override_get_current_main_user

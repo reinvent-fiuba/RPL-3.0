@@ -169,7 +169,7 @@ def test_get_couse_user_permissions_of_user_with_admin_role(
     assert response.status_code == status.HTTP_200_OK
 
     result = response.json()
-    assert result == base_roles["course_admin"].get_permissions()
+    assert result == base_roles["course_admin"].get_permissions() + ["superadmin"]
 
 
 def test_get_couse_user_permissions_of_user_with_student_role(
