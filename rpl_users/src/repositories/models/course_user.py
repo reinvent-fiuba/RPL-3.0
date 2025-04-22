@@ -1,3 +1,4 @@
+from typing import List
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -28,3 +29,11 @@ class CourseUser(Base):
     role: Mapped["Role"] = relationship(back_populates="course_users")
 
     __table_args__ = (UniqueConstraint("course_id", "user_id", name="uq_course_user"),)
+
+    def get_permissions(self) -> List[str]:
+        """Get the permissions for the user in the course."""
+        return (
+            self.role.get_permissions().append("superadmin")
+            if self.user.is_admin
+            else self.role.get_permissions()
+        )

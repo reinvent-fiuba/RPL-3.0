@@ -13,5 +13,5 @@ class UniversityResponseDTO(BaseModel):
         return cls(
             id=university.id,
             name=university.name,
-            degrees=[degree.strip() for degree in university.degrees.split(",")],
+            degrees=university.get_degrees(),
         )

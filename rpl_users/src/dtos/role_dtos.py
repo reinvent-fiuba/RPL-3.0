@@ -18,9 +18,7 @@ class RoleResponseDTO(BaseModel):
         return cls(
             id=role.id,
             name=role.name,
-            permissions=[
-                permission.strip() for permission in role.permissions.split(",")
-            ],
+            permissions=role.get_permissions(),
             date_created=role.date_created,
             last_updated=role.last_updated,
         )

@@ -34,9 +34,24 @@ class CourseUsersRepository(BaseRepository):
         except IntegrityError:
             self.db_session.rollback()
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="User is already registered in the course",
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User is already enrolled in the course",
             )
+
+    def update_course_user(
+        self, course_id: int, user_id: int, role_id: int, accepted: bool
+    ):
+        course_user = self.get_course_user(course_id=course_id, user_id=user_id)
+        course_user.role_id = role_id
+        course_user.accepted = accepted
+        self.db_session.commit()
+        self.db_session.refresh(course_user)
+        return course_user
+
+    def delete_course_user(self, course_id: int, user_id: int):
+        course_user = self.get_course_user(course_id=course_id, user_id=user_id)
+        self.db_session.delete(course_user)
+        self.db_session.commit()
 
     # ====================== QUERYING ====================== #
 
@@ -52,12 +67,10 @@ class CourseUsersRepository(BaseRepository):
             .one_or_none()
         )
 
-    def get_course_users_by_user_id(self, user_id: int) -> list[CourseUser]:
+    def get_course_users(self, course_id: int) -> list[CourseUser]:
         return (
             self.db_session.execute(
-                sa.select(CourseUser).where(
-                    CourseUser.user_id == user_id,
-                )
+                sa.select(CourseUser).where(CourseUser.course_id == course_id)
             )
             .scalars()
             .all()
