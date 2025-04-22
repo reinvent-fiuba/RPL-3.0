@@ -34,13 +34,13 @@ class UsersService:
         self.validation_tokens_repo = ValidationTokensRepository(db_session)
 
     def __verify_username_and_email_availability(self, username: str, email: str):
-        existing_user = self.users_repo.get_by_username(username)
+        existing_user = self.users_repo.get_user_with_username(username)
         if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Username already exists",
             )
-        existing_user = self.users_repo.get_by_email(email)
+        existing_user = self.users_repo.get_user_with_email(email)
         if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -49,9 +49,9 @@ class UsersService:
 
     def __get_user_by_username_or_email(self, username_or_email: str) -> User:
         if security.is_login_via_email(username_or_email):
-            user = self.users_repo.get_by_email(username_or_email)
+            user = self.users_repo.get_user_with_email(username_or_email)
         else:
-            user = self.users_repo.get_by_username(username_or_email)
+            user = self.users_repo.get_user_with_username(username_or_email)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -222,7 +222,9 @@ class UsersService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Permission denied",
             )
-        users = self.users_repo.get_all_by_username_or_fullname(username_or_fullname)
+        users = self.users_repo.get_all_users_with_username_or_fullname(
+            username_or_fullname
+        )
         return [
             FindUsersResponseDTO(
                 username=user.username,
