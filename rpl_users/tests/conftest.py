@@ -255,13 +255,13 @@ def course_with_regular_user_as_admin_user_fixture(
 @pytest.fixture(
     name="course_with_teacher_as_admin_user_and_student_user", scope="function"
 )
-def course_with_teacher_as_admin_user_and_student_user(
+def course_with_teacher_as_admin_user_and_student_user_fixture(
     users_api_dbsession: Session,
-    example_users,
-    base_roles,
-    course_with_superadmin_as_admin_user_fixture,
+    example_users: dict[str, User],
+    base_roles: dict[str, Role],
+    course_with_superadmin_as_admin_user,
 ):
-    course = course_with_superadmin_as_admin_user_fixture["course"]
+    course = course_with_superadmin_as_admin_user["course"]
 
     student_user = CourseUser(
         course_id=course.id,
@@ -275,8 +275,6 @@ def course_with_teacher_as_admin_user_and_student_user(
 
     yield {
         "course": course,
-        "teacher_user": course_with_superadmin_as_admin_user_fixture[
-            "admin_course_user"
-        ],
+        "teacher_user": course_with_superadmin_as_admin_user["admin_course_user"],
         "student_user": student_user,
     }

@@ -5,8 +5,8 @@ import httpx
 
 from rpl_activities.src.dtos.auth_dtos import (
     ExternalCurrentMainUserDTO,
-    ExternalCurrentCourseUserDTO,
 )
+from rpl_users.src.dtos.course_dtos import CourseUserResponseDTO
 
 
 # Dependencies =============================
@@ -58,8 +58,9 @@ CurrentMainUserDependency = Annotated[
 
 
 class CurrentCourseUser:
-    def __init__(self, user_data: ExternalCurrentCourseUserDTO):
-        self.id = user_data.id
+    def __init__(self, user_data: CourseUserResponseDTO):
+        self.id = user_data.course_user_id
+        self.user_id = user_data.user_id
         self.course_id = user_data.course_id
         self.username = user_data.username
         self.email = user_data.email
@@ -110,7 +111,7 @@ def get_current_course_user(
             status_code=res.status_code,
             detail=f"Failed to authenticate current course user: {res.text}",
         )
-    user_data = ExternalCurrentCourseUserDTO(**res.json())
+    user_data = CourseUserResponsDTO(**res.json())
     return CurrentCourseUser(user_data)
 
 

@@ -18,7 +18,6 @@ from rpl_activities.src.deps.auth import (
 )
 from rpl_activities.src.deps.database import get_db_session
 from rpl_activities.src.dtos.auth_dtos import (
-    ExternalCurrentCourseUserDTO,
     ExternalCurrentMainUserDTO,
 )
 from rpl_activities.src.main import app
@@ -28,6 +27,7 @@ from rpl_activities.src.config import env
 from rpl_activities.src.repositories.models.activity_category import ActivityCategory
 
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
+from rpl_users.src.dtos.course_dtos import CourseUserResponseDTO
 from rpl_users.tests.conftest import (
     users_api_dbsession_fixture,
     users_api_http_client_fixture,
@@ -35,10 +35,9 @@ from rpl_users.tests.conftest import (
     example_users_fixture,
     regular_auth_headers_fixture,
     admin_auth_headers_fixture,
-    example_course_fixture,
-    example_teacher_course_user_fixture,
-    example_student_course_user_fixture,
-    insert_base_roles_fixture,
+    course_with_superadmin_as_admin_user_fixture,
+    course_with_teacher_as_admin_user_and_student_user_fixture,
+    base_roles_fixture,
 )
 
 
@@ -62,8 +61,7 @@ def activities_api_dbsession_fixture():
 def activities_api_http_client_fixture(
     activities_api_dbsession,
     users_api_client: TestClient,
-    example_teacher_course_user,
-    example_student_course_user,
+    course_with_teacher_as_admin_user_and_student_user,
 ):
     app.dependency_overrides[get_db_session] = lambda: activities_api_dbsession
 
@@ -96,7 +94,7 @@ def activities_api_http_client_fixture(
                 status_code=res.status_code,
                 detail=f"Failed to authenticate current course user: {res.text}",
             )
-        user_data = ExternalCurrentCourseUserDTO(**res.json())
+        user_data = CourseUserResponseDTO(**res.json())
         return CurrentCourseUser(user_data)
 
     app.dependency_overrides[get_current_main_user] = override_get_current_main_user
@@ -146,3 +144,31 @@ def example_inactive_category_fixture(
     activities_api_dbsession.commit()
     activities_api_dbsession.refresh(category)
     yield category
+
+
+@pytest.fixture(name="example_rplfiles")
+def example_rplfiles_fixture(activities_api_dbsession: Session):
+    with open("rpl_activities/tests/resources/la_submission.tar.xz", "rb") as f:
+        rplfile_data = f.read()
+    example_file = RPLFile(
+        id=1,
+        file_name="la_submission.tar.xz",
+        file_type="application/x-tar",
+        data=rplfile_data,
+    )
+    activities_api_dbsession.add(example_file)
+    activities_api_dbsession.commit()
+    activities_api_dbsession.refresh(example_file)
+
+    with open("rpl_activities/tests/resources/la_submission_copy.tar.xz", "rb") as f:
+        rplfile_data = f.read()
+    example_file_2 = RPLFile(
+        id=2,
+        file_name="la_submission_copy.tar.xz",
+        file_type="application/x-tar",
+        data=rplfile_data,
+    )
+    activities_api_dbsession.add(example_file_2)
+    activities_api_dbsession.commit()
+    activities_api_dbsession.refresh(example_file_2)
+    yield [example_file, example_file_2]

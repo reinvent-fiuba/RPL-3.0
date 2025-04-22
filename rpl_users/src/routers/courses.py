@@ -10,7 +10,6 @@ from rpl_users.src.dtos.course_dtos import (
     CourseResponseDTO,
     CourseWithUserInformationResponseDTO,
     CourseUserResponseDTO,
-    ExternalCourseUserRequestDTO,
 )
 from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO

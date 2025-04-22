@@ -32,8 +32,7 @@ class CourseUser(Base):
 
     def get_permissions(self) -> List[str]:
         """Get the permissions for the user in the course."""
-        return (
-            self.role.get_permissions().append("superadmin")
-            if self.user.is_admin
-            else self.role.get_permissions()
-        )
+        permissions = self.role.get_permissions()
+        if self.user.is_admin:
+            return permissions + ["superadmin"]
+        return permissions

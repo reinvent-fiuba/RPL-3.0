@@ -2,6 +2,8 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
 
+from rpl_users.src.repositories.models.role import Role
+
 # ====================== USER ENROLLMENT ====================== #
 
 
@@ -154,10 +156,10 @@ def test_cannot_unenroll_course_user_from_non_existing_course(
 # ====================== GET PERMISSIONS ====================== #
 
 
-def test_get_couse_user_permissions_of_user_with_admin_role(
+def test_get_course_user_permissions_of_user_with_admin_role(
     users_api_client: TestClient,
     admin_auth_headers,
-    base_roles,
+    base_roles: dict[str, Role],
     course_with_superadmin_as_admin_user,
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
@@ -169,13 +171,13 @@ def test_get_couse_user_permissions_of_user_with_admin_role(
     assert response.status_code == status.HTTP_200_OK
 
     result = response.json()
-    assert result == base_roles["course_admin"].get_permissions()
+    assert result == base_roles["course_admin"].get_permissions() + ["superadmin"]
 
 
-def test_get_couse_user_permissions_of_user_with_student_role(
+def test_get_course_user_permissions_of_user_with_student_role(
     users_api_client: TestClient,
     regular_auth_headers,
-    base_roles,
+    base_roles: dict[str, Role],
     course_with_superadmin_as_admin_user,
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
@@ -194,7 +196,7 @@ def test_get_couse_user_permissions_of_user_with_student_role(
     assert result == base_roles["student"].get_permissions()
 
 
-def test_cannot_get_couse_user_permissions_using_non_existing_course(
+def test_cannot_get_course_user_permissions_using_non_existing_course(
     users_api_client: TestClient,
     admin_auth_headers,
 ):
@@ -211,7 +213,7 @@ def test_cannot_get_couse_user_permissions_using_non_existing_course(
     assert "Course not found" in result["detail"]
 
 
-def test_cannot_get_couse_user_permissions_using_user_that_has_not_been_enrolled_yet(
+def test_cannot_get_course_user_permissions_using_user_that_has_not_been_enrolled_yet(
     users_api_client: TestClient,
     regular_auth_headers,
     course_with_superadmin_as_admin_user,

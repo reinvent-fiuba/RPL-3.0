@@ -15,12 +15,12 @@ from .base_model import Base, AutoDateTime, IntPK, Str
 class Course(Base):
     __tablename__ = "courses"
 
-    id: Mapped[IntPK] = mapped_column(primary_key=True)
+    id: Mapped[IntPK]
 
     name: Mapped[Str]
     university: Mapped[Str]
-    subject_id: Mapped[Optional[Str]] = mapped_column(nullable=True)
-    description: Mapped[Optional[Str]] = mapped_column(nullable=True)
+    subject_id: Mapped[Optional[Str]]
+    description: Mapped[Optional[Str]]
     active: Mapped[bool] = mapped_column(default=True)
     deleted: Mapped[bool] = mapped_column(default=False)
     semester: Mapped[Str]
