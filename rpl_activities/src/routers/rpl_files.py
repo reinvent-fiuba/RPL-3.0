@@ -8,45 +8,43 @@ from rpl_activities.src.services.rpl_files import RPLFilesService
 router = APIRouter(prefix="/api/v3", tags=["RPLFiles"])
 
 
-@router.get("/files/{file_id}", status_code=status.HTTP_200_OK)
-async def get_file(
-    file_id: int,
+@router.get("/RPLFile/{rplfile_id}", status_code=status.HTTP_200_OK)
+def get_raw_compressed_rplfile(
+    rplfile_id: int,
     db: DBSessionDependency,
 ):
-    return RPLFilesService(db).get_file(file_id)
+    return RPLFilesService(db).get_raw_rplfile(rplfile_id)
 
 
-@router.get("/getExtractedFile/{file_id}", status_code=status.HTTP_200_OK)
-async def get_extracted_file(
-    file_id: int,
+@router.get("/extractedRPLFile/{rplfile_id}", status_code=status.HTTP_200_OK)
+def get_extracted_rplfile(
+    rplfile_id: int,
     db: DBSessionDependency,
 ):
-    return RPLFilesService(db).get_extracted_file(file_id)
+    return RPLFilesService(db).get_extracted_rplfile(rplfile_id)
 
 
-@router.get("/getExtractedFileForStudent/{file_id}", status_code=status.HTTP_200_OK)
-async def get_extracted_file_for_student(
-    file_id: int,
+@router.get("/extractedRPLFiles/{rplfiles_ids}", status_code=status.HTTP_200_OK)
+def get_multiple_extracted_rplfiles(
+    rplfiles_ids: str,
     db: DBSessionDependency,
 ):
-    return RPLFilesService(db).extract_file_for_student(file_id)
+    return RPLFilesService(db).get_multiple_extracted_rplfiles(rplfiles_ids)
 
 
-@router.get("/getExtractedFiles", status_code=status.HTTP_200_OK)
-async def get_extracted_files(
-    file_ids: list[int],
+@router.get("/extractedRPLFileForStudent/{rplfile_id}", status_code=status.HTTP_200_OK)
+def get_extracted_rplfile_for_student(
+    rplfile_id: int,
     db: DBSessionDependency,
 ):
-    if file_ids is None:
-        return []
-    return RPLFilesService(db).get_extracted_files(file_ids)
+    return RPLFilesService(db).get_extracted_rplfile_for_student(rplfile_id)
 
 
-@router.get("/getExtractedFilesForStudent/{file_ids}", status_code=status.HTTP_200_OK)
-async def get_extracted_files_for_student(
-    file_ids: str,
+@router.get(
+    "/extractedRPLFilesForStudent/{rplfiles_ids}", status_code=status.HTTP_200_OK
+)
+def get_multiple_extracted_rplfiles_for_student(
+    rplfiles_ids: str,
     db: DBSessionDependency,
 ):
-    if file_ids is None:
-        return []
-    return RPLFilesService(db).extract_files_for_student(file_ids.split(","))
+    return RPLFilesService(db).get_multiple_extracted_rplfiles_for_student(rplfiles_ids)

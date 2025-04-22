@@ -7,67 +7,78 @@ import logging
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
 
 
-def test_get_file_with_stored_file_return_crrectly(
+def test_get_raw_rplfile_success(
     activities_api_client: TestClient,
-    activities_api_dbsession: Session,
+    example_rplfiles: list[RPLFile],
 ):
-
-    data = open("rpl_activities/tests/resources/la_submission.tar.xz", "rb").read()
-    example_file = RPLFile(
-        id=1,
-        file_name="la_submission.tar.xz",
-        file_type="application/x-tar",
-        data=data,
-    )
-    # Simulate saving the file to the database
-    activities_api_dbsession.add(example_file)
-    activities_api_dbsession.commit()
-    activities_api_dbsession.refresh(example_file)
-
     response = activities_api_client.get(
-        f"/api/v3/files/{example_file.id}",
+        f"/api/v3/RPLFile/{example_rplfiles[0].id}",
     )
-
     assert response.status_code == status.HTTP_200_OK
-    assert response.content == example_file.data
-    assert response.headers["Content-Type"] == example_file.file_type
+    assert response.content == example_rplfiles[0].data
+    assert response.headers["Content-Type"] == example_rplfiles[0].file_type
 
 
-def test_get_file_with_non_existent_file_return_404(
+def test_get_nonexistent_raw_rplfile(
     activities_api_client: TestClient,
 ):
-    # Attempt to retrieve a non-existent file
     response = activities_api_client.get(
-        "/api/v3/files/99999",  # Assuming this ID does not exist
+        "/api/v3/RPLFile/99999",
     )
-
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_get_extracted_files_for_student_only_return_not_hidden_files(
+def test_get_extracted_rplfile_returns_all_inner_files(
     activities_api_client: TestClient,
-    activities_api_dbsession: Session,
+    example_rplfiles: list[RPLFile],
 ):
-    # Create a sample file with data
-    data = open("rpl_activities/tests/resources/la_submission.tar.xz", "rb").read()
-    example_file = RPLFile(
-        id=1,
-        file_name="la_submission.tar.xz",
-        file_type="application/x-tar",
-        data=data,
-    )
-    # Simulate saving the file to the database
-    activities_api_dbsession.add(example_file)
-    activities_api_dbsession.commit()
-    activities_api_dbsession.refresh(example_file)
-
-    # Test the endpoint
     response = activities_api_client.get(
-        f"/api/v3/getExtractedFileForStudent/{example_file.id}",
+        f"/api/v3/extractedRPLFile/{example_rplfiles[0].id}",
     )
-
     content = json.loads(response.content)
+    assert response.status_code == status.HTTP_200_OK
+    assert "assignment_main.py" in content
+    assert "main.c" in content
 
+
+def test_get_extracted_rplfile_for_student_only_returns_not_hidden_inner_files(
+    activities_api_client: TestClient,
+    example_rplfiles: list[RPLFile],
+):
+    response = activities_api_client.get(
+        f"/api/v3/extractedRPLFileForStudent/{example_rplfiles[0].id}",
+    )
+    content = json.loads(response.content)
     assert response.status_code == status.HTTP_200_OK
     assert "assignment_main.py" in content
     assert "main.c" not in content  # This is hidden
+
+
+def test_get_multiple_extracted_rplfiles_returns_all_inner_files_from_all_of_them(
+    activities_api_client: TestClient,
+    example_rplfiles: list[RPLFile],
+):
+    response = activities_api_client.get(
+        f"/api/v3/extractedRPLFiles/{example_rplfiles[0].id},{example_rplfiles[1].id}",
+    )
+    content = json.loads(response.content)
+    assert response.status_code == status.HTTP_200_OK
+    assert "assignment_main.py" in content[0]
+    assert "main.c" in content[0]
+    assert "assignment_main.py" in content[1]
+    assert "main.c" in content[1]
+
+
+def test_get_multiple_extracted_rplfiles_for_student_returns_only_not_hidden_inner_files_from_all_of_them(
+    activities_api_client: TestClient,
+    example_rplfiles: list[RPLFile],
+):
+    response = activities_api_client.get(
+        f"/api/v3/extractedRPLFilesForStudent/{example_rplfiles[0].id},{example_rplfiles[1].id}",
+    )
+    content = json.loads(response.content)
+    assert response.status_code == status.HTTP_200_OK
+    assert "assignment_main.py" in content[0]
+    assert "main.c" not in content[0]  # This is hidden
+    assert "assignment_main.py" in content[1]
+    assert "main.c" not in content[1]  # This is hidden

@@ -144,3 +144,31 @@ def example_inactive_category_fixture(
     activities_api_dbsession.commit()
     activities_api_dbsession.refresh(category)
     yield category
+
+
+@pytest.fixture(name="example_rplfiles")
+def example_rplfiles_fixture(activities_api_dbsession: Session):
+    with open("rpl_activities/tests/resources/la_submission.tar.xz", "rb") as f:
+        rplfile_data = f.read()
+    example_file = RPLFile(
+        id=1,
+        file_name="la_submission.tar.xz",
+        file_type="application/x-tar",
+        data=rplfile_data,
+    )
+    activities_api_dbsession.add(example_file)
+    activities_api_dbsession.commit()
+    activities_api_dbsession.refresh(example_file)
+
+    with open("rpl_activities/tests/resources/la_submission_copy.tar.xz", "rb") as f:
+        rplfile_data = f.read()
+    example_file_2 = RPLFile(
+        id=2,
+        file_name="la_submission_copy.tar.xz",
+        file_type="application/x-tar",
+        data=rplfile_data,
+    )
+    activities_api_dbsession.add(example_file_2)
+    activities_api_dbsession.commit()
+    activities_api_dbsession.refresh(example_file_2)
+    yield [example_file, example_file_2]
