@@ -314,7 +314,81 @@ def test_get_all_courses_of_user_that_has_been_enrolled_to_a_course(
     assert result[0]["accepted"] is False
 
 
-# when multiple courses
+def test_get_all_courses_of_admin_course_user_when_multiple_courses(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+    course_with_superadmin_as_admin_user,
+):
+    superadmin_course = course_with_superadmin_as_admin_user["course"]
+
+    course_data = {
+        "name": "Algo2Mendez",
+        "university": "UCA",
+        "subject_id": "3001",
+        "active": False,
+        "semester": "2019-2c",
+        "semester_start_date": "2019-07-01T00:00:00",
+        "semester_end_date": "2019-12-01T00:00:00",
+        "course_user_admin_user_id": example_users["regular"].id,
+    }
+    regular_user_course_response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    ).json()
+
+    response = users_api_client.get("/api/v3/courses", headers=admin_auth_headers)
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    assert len(result) == 2
+
+    result_superadmin_course = next(
+        (r for r in result if r["id"] == superadmin_course.id)
+    )
+    assert result_superadmin_course["id"] is not None
+    assert result_superadmin_course["name"] == superadmin_course.name
+    assert result_superadmin_course["university"] == superadmin_course.university
+    assert result_superadmin_course["active"] == superadmin_course.active
+    assert result_superadmin_course["semester"] == superadmin_course.semester
+    assert (
+        result_superadmin_course["semester_start_date"]
+        == superadmin_course.semester_start_date.isoformat()
+    )
+    assert (
+        result_superadmin_course["semester_end_date"]
+        == superadmin_course.semester_end_date.isoformat()
+    )
+    assert result_superadmin_course["enrolled"] is True
+    assert result_superadmin_course["accepted"] is True
+
+    result_regular_user_course = next(
+        (r for r in result if r["id"] == regular_user_course_response["id"])
+    )
+    assert result_regular_user_course["id"] is not None
+    assert result_regular_user_course["name"] == regular_user_course_response["name"]
+    assert (
+        result_regular_user_course["university"]
+        == regular_user_course_response["university"]
+    )
+    assert (
+        result_regular_user_course["active"] == regular_user_course_response["active"]
+    )
+    assert (
+        result_regular_user_course["semester"]
+        == regular_user_course_response["semester"]
+    )
+    assert (
+        result_regular_user_course["semester_start_date"]
+        == regular_user_course_response["semester_start_date"]
+    )
+    assert (
+        result_regular_user_course["semester_end_date"]
+        == regular_user_course_response["semester_end_date"]
+    )
+    assert result_regular_user_course["enrolled"] is False
+    assert result_regular_user_course["accepted"] is False
+
 
 # ====================== GET COURSE ====================== #
 
