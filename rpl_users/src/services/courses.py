@@ -54,15 +54,6 @@ class CoursesService:
         if not assertion:
             raise HTTPException(status_code, detail)
 
-    def _assert_role_exists(self, role_name: str) -> Role:
-        role = self._get_role_named(role_name)
-        self._assert_or_else_raise_http_exception(
-            role is not None,
-            status.HTTP_400_BAD_REQUEST,
-            "Role not found",
-        )
-        return role
-
     def _assert_course_exists(self, course_id: str) -> Course:
         course = self.courses_repo.get_course_with_id(course_id)
         self._assert_or_else_raise_http_exception(
@@ -72,6 +63,24 @@ class CoursesService:
         )
         return course
 
+    def _assert_user_exists(self, user_id: str) -> User:
+        user = self.users_repo.get_user_with_id(user_id)
+        self._assert_or_else_raise_http_exception(
+            user is not None,
+            status.HTTP_400_BAD_REQUEST,
+            "User not found",
+        )
+        return user
+
+    def _assert_role_exists(self, role_name: str) -> Role:
+        role = self._get_role_named(role_name)
+        self._assert_or_else_raise_http_exception(
+            role is not None,
+            status.HTTP_400_BAD_REQUEST,
+            "Role not found",
+        )
+        return role
+
     def _assert_course_user_exists_and_has_permissions(
         self, course_id: str, user_id: str, permissions: list[str] = []
     ) -> CourseUser:
@@ -80,7 +89,7 @@ class CoursesService:
             (course_user is not None)
             and self._has_course_user_permissions(course_user, permissions),
             status.HTTP_403_FORBIDDEN,
-            "User does not have permission to perform this action",
+            "Couser user not found or does not have required permissions",
         )
         return course_user
 
@@ -95,7 +104,9 @@ class CoursesService:
                 detail="Only admins can create courses",
             )
 
-        user_admin = self.users_repo.get_by_id(course_data.course_user_admin_user_id)
+        user_admin = self.users_repo.get_user_with_id(
+            course_data.course_user_admin_user_id
+        )
         if user_admin is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -183,6 +194,7 @@ class CoursesService:
         current_user: User,
         email_handler: EmailHandler,
     ) -> CourseUserResponseDTO:
+        self._assert_user_exists(user_id)
         self._assert_course_exists(course_id)
         role = self._assert_role_exists(course_data.role)
         self._assert_course_user_exists_and_has_permissions(
@@ -207,6 +219,28 @@ class CoursesService:
             )
 
         return CourseUserResponseDTO.from_course_user(course_user)
+
+    def unenroll_course_user(self, course_id: str, current_user: User):
+        self._assert_course_exists(course_id)
+        self._assert_course_user_exists_and_has_permissions(course_id, current_user.id)
+
+        self.course_users_repo.delete_course_user(
+            course_id=course_id,
+            user_id=current_user.id,
+        )
+
+    def delete_course_user(self, course_id: str, user_id: str, current_user: User):
+        self._assert_user_exists(user_id)
+        self._assert_course_exists(course_id)
+        self._assert_course_user_exists_and_has_permissions(
+            course_id, current_user.id, ["user_manage"]
+        )
+        self._assert_course_user_exists_and_has_permissions(course_id, user_id)
+
+        self.course_users_repo.delete_course_user(
+            course_id=course_id,
+            user_id=user_id,
+        )
 
     # ====================== QUERYING - COURSE USERS ====================== #
 

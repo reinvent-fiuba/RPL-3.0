@@ -83,7 +83,11 @@ def get_course_details(
 # ====================== MANAGING - COURSE USERS ====================== #
 
 
-@router.post("/courses/{course_id}/enroll", response_model=RoleResponseDTO)
+@router.post(
+    "/courses/{course_id}/enroll",
+    response_model=RoleResponseDTO,
+    status_code=status.HTTP_200_OK,
+)
 def enroll_student_in_course(
     course_id: str,
     current_user: CurrentUserDependency,
@@ -93,7 +97,9 @@ def enroll_student_in_course(
 
 
 @router.patch(
-    "/courses/{course_id}/users/{user_id}", response_model=CourseUserResponseDTO
+    "/courses/{course_id}/users/{user_id}",
+    response_model=CourseUserResponseDTO,
+    status_code=status.HTTP_200_OK,
 )
 def update_course_user(
     course_id: str,
@@ -108,10 +114,39 @@ def update_course_user(
     )
 
 
+@router.post(
+    "/courses/{course_id}/unenroll",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def unenroll_course_user(
+    course_id: str,
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+):
+    CoursesService(db).unenroll_course_user(course_id, current_user)
+
+
+@router.delete(
+    "/courses/{course_id}/users/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_course_user(
+    course_id: str,
+    user_id: str,
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+):
+    CoursesService(db).delete_course_user(course_id, user_id, current_user)
+
+
 # ====================== QUERYING - COURSE USERS ====================== #
 
 
-@router.get("/courses/{course_id}/permissions", response_model=List[str])
+@router.get(
+    "/courses/{course_id}/permissions",
+    response_model=List[str],
+    status_code=status.HTTP_200_OK,
+)
 def get_user_permissions(
     course_id: str,
     current_user: CurrentUserDependency,
@@ -120,7 +155,11 @@ def get_user_permissions(
     return CoursesService(db).get_user_permissions(course_id, current_user)
 
 
-@router.get("/courses/{course_id}/users", response_model=list[CourseUserResponseDTO])
+@router.get(
+    "/courses/{course_id}/users",
+    response_model=list[CourseUserResponseDTO],
+    status_code=status.HTTP_200_OK,
+)
 def get_all_course_users_from_course(
     course_id: str,
     current_user: CurrentUserDependency,
@@ -132,7 +171,11 @@ def get_all_course_users_from_course(
 # ====================== QUERYING - ROLES ====================== #
 
 
-@router.get("/auth/roles", response_model=list[RoleResponseDTO])
+@router.get(
+    "/auth/roles",
+    response_model=list[RoleResponseDTO],
+    status_code=status.HTTP_200_OK,
+)
 def get_all_roles(
     db: DBSessionDependency,
 ):
@@ -142,7 +185,11 @@ def get_all_roles(
 # ====================== QUERYING - UNIVERSITIES ====================== #
 
 
-@router.get("/auth/universities", response_model=list[UniversityResponseDTO])
+@router.get(
+    "/auth/universities",
+    response_model=list[UniversityResponseDTO],
+    status_code=status.HTTP_200_OK,
+)
 def get_all_universities(
     db: DBSessionDependency,
 ):
@@ -152,7 +199,10 @@ def get_all_universities(
 # ====================== QUERYING - EXTERNAL COURSE USER AUTH ====================== #
 
 
-@router.get("/auth/externalCourseUserAuth", response_model=CourseUserResponseDTO)
+@router.get(
+    "/auth/externalCourseUserAuth",
+    response_model=CourseUserResponseDTO,
+)
 def course_user_auth_from_activities_api(
     course_id: int,
     current_user: CurrentUserDependency,

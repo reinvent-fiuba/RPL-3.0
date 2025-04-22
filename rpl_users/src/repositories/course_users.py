@@ -35,7 +35,7 @@ class CourseUsersRepository(BaseRepository):
             self.db_session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="User is already registered in the course",
+                detail="User is already enrolled in the course",
             )
 
     def update_course_user(
@@ -47,6 +47,11 @@ class CourseUsersRepository(BaseRepository):
         self.db_session.commit()
         self.db_session.refresh(course_user)
         return course_user
+
+    def delete_course_user(self, course_id: int, user_id: int):
+        course_user = self.get_course_user(course_id=course_id, user_id=user_id)
+        self.db_session.delete(course_user)
+        self.db_session.commit()
 
     # ====================== QUERYING ====================== #
 
