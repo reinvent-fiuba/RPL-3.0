@@ -35,10 +35,9 @@ from rpl_users.tests.conftest import (
     example_users_fixture,
     regular_auth_headers_fixture,
     admin_auth_headers_fixture,
-    example_course_fixture,
-    example_teacher_course_user_fixture,
-    example_student_course_user_fixture,
-    insert_base_roles_fixture,
+    course_with_superadmin_as_admin_user_fixture,
+    course_with_teacher_as_admin_user_and_student_user_fixture,
+    base_roles_fixture,
 )
 
 
@@ -62,8 +61,7 @@ def activities_api_dbsession_fixture():
 def activities_api_http_client_fixture(
     activities_api_dbsession,
     users_api_client: TestClient,
-    example_teacher_course_user,
-    example_student_course_user,
+    course_with_teacher_as_admin_user_and_student_user,
 ):
     app.dependency_overrides[get_db_session] = lambda: activities_api_dbsession
 
