@@ -21,16 +21,14 @@ class ActivitySubmission(Base):
     is_final_solution: Mapped[bool]
     activity_id: Mapped[BigInt] = mapped_column(ForeignKey("activities.id"))
     user_id: Mapped[BigInt]
-    response_files_id: Mapped[BigInt] = mapped_column(ForeignKey("rpl_files.id"))
+    response_rplfile_id: Mapped[BigInt] = mapped_column(ForeignKey("rpl_files.id"))
     status: Mapped[Str]
     date_created: Mapped[AutoDateTime]
     last_updated: Mapped[AutoDateTime]
 
     activity: Mapped["Activity"] = relationship(back_populates="activity_submissions")
-    response_files: Mapped["RPLFile"] = relationship(
-        back_populates="activity_submissions"
-    )
-    results: Mapped[List["Result"]] = relationship(back_populates="activity_submission")
-    test_run: Mapped[List["TestRun"]] = relationship(
+    response_rplfile: Mapped["RPLFile"] = relationship(
         back_populates="activity_submission"
     )
+    result: Mapped["Result"] = relationship(back_populates="activity_submission")
+    test_run: Mapped["TestRun"] = relationship(back_populates="activity_submission")

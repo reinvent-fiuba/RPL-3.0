@@ -24,5 +24,5 @@ class Result(Base):
     last_updated: Mapped[AutoDateTime]
 
     activity_submission: Mapped["ActivitySubmission"] = relationship(
-        back_populates="results"
+        back_populates="result"
     )

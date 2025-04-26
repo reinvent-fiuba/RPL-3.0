@@ -14,7 +14,7 @@ from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
 
-# WARNING: FOR REFERENCE ONLY. The actual models are modified, simplified, and optimized to be more readable and database-agnostic.
+# WARNING: FOR REFERENCE ONLY. The actual models are modified, simplified, and optimized to be more readable and database-agnostic. They also fix some issues within these models.
 
 
 class Base(DeclarativeBase):

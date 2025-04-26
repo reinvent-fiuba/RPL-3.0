@@ -25,8 +25,8 @@ class RPLFile(Base):
     date_created: Mapped[AutoDateTime]
     last_updated: Mapped[AutoDateTime]
 
-    activities: Mapped[List["Activity"]] = relationship(back_populates="starting_files")
-    activity_submissions: Mapped[List["ActivitySubmission"]] = relationship(
-        back_populates="response_files"
+    activity: Mapped["Activity"] = relationship(back_populates="starting_rplfile")
+    activity_submission: Mapped["ActivitySubmission"] = relationship(
+        back_populates="response_rplfile"
     )
-    unit_tests: Mapped[List["UnitTest"]] = relationship(back_populates="test_file")
+    unit_test: Mapped["UnitTest"] = relationship(back_populates="test_rplfile")
