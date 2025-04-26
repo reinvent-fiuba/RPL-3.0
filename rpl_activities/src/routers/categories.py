@@ -17,7 +17,9 @@ router = APIRouter(prefix="/api/v3", tags=["ActivityCategories"])
 # ==============================================================================
 
 
-@router.get("/courses/{course_id}/categories", response_model=List[CategoryResponseDTO])
+@router.get(
+    "/courses/{course_id}/activityCategories", response_model=List[CategoryResponseDTO]
+)
 def get_categories(
     course_id: int,
     current_course_user: CurrentCourseUserDependency,
@@ -27,7 +29,7 @@ def get_categories(
 
 
 @router.post(
-    "/courses/{course_id}/categories",
+    "/courses/{course_id}/activityCategories",
     status_code=status.HTTP_201_CREATED,
     response_model=CategoryResponseDTO,
 )
@@ -45,7 +47,7 @@ def create_category(
 
 
 @router.patch(
-    "/courses/{course_id}/categories/{category_id}",
+    "/courses/{course_id}/activityCategories/{category_id}",
     status_code=status.HTTP_200_OK,
     response_model=CategoryResponseDTO,
 )

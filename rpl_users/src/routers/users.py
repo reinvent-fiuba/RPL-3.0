@@ -90,9 +90,9 @@ def update_user_profile(
 
 @router.get("/users", response_model=FindUsersResponseDTO)
 def find_users(
-    username: Optional[str],
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
+    username: Optional[str] = "",
 ):
     return UsersService(db).find_users(username, current_user)
 

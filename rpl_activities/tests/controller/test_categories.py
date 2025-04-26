@@ -12,7 +12,7 @@ def test_teacher_get_categories(
     example_inactive_category: ActivityCategory,
 ):
     response = activities_api_client.get(
-        f"/api/v3/courses/{example_category.course_id}/categories",
+        f"/api/v3/courses/{example_category.course_id}/activityCategories",
         headers=admin_auth_headers,
     )
     assert response.status_code == status.HTTP_200_OK
@@ -41,7 +41,7 @@ def test_student_get_categories(
     example_inactive_category: ActivityCategory,
 ):
     response = activities_api_client.get(
-        f"/api/v3/courses/{example_category.course_id}/categories",
+        f"/api/v3/courses/{example_category.course_id}/activityCategories",
         headers=regular_auth_headers,
     )
     assert response.status_code == status.HTTP_200_OK
@@ -57,7 +57,7 @@ def test_student_get_categories(
 def test_get_categories_empty(activities_api_client: TestClient, admin_auth_headers):
     course_id = 1
     response = activities_api_client.get(
-        f"/api/v3/courses/{course_id}/categories",
+        f"/api/v3/courses/{course_id}/activityCategories",
         headers=admin_auth_headers,
     )
     assert response.status_code == status.HTTP_200_OK
@@ -68,7 +68,7 @@ def test_create_category_success(activities_api_client: TestClient, admin_auth_h
     course_id = 1
     category_data = {"name": "New Category", "description": "Some new description"}
     response = activities_api_client.post(
-        f"/api/v3/courses/{course_id}/categories",
+        f"/api/v3/courses/{course_id}/activityCategories",
         headers=admin_auth_headers,
         json=category_data,
     )
@@ -87,7 +87,7 @@ def test_create_category_invalid_data(
     course_id = 1
     category_data = {"description": "Some new description", "active": True}
     response = activities_api_client.post(
-        f"/api/v3/courses/{course_id}/categories",
+        f"/api/v3/courses/{course_id}/activityCategories",
         headers=admin_auth_headers,
         json=category_data,
     )
@@ -99,7 +99,7 @@ def test_create_category_without_login(activities_api_client: TestClient):
     course_id = 1
     category_data = {"name": "New Category", "description": "Some new description"}
     response = activities_api_client.post(
-        f"/api/v3/courses/{course_id}/categories", json=category_data
+        f"/api/v3/courses/{course_id}/activityCategories", json=category_data
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -110,7 +110,7 @@ def test_create_category_without_permission(
     course_id = 1
     category_data = {"name": "New Category", "description": "Some new description"}
     response = activities_api_client.post(
-        f"/api/v3/courses/{course_id}/categories",
+        f"/api/v3/courses/{course_id}/activityCategories",
         headers=regular_auth_headers,
         json=category_data,
     )
@@ -132,7 +132,7 @@ def test_update_category(
         "active": False,
     }
     response = activities_api_client.patch(
-        f"/api/v3/courses/{example_category.course_id}/categories/{example_category.id}",
+        f"/api/v3/courses/{example_category.course_id}/activityCategories/{example_category.id}",
         headers=admin_auth_headers,
         json=update_data,
     )
@@ -154,7 +154,7 @@ def test_update_category_without_permission(
         "active": False,
     }
     response = activities_api_client.patch(
-        f"/api/v3/courses/{example_category.course_id}/categories/{example_category.id}",
+        f"/api/v3/courses/{example_category.course_id}/activityCategories/{example_category.id}",
         headers=regular_auth_headers,
         json=update_data,
     )
