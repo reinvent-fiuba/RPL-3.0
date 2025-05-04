@@ -99,5 +99,4 @@ def test_get_activities_with_multiple_submissions_returns_them_with_their_best_s
     )
 
 
-
-def test_get_acitvity
+# def test_get_acitvity

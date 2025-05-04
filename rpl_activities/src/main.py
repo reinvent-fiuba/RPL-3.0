@@ -5,13 +5,13 @@ from fastapi.responses import RedirectResponse
 import httpx
 
 
-from .config import env
-from .config.api_metadata import FASTAPI_METADATA
+from rpl_activities.src.config import env
+from rpl_activities.src.config.api_metadata import FASTAPI_METADATA
 
-from .routers.categories import router as categories_router
-from .routers.rpl_files import router as rpl_files_router
+from rpl_activities.src.routers.categories import router as categories_router
+from rpl_activities.src.routers.rpl_files import router as rpl_files_router
 
-# from .routers.activities import router as activities_router
+# from rpl_activities.src.routers.activities import router as activities_router
 
 
 @contextmanager

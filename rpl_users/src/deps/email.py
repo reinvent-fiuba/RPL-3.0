@@ -9,10 +9,10 @@ from fastapi import Depends
 
 from rpl_users.src.config.env import (
     FRONTEND_URL,
-    SMTP_PASSWORD,
+    RPL_HELP_EMAIL_PASSWORD,
     SMTP_PORT,
     SMTP_SERVER,
-    SMTP_USER,
+    RPL_HELP_EMAIL_USER,
 )
 
 
@@ -21,14 +21,14 @@ class EmailHandler:
     def __send_email(to_address, subject, body):
         msg = EmailMessage()
         msg["Subject"] = subject
-        msg["From"] = SMTP_USER
+        msg["From"] = RPL_HELP_EMAIL_USER
         msg["To"] = to_address
         msg.set_content(body)
 
         context = ssl.create_default_context()
 
         with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
-            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.login(RPL_HELP_EMAIL_USER, RPL_HELP_EMAIL_PASSWORD)
             server.send_message(msg)
             logging.info(f"Email sent to {to_address} with subject: {subject}")
 

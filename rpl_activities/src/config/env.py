@@ -1,7 +1,9 @@
 from dotenv import load_dotenv
 import os
 
-load_dotenv(override=True)
+FASTAPI_PRODUCTION_PROFILE = os.getenv("FASTAPI_PRODUCTION_PROFILE")
+if FASTAPI_PRODUCTION_PROFILE is None:
+    load_dotenv(override=True)
 
 DB_URL = os.getenv("DB_URL")
 FRONTEND_URL = os.getenv("FRONTEND_URL")

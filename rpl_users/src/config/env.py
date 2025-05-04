@@ -1,7 +1,9 @@
 from dotenv import load_dotenv
 import os
 
-load_dotenv(override=True)
+FASTAPI_PRODUCTION_PROFILE = os.getenv("FASTAPI_PRODUCTION_PROFILE")
+if FASTAPI_PRODUCTION_PROFILE is None:
+    load_dotenv(override=True)
 
 DB_URL = os.getenv("DB_URL")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
@@ -12,8 +14,8 @@ JWT_EXPIRE_MINUTES = os.getenv("JWT_EXPIRE_MINUTES")
 
 SMTP_SERVER = os.getenv("SMTP_SERVER")
 SMTP_PORT = os.getenv("SMTP_PORT")
-SMTP_USER = os.getenv("SMTP_USER")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+RPL_HELP_EMAIL_USER = os.getenv("RPL_HELP_EMAIL_USER")
+RPL_HELP_EMAIL_PASSWORD = os.getenv("RPL_HELP_EMAIL_PASSWORD")
 
 if not all(
     [
@@ -24,8 +26,8 @@ if not all(
         JWT_EXPIRE_MINUTES,
         # SMTP_SERVER,
         # SMTP_PORT,
-        # SMTP_USER,
-        # SMTP_PASSWORD,
+        # RPL_HELP_EMAIL_USER,
+        # RPL_HELP_EMAIL_PASSWORD,
     ]
 ):
     raise ValueError("Missing environment variables")

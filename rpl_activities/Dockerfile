@@ -1,12 +1,14 @@
 FROM python:3.13-slim
 
-WORKDIR /app
+WORKDIR /
 
-COPY ./base_requirements.txt /app/base_requirements.txt
-COPY ./rpl_activities/extra_requirements.txt /app/extra_requirements.txt
+COPY ./base_requirements.txt /rpl_activities/base_requirements.txt
+COPY ./rpl_activities/extra_requirements.txt /rpl_activities/extra_requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /app/base_requirements.txt -r /app/extra_requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /rpl_activities/base_requirements.txt -r /rpl_activities/extra_requirements.txt
 
-COPY ./rpl_activities/src /app/src
+COPY ./rpl_activities/src /rpl_activities/src
+COPY ./rpl_activities/__init__.py /rpl_activities/__init__.py
 
-CMD ["fastapi", "run", "src/main.py", "--port", "80"]
+
+CMD ["fastapi", "run", "rpl_activities/src/main.py", "--port", "80"]
