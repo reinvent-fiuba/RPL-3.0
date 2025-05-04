@@ -6,7 +6,6 @@ if FASTAPI_PRODUCTION_PROFILE is None:
     load_dotenv(override=True)
 
 DB_URL = os.getenv("DB_URL")
-FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
@@ -20,14 +19,13 @@ RPL_HELP_EMAIL_PASSWORD = os.getenv("RPL_HELP_EMAIL_PASSWORD")
 if not all(
     [
         DB_URL,
-        # FRONTEND_URL,
         JWT_SECRET,
         JWT_ALGORITHM,
         JWT_EXPIRE_MINUTES,
-        # SMTP_SERVER,
-        # SMTP_PORT,
-        # RPL_HELP_EMAIL_USER,
-        # RPL_HELP_EMAIL_PASSWORD,
+        SMTP_SERVER,
+        SMTP_PORT,
+        RPL_HELP_EMAIL_USER,
+        RPL_HELP_EMAIL_PASSWORD,
     ]
 ):
     raise ValueError("Missing environment variables")
