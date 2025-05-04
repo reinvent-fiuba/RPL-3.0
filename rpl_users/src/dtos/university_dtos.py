@@ -9,7 +9,7 @@ class UniversityResponseDTO(BaseModel):
     degrees: list[str]
 
     @classmethod
-    def from_unversity(cls, university: "University") -> "UniversityResponseDTO":
+    def from_university(cls, university: "University") -> "UniversityResponseDTO":
         return cls(
             id=university.id,
             name=university.name,

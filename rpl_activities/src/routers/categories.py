@@ -48,7 +48,6 @@ def create_category(
 
 @router.patch(
     "/courses/{course_id}/activityCategories/{category_id}",
-    status_code=status.HTTP_200_OK,
     response_model=CategoryResponseDTO,
 )
 def update_category(
