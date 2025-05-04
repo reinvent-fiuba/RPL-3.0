@@ -1,0 +1,21 @@
+# TODO: Check upstream bcs: 1. I don't see it currently used in the CI; and 2. It currently "cannot obtain metrics" as per the gcp console info
+---
+# apiVersion: autoscaling/v2beta1
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: runners-hpa
+# spec:
+#   scaleTargetRef:
+#     apiVersion: extensions/v1beta1
+#     kind: Deployment
+#     name: runner
+#   minReplicas: 1
+#   maxReplicas: 10
+#   metrics:
+#     - type: External
+#       external:
+#         metricName: "custom.googleapis.com|rabbitmq_queue_messages_ready"
+#         metricSelector:
+#           matchLabels:
+#             metric.labels.queue: hello
+#         targetAverageValue: 10

@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rpl-activities-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rpl-activities-api
+      tier: backend
+      track: stable
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 3
+  template:
+    metadata:
+      labels:
+        app: rpl-activities-api
+        tier: backend
+        track: stable
+    spec:
+      containers:
+      - name: rpl-activities-api
+        image: rpl-activities-api:local # gcr.io/rpl2-fiuba/rpl-3.0-activities:latest
+        env:
+        - name: FASTAPI_PRODUCTION_PROFILE
+          value: "true"
+        - name: FRONTEND_URL
+          value: "https://myrpl.ar"
+        - name: USERS_API_URL
+          value: "http://rpl-users-api"
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: activities-db-url-local
+              key: activities-db-url-local
+        ports:
+          - name: http
+            containerPort: 80
+        readinessProbe:
+          initialDelaySeconds: 30 #300
+          periodSeconds: 60
+          httpGet:
+            path: /api/v3/health
+            port: 80
+        livenessProbe:
+          initialDelaySeconds: 300
+          periodSeconds: 300 #60
+          failureThreshold: 3
+          httpGet:
+            path: /api/v3/health
+            port: 80
+        resources:
+          requests:
+            cpu: 25m
+            memory: 256Mi
+          limits:
+            memory: 512Mi
