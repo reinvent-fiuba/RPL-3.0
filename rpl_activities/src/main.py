@@ -5,9 +5,8 @@ from fastapi.responses import RedirectResponse
 from rpl_activities.src.config.api_metadata import FASTAPI_METADATA
 from rpl_activities.src.config.api_lifespan import users_api_conn_lifespan
 from rpl_activities.src.routers.categories import router as categories_router
-from rpl_activities.src.routers.rpl_files import router as rpl_files_router
-
-# from rpl_activities.src.routers.activities import router as activities_router
+from rpl_activities.src.routers.rpl_files import router as rplfiles_router
+from rpl_activities.src.routers.activities import router as activities_router
 
 
 app = FastAPI(lifespan=users_api_conn_lifespan, **FASTAPI_METADATA)
@@ -21,8 +20,8 @@ app.add_middleware(
 )
 
 app.include_router(categories_router)
-app.include_router(rpl_files_router)
-# app.include_router(activities_router)
+app.include_router(rplfiles_router)
+app.include_router(activities_router)
 
 
 # ==============================================================================

@@ -26,9 +26,7 @@ class ActivitySubmission(Base):
     date_created: Mapped[AutoDateTime]
     last_updated: Mapped[AutoDateTime]
 
-    activity: Mapped["Activity"] = relationship(back_populates="activity_submissions")
-    response_rplfile: Mapped["RPLFile"] = relationship(
-        back_populates="activity_submission"
-    )
-    result: Mapped["Result"] = relationship(back_populates="activity_submission")
-    test_run: Mapped["TestRun"] = relationship(back_populates="activity_submission")
+    activity: Mapped["Activity"] = relationship(back_populates="submissions")
+    response_rplfile: Mapped["RPLFile"] = relationship(back_populates="submission")
+    result: Mapped["Result"] = relationship(back_populates="submission")
+    test_run: Mapped["TestRun"] = relationship(back_populates="submission")

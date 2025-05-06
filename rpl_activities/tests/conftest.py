@@ -201,6 +201,12 @@ def example_starting_rplfile_fixture(activities_api_dbsession: Session):
     yield example_rplfile
 
 
+@pytest.fixture(name="example_starting_rplfile_raw_data")
+def example_starting_rplfile_raw_data_fixture():
+    # TODO
+    pass
+
+
 @pytest.fixture(name="example_submission_rplfile")
 def example_submission_rplfile_fixture(activities_api_dbsession: Session):
     with open(
@@ -326,24 +332,50 @@ def example_failed_submission_fixture(
 # ==============================================================================
 
 
+@pytest.fixture(name="example_activity_with_io_tests")
+def example_activity_with_io_tests_fixture(
+    activities_api_dbsession: Session,
+):
+    activity = Activity(
+        id=3,
+        course_id=1,
+        activity_category_id=1,
+        name="Example Activity with IO Tests",
+        description="This is an example activity with IO tests",
+        language=aux_models.Language.C,
+        is_io_tested=True,
+        active=True,
+        deleted=False,
+        starting_rplfile_id=1,
+        points=10,
+        compilation_flags="",
+        date_created=datetime.now(timezone.utc),
+        last_updated=datetime.now(timezone.utc),
+    )
+    activities_api_dbsession.add(activity)
+    activities_api_dbsession.commit()
+    activities_api_dbsession.refresh(activity)
+    yield activity
+
+
 @pytest.fixture(name="example_io_tests")
 def example_io_tests_fixture(
     activities_api_dbsession: Session,
-    example_activity: Activity,
+    example_activity_with_io_tests: Activity,
 ):
     io_test1 = IOTest(
         id=1,
-        activity_id=example_activity.id,
-        input="input1",
-        output="output1",
+        activity_id=example_activity_with_io_tests.id,
+        test_in="input1",
+        test_out="output1",
         date_created=datetime.now(timezone.utc),
         last_updated=datetime.now(timezone.utc),
     )
     io_test2 = IOTest(
         id=2,
-        activity_id=example_activity.id,
-        input="input2",
-        output="output2",
+        activity_id=example_activity_with_io_tests.id,
+        test_in="input2",
+        test_out="output2",
         date_created=datetime.now(timezone.utc),
         last_updated=datetime.now(timezone.utc),
     )

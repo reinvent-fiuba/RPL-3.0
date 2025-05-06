@@ -38,11 +38,9 @@ class Activity(Base):
     date_created: Mapped[AutoDateTime]
     last_updated: Mapped[AutoDateTime]
 
-    activity_category: Mapped["ActivityCategory"] = relationship(
-        back_populates="activities"
-    )
+    category: Mapped["ActivityCategory"] = relationship(back_populates="activities")
     starting_rplfile: Mapped["RPLFile"] = relationship(back_populates="activity")
-    activity_submissions: Mapped[List["ActivitySubmission"]] = relationship(
+    submissions: Mapped[List["ActivitySubmission"]] = relationship(
         back_populates="activity", lazy="raise"
     )
     io_tests: Mapped[List["IOTest"]] = relationship(back_populates="activity")
