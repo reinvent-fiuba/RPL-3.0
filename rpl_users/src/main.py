@@ -3,13 +3,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
+# from rpl_users.src.config.api_lifespan import
 from rpl_users.src.config.api_metadata import FASTAPI_METADATA
-from rpl_users.src.config.api_lifespan import token_cleaner_lifespan
 from rpl_users.src.routers.users import router as users_router
 from rpl_users.src.routers.courses import router as courses_router
 
 
-app = FastAPI(**FASTAPI_METADATA, lifespan=token_cleaner_lifespan)
+app = FastAPI(**FASTAPI_METADATA)
 
 app.add_middleware(
     CORSMiddleware,

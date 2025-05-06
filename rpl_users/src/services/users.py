@@ -142,7 +142,7 @@ class UsersService:
                 detail="Email already validated",
             )
         user.email_validated = True
-        self.users_repo.update_user(user)
+        user = self.users_repo.update_user(user)
         self.validation_tokens_repo.delete_by_token(validation_data.token)
         logging.info(
             f"[users:services] User {user.username} validated email successfully"
@@ -170,7 +170,7 @@ class UsersService:
         user = token_data.user
         hashed_new_password = security.hash_password(user_data.new_password)
         user.password = hashed_new_password
-        self.users_repo.update_user(user)
+        user = self.users_repo.update_user(user)
         self.validation_tokens_repo.delete_by_token(user_data.token)
         logging.info(f"[users:services] Password reset successful for {user.username}")
         return UserProfileResponseDTO(
@@ -207,7 +207,7 @@ class UsersService:
             if value is not None:
                 setattr(user, key, value)
 
-        self.users_repo.update_user(user)
+        user = self.users_repo.update_user(user)
         return UserProfileResponseDTO(
             username=user.username,
             name=user.name,
