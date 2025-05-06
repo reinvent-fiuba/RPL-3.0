@@ -27,3 +27,17 @@ class ValidationTokensRepository(BaseRepository):
         if validation_token:
             self.db_session.delete(validation_token)
             self.db_session.commit()
+
+    def delete_expired_tokens(self) -> int:
+        now = datetime.now(timezone.utc)
+        expired_tokens = (
+            self.db_session.execute(
+                sa.select(ValidationToken).where(ValidationToken.expiration_date < now)
+            )
+            .scalars()
+            .all()
+        )
+        for token in expired_tokens:
+            self.db_session.delete(token)
+        self.db_session.commit()
+        return len(expired_tokens)
