@@ -1,22 +1,36 @@
 services:
-  backend-users:
+  users_api:
     build:
       context: .
       dockerfile: ./rpl_users/Dockerfile
     restart: always
     ports:
-      - 8000:80
+      - "8000:80"
     env_file:
       - path: ./rpl_users/.env
         required: true
-  # backend-activities:
+    networks:
+      - localrpl_net
+      - rpl3_backend_localdb_net
+  # activities_api:
   #   build:
   #     context: .
   #     dockerfile: ./rpl_activities/Dockerfile
   #   restart: always
   #   ports:
-  #     - 8001:80
+  #     - "8001:80"
   #   env_file:
   #     - path: ./rpl_activities/.env
   #       required: true
+  #   networks:
+  #     - localrpl_net
+  #     - rpl3_backend_localdb_net
+
+networks:
+  localrpl_net:
+    driver: bridge
+
+  rpl3_backend_localdb_net:
+    external: true
+
 

@@ -5,6 +5,7 @@ FASTAPI_PRODUCTION_PROFILE = os.getenv("FASTAPI_PRODUCTION_PROFILE")
 if FASTAPI_PRODUCTION_PROFILE is None:
     load_dotenv(override=True)
 
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 DB_URL = os.getenv("DB_URL")
 
 JWT_SECRET = os.getenv("JWT_SECRET")
@@ -18,6 +19,7 @@ RPL_HELP_EMAIL_PASSWORD = os.getenv("RPL_HELP_EMAIL_PASSWORD")
 
 if not all(
     [
+        FRONTEND_URL,
         DB_URL,
         JWT_SECRET,
         JWT_ALGORITHM,

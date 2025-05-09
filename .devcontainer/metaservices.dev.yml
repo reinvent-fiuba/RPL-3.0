@@ -10,11 +10,11 @@ services:
       # - ./mysql_test_data:/var/lib/mysql
       - ./db_test_config/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - dev_network
+      - devcontainer_net
     ports:
       - "3306:3306"
 
 networks:
-  dev_network:
+  devcontainer_net:
     driver: bridge
 
