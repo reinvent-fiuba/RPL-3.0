@@ -9,7 +9,7 @@ router = APIRouter(prefix="/api/v3", tags=["RPLFiles"])
 
 
 @router.get("/RPLFile/{rplfile_id}")
-def get_raw_compressed_rplfile(
+def get_raw_rplfile(
     rplfile_id: int,
     db: DBSessionDependency,
 ):

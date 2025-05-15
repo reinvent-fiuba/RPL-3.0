@@ -2,11 +2,12 @@ import logging
 import os
 from fastapi import HTTPException, status
 from fastapi.responses import StreamingResponse, FileResponse, Response
-import mimetypes
+import mimetypes # TODO: Pending to be used: needed when creating 
 import io
 import tarfile
 import json
 
+from rpl_activities.src.repositories.models import aux_models
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
 from rpl_activities.src.deps.database import DBSessionDependency
 from rpl_activities.src.repositories.rpl_files import RPLFilesRepository
@@ -29,15 +30,12 @@ class RPLFilesService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="File not found",
             )
-        mime_type, _ = mimetypes.guess_type(file.file_name)
-        if mime_type is None:
-            mime_type = "application/gzip"  # Default content type if not determined
         return Response(
             content=file.data,
-            media_type=mime_type,
+            media_type=file.file_type,
             headers={
                 "Content-Disposition": f"attachment; filename={file.file_name}",
-                "Content-Type": mime_type,
+                "Content-Type": file.file_type,
             },
         )
 
@@ -48,10 +46,10 @@ class RPLFilesService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="File not found",
             )
-        if not rplfile.file_name.endswith(".tar.xz"):
+        if rplfile.file_type != aux_models.RPLFileType.GZIP:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="File is not a tar.xz file",
+                detail="File is not a gzip file",
             )
         return self.__extract_tar_gz_to_dict_of_files(rplfile.data)
 
