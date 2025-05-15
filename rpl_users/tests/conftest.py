@@ -129,7 +129,7 @@ def example_users_fixture(users_api_dbsession: Session):
 
 @pytest.fixture(name="admin_auth_headers", scope="function")
 def admin_auth_headers_fixture(
-    users_api_client: TestClient, example_users
+    users_api_client: TestClient, example_users: dict[str, User]
 ) -> dict[str, str]:
     response = users_api_client.post(
         "/api/v3/auth/login",
@@ -147,7 +147,7 @@ def admin_auth_headers_fixture(
 
 @pytest.fixture(name="regular_auth_headers", scope="function")
 def regular_auth_headers_fixture(
-    users_api_client: TestClient, example_users
+    users_api_client: TestClient, example_users: dict[str, User]
 ) -> dict[str, str]:
     response = users_api_client.post(
         "/api/v3/auth/login",
@@ -194,7 +194,9 @@ def base_roles_fixture(users_api_dbsession: Session):
 
 @pytest.fixture(name="course_with_superadmin_as_admin_user", scope="function")
 def course_with_superadmin_as_admin_user_fixture(
-    users_api_dbsession: Session, example_users, base_roles
+    users_api_dbsession: Session, 
+    example_users: dict[str, User], 
+    base_roles: dict[str, Role]
 ):
     course = Course(
         name="Algo1Mendez",
@@ -224,7 +226,9 @@ def course_with_superadmin_as_admin_user_fixture(
 
 @pytest.fixture(name="course_with_regular_user_as_admin_user", scope="function")
 def course_with_regular_user_as_admin_user_fixture(
-    users_api_dbsession: Session, example_users, base_roles
+    users_api_dbsession: Session, 
+    example_users: dict[str, User],
+    base_roles: dict[str, Role]
 ):
     course = Course(
         name="Algo1Mendez",

@@ -14,6 +14,8 @@ from rpl_users.src.config.env import (
     SMTP_SERVER,
     RPL_HELP_EMAIL_USER,
 )
+from rpl_users.src.repositories.models.course import Course
+from rpl_users.src.repositories.models.user import User
 
 
 class EmailHandler:
@@ -73,8 +75,7 @@ class EmailHandler:
         self.__send_email(to_address, subject, body)
         return token
 
-    def send_course_acceptance_email(self, to_address, user_data, course_data):
-        # TODO: Add type hints
+    def send_course_acceptance_email(self, to_address: str, user_data: User, course_data: Course):
         link = f"{FRONTEND_URL}/course/{course_data.id}"
         subject = "RPL: Aceptación de curso"
         body = f"""
