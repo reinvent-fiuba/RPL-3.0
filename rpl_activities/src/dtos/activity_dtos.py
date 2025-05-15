@@ -1,8 +1,21 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
+from fastapi import File, UploadFile
 from pydantic import BaseModel
 
 from rpl_activities.src.repositories.models import aux_models
+
+
+class IOTestDTO(BaseModel):
+    name: str
+    text_in: str
+    text_out: str
+
+class CreateUnitTestRequestDTO(BaseModel):
+    unit_test_code: str
+
+
+# ==============================================================================
 
 
 class AllActivitiesResponseDTO(BaseModel):
@@ -17,15 +30,47 @@ class AllActivitiesResponseDTO(BaseModel):
     last_updated: datetime
 
 
+class ActivityCreationRequestDTO(BaseModel):
+    name: str
+    points: int
+    language: aux_models.Language
+    category_id: int
+    description: Optional[str] = None
+    starting_files: List[UploadFile] = File(...)
+    model_config = {"extra": "forbid"}
+
+
+class ActivityUpdateRequestDTO(BaseModel):
+    category_id: Optional[int] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    language: Optional[aux_models.Language] = None
+    compilation_flags: Optional[str] = None
+    active: Optional[bool] = None
+    points: Optional[int] = None
+    starting_files: Optional[List[UploadFile]] = File(None)
+    model_config = {"extra": "forbid"}
+
+
 class ActivityResponseDTO(BaseModel):
-    id: int
     course_id: int
     category_id: int
+    category_name: str
+    category_description: str
     name: str
-    description: Optional[str] = None
+    description: str = ""
     language: aux_models.Language
     is_io_tested: bool
     active: bool
     deleted: bool
     points: int
     starting_rplfile_id: Optional[int] = None
+    activity_unittests: str = ""
+    compilation_flags: str = ""
+    activity_iotests: List[IOTestDTO] = []
+    date_created: datetime
+    last_updated: datetime
+
+
+# ==============================================================================
+

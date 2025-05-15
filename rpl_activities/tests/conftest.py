@@ -32,6 +32,7 @@ from rpl_activities.src.repositories.models.activity_category import ActivityCat
 
 from rpl_activities.src.repositories.models.io_test import IOTest
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
+from rpl_activities.src.repositories.models.unit_test import UnitTest
 from rpl_users.src.dtos.course_dtos import CourseUserResponseDTO
 from rpl_users.tests.conftest import (
     users_api_dbsession_fixture,
@@ -151,48 +152,80 @@ def example_inactive_category_fixture(
     yield category
 
 
+@pytest.fixture(name="example_category_from_another_course")
+def example_category_from_another_course_fixture(
+    course_with_regular_user_as_admin_user,
+    activities_api_dbsession: Session,
+):
+    category = ActivityCategory(
+        id=3,
+        course_id=course_with_regular_user_as_admin_user["course"].id,
+        name="Example Category",
+        description="This is an example category",
+        active=True,
+        date_created=datetime.now(timezone.utc),
+        last_updated=datetime.now(timezone.utc),
+    )
+    activities_api_dbsession.add(category)
+    activities_api_dbsession.commit()
+    activities_api_dbsession.refresh(category)
+    yield category
+    
+
+
 # ==========================================================================
 
 
 @pytest.fixture(name="example_basic_rplfiles")
 def example_basic_rplfiles_fixture(activities_api_dbsession: Session):
-    with open("rpl_activities/tests/resources/basic_rplfile.tar.xz", "rb") as f:
+    with open("rpl_activities/tests/resources/basic_rplfile.tar.gz", "rb") as f:
         rplfile_data = f.read()
     example_rplfile = RPLFile(
         id=1,
-        file_name="basic_rplfile.tar.xz",
-        file_type="application/x-tar",
+        file_name="basic_rplfile.tar.gz",
+        file_type="application/gzip",
         data=rplfile_data,
     )
     activities_api_dbsession.add(example_rplfile)
     activities_api_dbsession.commit()
     activities_api_dbsession.refresh(example_rplfile)
 
-    with open("rpl_activities/tests/resources/basic_rplfile_copy.tar.xz", "rb") as f:
+    with open("rpl_activities/tests/resources/basic_rplfile_copy.tar.gz", "rb") as f:
         rplfile_data = f.read()
     example_rplfile_2 = RPLFile(
         id=2,
-        file_name="basic_rplfile_copy.tar.xz",
-        file_type="application/x-tar",
+        file_name="basic_rplfile_copy.tar.gz",
+        file_type="application/gzip",
         data=rplfile_data,
     )
     activities_api_dbsession.add(example_rplfile_2)
     activities_api_dbsession.commit()
     activities_api_dbsession.refresh(example_rplfile_2)
-    yield [example_rplfile, example_rplfile_2]
+
+    example_rplfile_3 = RPLFile(
+        id=3,
+        file_name="basic_rplfile_with_text.txt",
+        file_type="text",
+        data=b"print('This is a file with many unit tests')",
+    )
+    activities_api_dbsession.add(example_rplfile_3)
+    activities_api_dbsession.commit()
+    activities_api_dbsession.refresh(example_rplfile_3)
+
+    yield [example_rplfile, example_rplfile_2, example_rplfile_3]
 
 
 @pytest.fixture(name="example_starting_rplfile")
 def example_starting_rplfile_fixture(activities_api_dbsession: Session):
     with open(
-        "rpl_activities/tests/resources/activity_1_starting_files/activity_1_starting_files.tar.xz",
+        "rpl_activities/tests/resources/activity_1_starting_files/activity_1_starting_files.tar.gz",
         "rb",
     ) as f:
         rplfile_data = f.read()
     example_rplfile = RPLFile(
         id=3,
-        file_name="activity_1_starting_files.tar.xz",
-        file_type="application/x-tar",
+        file_name="activity_1_starting_files.tar.gz",
+        file_type="application/gzip",
         data=rplfile_data,
     )
     activities_api_dbsession.add(example_rplfile)
@@ -201,23 +234,38 @@ def example_starting_rplfile_fixture(activities_api_dbsession: Session):
     yield example_rplfile
 
 
-@pytest.fixture(name="example_starting_rplfile_raw_data")
-def example_starting_rplfile_raw_data_fixture():
-    # TODO
-    pass
+type StartingFileRawRequestData = tuple[str, str, str]
+type ExamplesOfStartingFilesRawData = dict[list[StartingFileRawRequestData]]
+@pytest.fixture(name="examples_of_starting_files_raw_data")
+def examples_of_starting_files_raw_data_fixture() -> ExamplesOfStartingFilesRawData:
+    py_files = [
+        ("startingFile", "main.py", b'print("test")', "application/octet-stream"),
+        ("startingFile", "assignment_main.py", b"# file assignment_main.py\ndef test():\n    pass\n", "application/octet-stream"),
+        ("startingFile", "files_metadata", b'{"assignment_main.py":{"display":"read_write"}}', "application/octet-stream"),
+    ]
+    c_files = [
+        ("startingFile", "main.c", open("rpl_activities/tests/resources/activity_1_starting_files/main.c", "rb").read(), "application/octet-stream"),
+        ("startingFile", "tiempo.c", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.c", "rb").read(), "application/octet-stream"),
+        ("startingFile", "tiempo.h", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.h", "rb").read(), "application/octet-stream"),
+        ("startingFile", "files_metadata", open("rpl_activities/tests/resources/activity_1_starting_files/files_metadata", "rb").read(), "application/octet-stream"),
+    ]
+    return {
+        "python": py_files,
+        "c": c_files,
+    }
 
 
 @pytest.fixture(name="example_submission_rplfile")
 def example_submission_rplfile_fixture(activities_api_dbsession: Session):
     with open(
-        "rpl_activities/tests/resources/activity_1_submission/activity_1_submission.tar.xz",
+        "rpl_activities/tests/resources/activity_1_submission/activity_1_submission.tar.gz",
         "rb",
     ) as f:
         rplfile_data = f.read()
     example_rplfile = RPLFile(
         id=4,
-        file_name="activity_1_submission.tar.xz",
-        file_type="application/x-tar",
+        file_name="activity_1_submission.tar.gz",
+        file_type="application/gzip",
         data=rplfile_data,
     )
     activities_api_dbsession.add(example_rplfile)
@@ -366,6 +414,7 @@ def example_io_tests_fixture(
     io_test1 = IOTest(
         id=1,
         activity_id=example_activity_with_io_tests.id,
+        name="IOTest 1",
         test_in="input1",
         test_out="output1",
         date_created=datetime.now(timezone.utc),
@@ -374,6 +423,7 @@ def example_io_tests_fixture(
     io_test2 = IOTest(
         id=2,
         activity_id=example_activity_with_io_tests.id,
+        name="IOTest 2",
         test_in="input2",
         test_out="output2",
         date_created=datetime.now(timezone.utc),
@@ -388,4 +438,25 @@ def example_io_tests_fixture(
 
 
 # ==============================================================================
+
+
+@pytest.fixture(name="example_unit_test")
+def example_unit_test_fixture(
+    activities_api_dbsession: Session,
+    example_activity: Activity,
+    example_basic_rplfiles: list[RPLFile],
+):
+    unit_test = UnitTest(
+        id=1,
+        activity_id=example_activity.id,
+        test_rplfile_id=example_basic_rplfiles[2].id,
+        date_created=datetime.now(timezone.utc),
+        last_updated=datetime.now(timezone.utc),
+    )
+    activities_api_dbsession.add(unit_test)
+    activities_api_dbsession.commit()
+    activities_api_dbsession.refresh(unit_test)
+    yield unit_test
+
+
 # ==============================================================================
