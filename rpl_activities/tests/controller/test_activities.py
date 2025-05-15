@@ -143,8 +143,8 @@ def test_get_nonexistent_activity_not_found(
 
 def test_get_activity_with_io_tests(
     activities_api_client: TestClient,
-    example_activity_with_io_tests: Activity,
     example_io_tests: list[IOTest],
+    example_activity_with_io_tests: Activity,
     regular_auth_headers,
 ):
     response = activities_api_client.get(
@@ -346,7 +346,7 @@ def test_create_activity_with_missing_required_fields(
         files=examples_of_starting_files_raw_data["python"],
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert response.json()["detail"][0]["msg"] == "Field required: name"
+    assert response.json()["detail"][0]["msg"] == "Field required"
 
     # Missing points
     form_data = {
@@ -362,7 +362,7 @@ def test_create_activity_with_missing_required_fields(
         files=examples_of_starting_files_raw_data["python"],
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert response.json()["detail"][0]["msg"] == "Field required: points"
+    assert response.json()["detail"][0]["msg"] == "Field required"
 
     # Missing language
     form_data = {
@@ -378,7 +378,7 @@ def test_create_activity_with_missing_required_fields(
         files=examples_of_starting_files_raw_data["python"],
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert response.json()["detail"][0]["msg"] == "Field required: language"
+    assert response.json()["detail"][0]["msg"] == "Field required"
 
     # Missing category_id
     form_data = {
@@ -394,7 +394,7 @@ def test_create_activity_with_missing_required_fields(
         files=examples_of_starting_files_raw_data["python"],
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert response.json()["detail"][0]["msg"] == "Field required: category_id"
+    assert response.json()["detail"][0]["msg"] == "Field required"
 
 
 def test_create_activity_in_wrong_existing_course_forbidden(
@@ -528,8 +528,8 @@ def test_update_activity_as_student_forbidden(
 
 def test_create_io_test_for_activity_as_student_forbidden(
     activities_api_client: TestClient,
-    example_activity_with_io_tests: Activity,
     example_io_tests: list[IOTest],
+    example_activity_with_io_tests: Activity,
     regular_auth_headers,
 ):
     data = {
@@ -547,8 +547,8 @@ def test_create_io_test_for_activity_as_student_forbidden(
 
 def test_update_io_test_for_activity_as_student_forbidden(
     activities_api_client: TestClient,
-    example_activity_with_io_tests: Activity,
     example_io_tests: list[IOTest],
+    example_activity_with_io_tests: Activity,
     regular_auth_headers,
 ):
     data = {
@@ -566,8 +566,8 @@ def test_update_io_test_for_activity_as_student_forbidden(
 
 def test_delete_io_test_for_activity_as_student_forbidden(
     activities_api_client: TestClient,
-    example_activity_with_io_tests: Activity,
     example_io_tests: list[IOTest],
+    example_activity_with_io_tests: Activity,
     regular_auth_headers,
 ):
     response = activities_api_client.delete(
@@ -579,8 +579,8 @@ def test_delete_io_test_for_activity_as_student_forbidden(
 
 def test_create_io_test_for_activity_that_had_iotests_previously(
     activities_api_client: TestClient,
-    example_activity_with_io_tests: Activity,
     example_io_tests: list[IOTest],
+    example_activity_with_io_tests: Activity,
     admin_auth_headers,
 ):
     data = {
@@ -642,8 +642,8 @@ def test_create_io_test_for_activity_that_had_unittests_previously(
 
 def test_update_io_test_for_activity(
     activities_api_client: TestClient,
-    example_activity_with_io_tests: Activity,
     example_io_tests: list[IOTest],
+    example_activity_with_io_tests: Activity,
     admin_auth_headers,
 ):
     data = {
@@ -672,8 +672,8 @@ def test_update_io_test_for_activity(
 
 def test_delete_io_test_for_activity(
     activities_api_client: TestClient,
-    example_activity_with_io_tests: Activity,
     example_io_tests: list[IOTest],
+    example_activity_with_io_tests: Activity,
     admin_auth_headers,
 ):
     response = activities_api_client.delete(
@@ -757,8 +757,8 @@ def test_create_unit_tests_for_activity_that_already_had_them_returns_conflict(
 
 def test_create_unit_tests_for_activity_that_had_iotests_previously(
     activities_api_client: TestClient,
-    example_activity_with_io_tests: Activity,
     example_io_tests: list[IOTest],
+    example_activity_with_io_tests: Activity,
     admin_auth_headers,
 ):
     data = {

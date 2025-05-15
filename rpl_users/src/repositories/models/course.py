@@ -32,8 +32,3 @@ class Course(Base):
 
     course_users: Mapped[List["CourseUser"]] = relationship(back_populates="course")
 
-    __table_args__ = (
-        UniqueConstraint(
-            "name", "university", "semester", name="uq_courses_name_university_semester"
-        ),
-    )

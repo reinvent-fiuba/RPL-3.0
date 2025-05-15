@@ -43,6 +43,7 @@ from rpl_users.tests.conftest import (
     admin_auth_headers_fixture,
     course_with_superadmin_as_admin_user_fixture,
     course_with_teacher_as_admin_user_and_student_user_fixture,
+    course_with_regular_user_as_admin_user_fixture,
     base_roles_fixture,
 )
 
@@ -223,7 +224,7 @@ def example_starting_rplfile_fixture(activities_api_dbsession: Session):
     ) as f:
         rplfile_data = f.read()
     example_rplfile = RPLFile(
-        id=3,
+        id=4,
         file_name="activity_1_starting_files.tar.gz",
         file_type="application/gzip",
         data=rplfile_data,
@@ -234,20 +235,20 @@ def example_starting_rplfile_fixture(activities_api_dbsession: Session):
     yield example_rplfile
 
 
-type StartingFileRawRequestData = tuple[str, str, str]
+type StartingFileRawRequestData = tuple[str, tuple[str, bytes, str]]
 type ExamplesOfStartingFilesRawData = dict[list[StartingFileRawRequestData]]
 @pytest.fixture(name="examples_of_starting_files_raw_data")
-def examples_of_starting_files_raw_data_fixture() -> ExamplesOfStartingFilesRawData:
+def examples_of_starting_files_raw_data_fixture():
     py_files = [
-        ("startingFile", "main.py", b'print("test")', "application/octet-stream"),
-        ("startingFile", "assignment_main.py", b"# file assignment_main.py\ndef test():\n    pass\n", "application/octet-stream"),
-        ("startingFile", "files_metadata", b'{"assignment_main.py":{"display":"read_write"}}', "application/octet-stream"),
+        ("startingFile", ("main.py", b'print("test")', "application/octet-stream")),
+        ("startingFile", ("assignment_main.py", b"# file assignment_main.py\ndef test():\n    pass\n", "application/octet-stream")),
+        ("startingFile", ("files_metadata", b'{"assignment_main.py":{"display":"read_write"}}', "application/octet-stream")),
     ]
     c_files = [
-        ("startingFile", "main.c", open("rpl_activities/tests/resources/activity_1_starting_files/main.c", "rb").read(), "application/octet-stream"),
-        ("startingFile", "tiempo.c", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.c", "rb").read(), "application/octet-stream"),
-        ("startingFile", "tiempo.h", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.h", "rb").read(), "application/octet-stream"),
-        ("startingFile", "files_metadata", open("rpl_activities/tests/resources/activity_1_starting_files/files_metadata", "rb").read(), "application/octet-stream"),
+        ("startingFile", ("main.c", open("rpl_activities/tests/resources/activity_1_starting_files/main.c", "rb").read(), "application/octet-stream")),
+        ("startingFile", ("tiempo.c", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.c", "rb").read(), "application/octet-stream")),
+        ("startingFile", ("tiempo.h", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.h", "rb").read(), "application/octet-stream")),
+        ("startingFile", ("files_metadata", open("rpl_activities/tests/resources/activity_1_starting_files/files_metadata", "rb").read(), "application/octet-stream")),
     ]
     return {
         "python": py_files,
@@ -263,7 +264,7 @@ def example_submission_rplfile_fixture(activities_api_dbsession: Session):
     ) as f:
         rplfile_data = f.read()
     example_rplfile = RPLFile(
-        id=4,
+        id=5,
         file_name="activity_1_submission.tar.gz",
         file_type="application/gzip",
         data=rplfile_data,
@@ -383,18 +384,20 @@ def example_failed_submission_fixture(
 @pytest.fixture(name="example_activity_with_io_tests")
 def example_activity_with_io_tests_fixture(
     activities_api_dbsession: Session,
+    example_category: ActivityCategory,
+    example_basic_rplfiles: list[RPLFile],
 ):
     activity = Activity(
         id=3,
         course_id=1,
-        activity_category_id=1,
+        activity_category_id=example_category.id,
         name="Example Activity with IO Tests",
         description="This is an example activity with IO tests",
         language=aux_models.Language.C,
         is_io_tested=True,
         active=True,
         deleted=False,
-        starting_rplfile_id=1,
+        starting_rplfile_id=example_basic_rplfiles[0].id,
         points=10,
         compilation_flags="",
         date_created=datetime.now(timezone.utc),
