@@ -21,6 +21,15 @@ class LanguageWithVersion(str, Enum):
     C = "c_std11"
     PYTHON = "python_3.7"
     GO = "go_1.19"
+    def without_version(self):
+        if self == LanguageWithVersion.C:
+            return Language.C
+        elif self == LanguageWithVersion.PYTHON:
+            return Language.PYTHON
+        elif self == LanguageWithVersion.GO:
+            return Language.GO
+        else:
+            raise ValueError(f"Unsupported language: {self}")
 
 
 class SubmissionStatus(str, Enum):

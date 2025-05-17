@@ -46,7 +46,7 @@ class ActivityCreationRequestDTO(BaseModel):
     compilation_flags: Optional[str] = None
     active: bool = True
     points: int
-    starting_files: List[UploadFile] = File(...)
+    startingFile: List[UploadFile] = File(...)
     model_config = {"extra": "forbid"}
 
 
@@ -58,7 +58,7 @@ class ActivityUpdateRequestDTO(BaseModel):
     compilation_flags: Optional[str] = None
     active: Optional[bool] = None
     points: Optional[int] = None
-    starting_files: Optional[List[UploadFile]] = File(None)
+    startingFile: Optional[List[UploadFile]] = File(None)
     model_config = {"extra": "forbid"}
 
 

@@ -77,11 +77,12 @@ class ActivitiesRepository(BaseRepository):
         course_id: int,
         new_activity_data: ActivityCreationRequestDTO
     ) -> Activity:
+        tar_filename = datetime.today().strftime("%Y-%m-%d") + str(course_id) + new_activity_data.name
         compressed_rplfile_bytes = tar_utils.compress_files_to_tar_gz(
-            new_activity_data.starting_files
+            new_activity_data.startingFile, tar_filename
         )
         rplfile = self.rplfiles_repo.create_rplfile(
-            file_name=datetime.today().strftime("%Y-%m-%d") + ".tar.gz",
+            file_name=tar_filename,
             file_type="application/gzip",
             data=compressed_rplfile_bytes,
         )
@@ -109,16 +110,18 @@ class ActivitiesRepository(BaseRepository):
     
     def update_activity(
         self,
+        course_id: int,
         activity: Activity,
         new_activity_data: ActivityUpdateRequestDTO
     ) -> Activity:
-        if new_activity_data.starting_files:
+        if new_activity_data.startingFile:
+            tar_filename = datetime.today().strftime("%Y-%m-%d") + str(course_id) + new_activity_data.name
             compressed_rplfile_bytes = tar_utils.compress_files_to_tar_gz(
-                new_activity_data.starting_files
+                new_activity_data.startingFile, tar_filename
             )
             self.rplfiles_repo.update_rplfile(
                 rplfile_id=activity.starting_rplfile_id,
-                file_name=datetime.today().strftime("%Y-%m-%d") + ".tar.gz",
+                file_name=tar_filename,
                 file_type="application/gzip",
                 data=compressed_rplfile_bytes,
             )
@@ -127,7 +130,7 @@ class ActivitiesRepository(BaseRepository):
             if new_value is not None:
                 if field == "language":
                     setattr(activity, field, new_activity_data.language.with_version())
-                elif field == "starting_files" or field == "model_config":
+                elif field == "startingFile" or field == "model_config":
                     continue
                 else:
                     setattr(activity, field, new_value)

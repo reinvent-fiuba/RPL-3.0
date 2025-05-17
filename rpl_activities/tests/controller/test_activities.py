@@ -33,7 +33,7 @@ def test_get_activities_as_student_returns_only_active_activities(
     assert len(response.json()) == 1
     assert response_activity["name"] == example_activity.name
     assert response_activity["description"] == example_activity.description
-    assert response_activity["language"] == example_activity.language
+    assert response_activity["language"] == aux_models.LanguageWithVersion(example_activity.language).without_version()
     assert response_activity["is_io_tested"] == example_activity.is_io_tested
     assert response_activity["points"] == example_activity.points
 
@@ -121,7 +121,7 @@ def test_get_activity(
     assert response_activity["description"] == example_activity.description
     assert response_activity["category_name"] == example_category.name
     assert response_activity["category_description"] == example_category.description
-    assert response_activity["language"] == example_activity.language
+    assert response_activity["language"] == aux_models.LanguageWithVersion(example_activity.language).without_version()
     assert response_activity["active"] == example_activity.active
     assert response_activity["activity_iotests"] == []
     assert response_activity["starting_rplfile_id"] == example_activity.starting_rplfile_id
@@ -236,9 +236,8 @@ def test_create_activity_as_teacher_success(
         files=examples_of_starting_files_raw_data["python"],
     )
 
-    response_data = response.json()
-    logging.warning(f"Response data: {response_data}")
     assert response.status_code == status.HTTP_201_CREATED
+    response_data = response.json()
     assert response_data["course_id"] == example_category.course_id
     assert response_data["category_id"] == example_category.id
     assert response_data["name"] == form_data["name"]
@@ -262,7 +261,7 @@ def test_create_activity_as_teacher_success(
         f"/api/v3/courses/{example_category.course_id}/activities",
         headers=admin_auth_headers,
         data=form_data,
-        files=examples_of_starting_files_raw_data["C"],
+        files=examples_of_starting_files_raw_data["c"],
     )
 
     assert response.status_code == status.HTTP_201_CREATED
@@ -435,7 +434,7 @@ def test_update_activity_as_teacher_success(
     examples_of_starting_files_raw_data: ExamplesOfStartingFilesRawData,
     admin_auth_headers,
 ):
-    form_data = {
+    form_data_1 = {
         "category_id": example_category.id,
         "name": "updated test",
         "description": "enunciado",
@@ -448,20 +447,20 @@ def test_update_activity_as_teacher_success(
     response = activities_api_client.patch(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}",
         headers=admin_auth_headers,
-        data=form_data,
+        data=form_data_1,
         files=examples_of_starting_files_raw_data["python"],
     )
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data["course_id"] == example_category.course_id
     assert response_data["category_id"] == example_category.id
-    assert response_data["name"] == form_data["name"]
-    assert response_data["description"] == form_data["description"]
-    assert response_data["language"] == form_data["language"]
+    assert response_data["name"] == form_data_1["name"]
+    assert response_data["description"] == form_data_1["description"]
+    assert response_data["language"] == form_data_1["language"]
     assert response_data["is_io_tested"] is False
     assert response_data["active"] is True
     assert response_data["deleted"] is False
-    assert response_data["points"] == int(form_data["points"])
+    assert response_data["points"] == int(form_data_1["points"])
     assert response_data["starting_rplfile_id"] is not None
     aux_response = activities_api_client.get(
         f"/api/v3/extractedRPLFile/{response_data['starting_rplfile_id']}",
@@ -476,25 +475,25 @@ def test_update_activity_as_teacher_success(
     assert aux_response_data.get("assignment_main.py") is not None
 
     # Change only some fields
-    form_data = {
+    form_data_2 = {
         "category_id": example_inactive_activity.category_id,
         "active": "true",
     }
     response = activities_api_client.patch(
         f"/api/v3/courses/{example_inactive_activity.course_id}/activities/{example_inactive_activity.id}",
         headers=admin_auth_headers,
-        data=form_data,
+        data=form_data_2,
     )
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data["category_id"] == example_inactive_activity.category_id
-    assert response_data["name"] == form_data["name"]
-    assert response_data["description"] == form_data["description"]
-    assert response_data["language"] == form_data["language"]
+    assert response_data["name"] == example_inactive_activity.name
+    assert response_data["description"] == example_inactive_activity.description
+    assert response_data["language"] == aux_models.LanguageWithVersion(example_inactive_activity.language).without_version()
     assert response_data["is_io_tested"] is False
     assert response_data["active"] is True
     assert response_data["deleted"] is False
-    assert response_data["points"] == int(form_data["points"])
+    assert response_data["points"] == example_inactive_activity.points
     assert response_data["starting_rplfile_id"] is not None
 
 

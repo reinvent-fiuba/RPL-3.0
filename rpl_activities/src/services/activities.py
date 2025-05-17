@@ -11,6 +11,7 @@ from rpl_activities.src.dtos.activity_dtos import (
 )
 from rpl_activities.src.repositories.activities import ActivitiesRepository
 from rpl_activities.src.repositories.categories import CategoriesRepository
+from rpl_activities.src.repositories.models import aux_models
 from rpl_activities.src.repositories.models.activity import Activity
 from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
 from rpl_activities.src.repositories.submissions import SubmissionsRepository
@@ -71,7 +72,7 @@ class ActivitiesService:
             category_description=activity.category.description,
             name=activity.name,
             description=activity.description,
-            language=activity.language,
+            language=aux_models.LanguageWithVersion(activity.language).without_version(),
             is_io_tested=activity.is_io_tested,
             active=activity.active,
             deleted=activity.deleted,
@@ -98,7 +99,7 @@ class ActivitiesService:
             category_description=activity.category.description,
             name=activity.name,
             description=activity.description,
-            language=activity.language,
+            language=aux_models.LanguageWithVersion(activity.language).without_version(),
             is_io_tested=activity.is_io_tested,
             active=activity.active,
             deleted=activity.deleted,
@@ -229,6 +230,6 @@ class ActivitiesService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have permission to update this activity",
             )
-        updated_activity = self.activities_repo.update_activity(activity, new_activity_data)
+        updated_activity = self.activities_repo.update_activity(course_id, activity, new_activity_data)
         return self.__build_activity_response_dto(updated_activity)
 
