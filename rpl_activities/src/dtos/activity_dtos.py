@@ -8,8 +8,8 @@ from rpl_activities.src.repositories.models import aux_models
 
 class IOTestDTO(BaseModel):
     name: str
-    text_in: str
-    text_out: str
+    test_in: str
+    test_out: str
 
 class CreateUnitTestRequestDTO(BaseModel):
     unit_test_code: str
@@ -18,24 +18,34 @@ class CreateUnitTestRequestDTO(BaseModel):
 # ==============================================================================
 
 
-class AllActivitiesResponseDTO(BaseModel):
+class ActivityWithMetadataOnlyResponseDTO(BaseModel):
+    course_id: int
+    category_id: int
+    category_name: str
+    category_description: str
     name: str
-    description: Optional[str] = None
+    description: str = ""
     language: aux_models.Language
     is_io_tested: bool
+    active: bool
+    deleted: bool
     points: int
+    starting_rplfile_id: int
     submission_status: aux_models.SubmissionStatus
-    last_submission_date: Optional[datetime]
+    last_submission_date: Optional[datetime] = None
     date_created: datetime
     last_updated: datetime
 
 
+
 class ActivityCreationRequestDTO(BaseModel):
-    name: str
-    points: int
-    language: aux_models.Language
     category_id: int
+    name: str
     description: Optional[str] = None
+    language: aux_models.Language
+    compilation_flags: Optional[str] = None
+    active: bool = True
+    points: int
     starting_files: List[UploadFile] = File(...)
     model_config = {"extra": "forbid"}
 
@@ -64,7 +74,7 @@ class ActivityResponseDTO(BaseModel):
     active: bool
     deleted: bool
     points: int
-    starting_rplfile_id: Optional[int] = None
+    starting_rplfile_id: int
     activity_unittests: str = ""
     compilation_flags: str = ""
     activity_iotests: List[IOTestDTO] = []

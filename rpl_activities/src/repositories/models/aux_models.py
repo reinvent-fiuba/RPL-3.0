@@ -1,10 +1,21 @@
 from enum import Enum
 
 
+DEFAULT_GCC_FLAGS = "-g -O2 -std=c99 -Wall -Wformat=2 -Wshadow -Wpointer-arith -Wunreachable-code -Wconversion -Wno-sign-conversion -Wbad-function-cast"
+
 class Language(str, Enum):
     C = "C"
     PYTHON = "python"
     GO = "go"
+    def with_version(self):
+        if self == Language.C:
+            return LanguageWithVersion.C
+        elif self == Language.PYTHON:
+            return LanguageWithVersion.PYTHON
+        elif self == Language.GO:
+            return LanguageWithVersion.GO
+        else:
+            raise ValueError(f"Unsupported language: {self}")
 
 class LanguageWithVersion(str, Enum):
     C = "c_std11"
@@ -13,6 +24,7 @@ class LanguageWithVersion(str, Enum):
 
 
 class SubmissionStatus(str, Enum):
+    NO_SUBMISSIONS = ""
     PENDING = "PENDING"
     ENQUEUED = "ENQUEUED"
     PROCESSING = "PROCESSING"

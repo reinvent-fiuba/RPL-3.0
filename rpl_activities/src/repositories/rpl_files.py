@@ -11,3 +11,36 @@ class RPLFilesRepository(BaseRepository):
             .scalars()
             .one_or_none()
         )
+    
+    def create_rplfile(
+        self,
+        file_name: str,
+        file_type: str,
+        data: bytes,
+    ) -> RPLFile:
+        rplfile = RPLFile(
+            file_name=file_name,
+            file_type=file_type,
+            data=data,
+        )
+        self.db_session.add(rplfile)
+        self.db_session.commit()
+        self.db_session.refresh(rplfile)
+        return rplfile
+    
+    def update_rplfile(
+        self,
+        rplfile_id: int,
+        file_name: str,
+        file_type: str,
+        data: bytes,
+    ) -> RPLFile:
+        rplfile = self.get_by_id(rplfile_id)        
+        rplfile.file_name = file_name
+        rplfile.file_type = file_type
+        rplfile.data = data
+        self.db_session.commit()
+        self.db_session.refresh(rplfile)
+        return rplfile
+
+        

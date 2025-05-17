@@ -23,7 +23,7 @@ class Activity(Base):
 
     id: Mapped[IntPK]
     course_id: Mapped[BigInt]
-    activity_category_id: Mapped[BigInt] = mapped_column(
+    category_id: Mapped[BigInt] = mapped_column(
         ForeignKey("activity_categories.id")
     )
     name: Mapped[LargeStr]

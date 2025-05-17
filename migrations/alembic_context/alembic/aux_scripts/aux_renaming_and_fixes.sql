@@ -8,6 +8,7 @@ INSERT INTO universities (id, name, degrees) VALUES (1, 'FIUBA', 'Ingeniería en
 
 USE rpl_activities;
 ALTER TABLE activities RENAME COLUMN starting_files_id TO starting_rplfile_id;
+ALTER TABLE activities RENAME COLUMN activity_category_id TO category_id;
 ALTER TABLE activities ADD UNIQUE (starting_rplfile_id);
 RENAME TABLE unit_test_run TO unit_test_runs, io_test_run TO io_test_runs, test_run TO test_runs;
 ALTER TABLE unit_tests ADD UNIQUE (activity_id);
