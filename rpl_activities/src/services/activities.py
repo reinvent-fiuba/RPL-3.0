@@ -2,8 +2,6 @@ import logging
 from fastapi import HTTPException, status
 from rpl_activities.src.deps.auth import CurrentCourseUser
 from rpl_activities.src.dtos.activity_dtos import (
-    IOTestDTO,
-    CreateUnitTestRequestDTO,
     ActivityWithMetadataOnlyResponseDTO,
     ActivityCreationRequestDTO,
     ActivityUpdateRequestDTO,
@@ -23,7 +21,7 @@ class ActivitiesService:
         self.categories_repo = CategoriesRepository(db)
 
 
-    def __verify_permission_to_view(self, current_course_user: CurrentCourseUser):
+    def verify_permission_to_view(self, current_course_user: CurrentCourseUser):
         can_view_activities = current_course_user.has_authority("activity_view")
         if not can_view_activities:
             raise HTTPException(
@@ -31,8 +29,15 @@ class ActivitiesService:
                 detail="You do not have permission to view activities on this course",
             )
         
+    def verify_permission_to_manage(self, current_course_user: CurrentCourseUser):
+        can_manage_activities = current_course_user.has_authority("activity_manage")
+        if not can_manage_activities:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to manage activities on this course",
+            )
 
-    def __has_permission_to_manage(self, current_course_user: CurrentCourseUser):
+    def has_permission_to_manage(self, current_course_user: CurrentCourseUser):
         return current_course_user.has_authority("activity_manage")
 
 
@@ -41,7 +46,7 @@ class ActivitiesService:
             current_course_user: CurrentCourseUser, 
             course_id: int
     ) -> list[Activity]:
-        if self.__has_permission_to_manage(current_course_user):
+        if self.has_permission_to_manage(current_course_user):
             activities = self.activities_repo.get_all_activities_by_course_id(course_id)
         else:
             activities = self.activities_repo.get_all_active_activities_by_course_id(course_id)
@@ -58,7 +63,7 @@ class ActivitiesService:
         return submissions_by_activity
 
 
-    def __build_activity_metadata_response_dto(
+    def build_activity_metadata_response_dto(
             self,
             activity: Activity,
             course_id: int,
@@ -89,7 +94,7 @@ class ActivitiesService:
         )
 
 
-    def __build_activity_response_dto(self, activity: Activity) -> ActivityResponseDTO:
+    def build_activity_response_dto(self, activity: Activity) -> ActivityResponseDTO:
         unit_tests_data = self.activities_repo.get_unit_tests_data(activity)
         io_tests_data = self.activities_repo.get_io_tests_data(activity)
         return ActivityResponseDTO(
@@ -121,7 +126,7 @@ class ActivitiesService:
             current_course_user: CurrentCourseUser, 
             course_id: int
     ) -> list[ActivityWithMetadataOnlyResponseDTO]:
-        self.__verify_permission_to_view(current_course_user)
+        self.verify_permission_to_view(current_course_user)
         activities = self.__get_all_activities_for_user_depending_on_permission(
             current_course_user, course_id
         )
@@ -133,7 +138,7 @@ class ActivitiesService:
         )
         current_user_submissions_by_activity = self.__group_submissions_by_activity(all_submissions_by_current_user)
         return [
-            self.__build_activity_metadata_response_dto(
+            self.build_activity_metadata_response_dto(
                 activity, course_id, current_course_user, current_user_submissions_by_activity.get(activity.id, [])
             )
             for activity in activities
@@ -146,14 +151,14 @@ class ActivitiesService:
             course_id: int,
             activity_id: int
     ) -> ActivityResponseDTO:
-        self.__verify_permission_to_view(current_course_user)
+        self.verify_permission_to_view(current_course_user)
         activity = self.activities_repo.get_activity_by_id(activity_id)
         if not activity:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Activity not found",
             )
-        return self.__build_activity_response_dto(activity)
+        return self.build_activity_response_dto(activity)
 
 
     def delete_activity(
@@ -162,11 +167,7 @@ class ActivitiesService:
             course_id: int,
             activity_id: int
     ) -> ActivityResponseDTO:
-        if not self.__has_permission_to_manage(current_course_user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to delete activities on this course",
-            )
+        self.verify_permission_to_manage(current_course_user)
         activity = self.activities_repo.get_activity_by_id(activity_id)
         if not activity:
             raise HTTPException(
@@ -179,7 +180,7 @@ class ActivitiesService:
                 detail="You do not have permission to delete this activity",
             )
         self.activities_repo.delete_activity(activity)
-        return self.__build_activity_response_dto(activity)
+        return self.build_activity_response_dto(activity)
 
 
     def create_activity(
@@ -188,11 +189,7 @@ class ActivitiesService:
             course_id: int,
             new_activity_data: ActivityCreationRequestDTO
     ) -> ActivityResponseDTO:
-        if not self.__has_permission_to_manage(current_course_user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to create activities on this course",
-            )
+        self.verify_permission_to_manage(current_course_user)
         category = self.categories_repo.get_category_by_id_and_course_id(
             new_activity_data.category_id, course_id
         )
@@ -204,7 +201,7 @@ class ActivitiesService:
         activity = self.activities_repo.create_activity(
             course_id, new_activity_data
         )
-        return self.__build_activity_response_dto(activity)
+        return self.build_activity_response_dto(activity)
 
 
     def update_activity(
@@ -214,11 +211,7 @@ class ActivitiesService:
             activity_id: int,
             new_activity_data: ActivityUpdateRequestDTO
     ) -> ActivityResponseDTO:
-        if not self.__has_permission_to_manage(current_course_user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to update activities on this course",
-            )
+        self.verify_permission_to_manage(current_course_user)
         activity = self.activities_repo.get_activity_by_id(activity_id)
         if not activity:
             raise HTTPException(
@@ -231,5 +224,5 @@ class ActivitiesService:
                 detail="You do not have permission to update this activity",
             )
         updated_activity = self.activities_repo.update_activity(course_id, activity, new_activity_data)
-        return self.__build_activity_response_dto(updated_activity)
+        return self.build_activity_response_dto(updated_activity)
 

@@ -6,7 +6,13 @@ from pydantic import BaseModel
 from rpl_activities.src.repositories.models import aux_models
 
 
-class IOTestDTO(BaseModel):
+class IOTestRequestDTO(BaseModel):
+    name: str
+    test_in: str
+    test_out: str
+
+class IOTestResponseDTO(BaseModel):
+    id: int
     name: str
     test_in: str
     test_out: str
@@ -77,7 +83,7 @@ class ActivityResponseDTO(BaseModel):
     starting_rplfile_id: int
     activity_unittests: str = ""
     compilation_flags: str = ""
-    activity_iotests: List[IOTestDTO] = []
+    activity_iotests: List[IOTestResponseDTO] = []
     date_created: datetime
     last_updated: datetime
 

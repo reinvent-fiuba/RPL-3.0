@@ -1,9 +1,8 @@
 from datetime import datetime, timezone
 import logging
-from typing import Optional
 
 from rpl_activities.src.deps import tar_utils
-from rpl_activities.src.dtos.activity_dtos import ActivityCreationRequestDTO, ActivityUpdateRequestDTO, IOTestDTO
+from rpl_activities.src.dtos.activity_dtos import ActivityCreationRequestDTO, ActivityUpdateRequestDTO, IOTestResponseDTO
 from rpl_activities.src.repositories.base import BaseRepository
 import sqlalchemy as sa
 
@@ -56,10 +55,11 @@ class ActivitiesRepository(BaseRepository):
     def get_unit_tests_data(self, activity: Activity) -> str:
         return activity.unit_test.test_rplfile.data.decode() if activity.unit_test else ""
     
-    def get_io_tests_data(self, activity: Activity) -> list[IOTestDTO]:
+    def get_io_tests_data(self, activity: Activity) -> list[IOTestResponseDTO]:
         io_tests = activity.io_tests
         return [
-            IOTestDTO(
+            IOTestResponseDTO(
+                id=io_test.id,
                 name=io_test.name,
                 test_in=io_test.test_in,
                 test_out=io_test.test_out,
@@ -77,10 +77,10 @@ class ActivitiesRepository(BaseRepository):
         course_id: int,
         new_activity_data: ActivityCreationRequestDTO
     ) -> Activity:
-        tar_filename = datetime.today().strftime("%Y-%m-%d") + str(course_id) + new_activity_data.name
         compressed_rplfile_bytes = tar_utils.compress_files_to_tar_gz(
-            new_activity_data.startingFile, tar_filename
+            new_activity_data.startingFile
         )
+        tar_filename = f"{datetime.today().strftime('%Y-%m-%d')}__{str(course_id)}__ACT__{new_activity_data.name}.tar.gz"
         rplfile = self.rplfiles_repo.create_rplfile(
             file_name=tar_filename,
             file_type="application/gzip",
@@ -115,10 +115,10 @@ class ActivitiesRepository(BaseRepository):
         new_activity_data: ActivityUpdateRequestDTO
     ) -> Activity:
         if new_activity_data.startingFile:
-            tar_filename = datetime.today().strftime("%Y-%m-%d") + str(course_id) + new_activity_data.name
             compressed_rplfile_bytes = tar_utils.compress_files_to_tar_gz(
-                new_activity_data.startingFile, tar_filename
+                new_activity_data.startingFile
             )
+            tar_filename = f"{datetime.today().strftime('%Y-%m-%d')}__{str(course_id)}__ACT__{new_activity_data.name}.tar.gz"
             self.rplfiles_repo.update_rplfile(
                 rplfile_id=activity.starting_rplfile_id,
                 file_name=tar_filename,
@@ -139,4 +139,23 @@ class ActivitiesRepository(BaseRepository):
         
         self.db_session.commit()
         self.db_session.refresh(activity)
+        return activity
+    
+
+    def update_iotest_mode_for_activity(self, activity: Activity, is_io_tested: bool) -> Activity:
+        activity.is_io_tested = is_io_tested
+        activity.last_updated = datetime.now(timezone.utc)
+        self.db_session.commit()
+        self.db_session.refresh(activity)
+        return activity
+
+    def enable_iotest_mode_for_activity(self, activity: Activity) -> Activity:
+        if not activity.is_io_tested:
+            activity = self.update_iotest_mode_for_activity(activity, True)
+        return activity
+        
+            
+    def disable_iotest_mode_for_activity(self, activity: Activity) -> Activity:
+        if activity.is_io_tested:
+            activity = self.update_iotest_mode_for_activity(activity, False)
         return activity

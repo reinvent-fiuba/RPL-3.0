@@ -2,7 +2,6 @@ import io
 import logging
 import os
 
-import mimetypes # TODO: Pending to be used: needed when creating 
 import tarfile
 from typing import IO
 
@@ -39,7 +38,7 @@ def extract_tar_gz_to_dict_of_files(data: bytes) -> ExtractedFilesDict:
                         logging.warning(f"Could not decode {filename} as UTF-8.")
     return extracted_files
 
-def compress_files_to_tar_gz(files_from_request: list[UploadFile], tar_gz_filename: str) -> bytes:
+def compress_files_to_tar_gz(files_from_request: list[UploadFile]) -> bytes:
     files: dict[str, bytes] = {}
     for file in files_from_request:
         file_content = file.file.read()
