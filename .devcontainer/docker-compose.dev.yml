@@ -9,14 +9,14 @@ services:
       - "9000:9000"
       - "9001:9001"
     networks:
-      - dev_network
-      # - rpl3_backend_default # Requires the local db container to be running (latest_db at metaservices.local.yml). USEFUL FOR MIGRATIONS
+      - devcontainer_net
+      # - rpl3_backend_localdb_net # Requires the local db container to be running (latest_db at metaservices.local.yml). USEFUL FOR MIGRATIONS
     command: sleep infinity
 
 networks:
-  dev_network:
+  devcontainer_net:
     driver: bridge
     
   
-  # rpl3_backend_default:  # Requires the local db container to be running (latest_db at metaservices.local.yml). USEFUL FOR MIGRATIONS
+  # rpl3_backend_localdb_net:  # Requires the local db container to be running (latest_db at metaservices.local.yml). USEFUL FOR MIGRATIONS
   #   external: true

@@ -12,6 +12,8 @@ services:
   #     - ./mysql/mysql80_data_vol:/var/lib/mysql
   #   ports:
   #     - "33068:3306"
+  #   networks:
+  #     - localdb_net
   latest_db:
     build:
       context: ./mysql/mysql84
@@ -25,3 +27,9 @@ services:
       - ./mysql/mysql84_data_vol:/var/lib/mysql
     ports:
       - "33069:3306"
+    networks:
+      - localdb_net
+
+networks:
+  localdb_net:
+    driver: bridge

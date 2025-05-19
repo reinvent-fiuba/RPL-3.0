@@ -1,21 +1,13 @@
 import logging
-import os
 from fastapi import HTTPException, status
-from fastapi.responses import StreamingResponse, FileResponse, Response
-import mimetypes
-import io
-import tarfile
+from fastapi.responses import Response
 import json
 
+from rpl_activities.src.deps.tar_utils import ExtractedFilesDict
+from rpl_activities.src.deps import tar_utils
+from rpl_activities.src.repositories.models import aux_models
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
-from rpl_activities.src.deps.database import DBSessionDependency
 from rpl_activities.src.repositories.rpl_files import RPLFilesRepository
-
-type ExtractedFileName = str
-type DecodedFileContent = str
-type ExtractedFilesDict = dict[ExtractedFileName, DecodedFileContent]
-
-METADATA_FILENAME = "files_metadata"
 
 
 class RPLFilesService:
@@ -29,15 +21,12 @@ class RPLFilesService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="File not found",
             )
-        mime_type, _ = mimetypes.guess_type(file.file_name)
-        if mime_type is None:
-            mime_type = "application/gzip"  # Default content type if not determined
         return Response(
             content=file.data,
-            media_type=mime_type,
+            media_type=file.file_type,
             headers={
                 "Content-Disposition": f"attachment; filename={file.file_name}",
-                "Content-Type": mime_type,
+                "Content-Type": file.file_type,
             },
         )
 
@@ -48,12 +37,12 @@ class RPLFilesService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="File not found",
             )
-        if not rplfile.file_name.endswith(".tar.xz"):
+        if rplfile.file_type != aux_models.RPLFileType.GZIP:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="File is not a tar.xz file",
+                detail="File is not a gzip file",
             )
-        return self.__extract_tar_gz_to_dict_of_files(rplfile.data)
+        return tar_utils.extract_tar_gz_to_dict_of_files(rplfile.data)
 
     def get_multiple_extracted_rplfiles(
         self, raw_rplfiles_ids: str
@@ -75,9 +64,9 @@ class RPLFilesService:
                 detail="No files extracted",
             )
 
-        if METADATA_FILENAME not in extracted_rplfile:
+        if tar_utils.METADATA_FILENAME not in extracted_rplfile:
             return extracted_rplfile
-        raw_metadata_file = extracted_rplfile[METADATA_FILENAME]
+        raw_metadata_file = extracted_rplfile[tar_utils.METADATA_FILENAME]
         try:
             general_metadata_dict = json.loads(raw_metadata_file)
         except json.JSONDecodeError:
@@ -88,7 +77,7 @@ class RPLFilesService:
 
         filtered_files: ExtractedFilesDict = {}
         for filename, file_content in extracted_rplfile.items():
-            if filename == METADATA_FILENAME:
+            if filename == tar_utils.METADATA_FILENAME:
                 continue
             if filename not in general_metadata_dict:
                 filtered_files[filename] = file_content
@@ -111,31 +100,4 @@ class RPLFilesService:
             extracted_rplfiles.append(extracted_rplfile)
         return extracted_rplfiles
 
-    # =========================
-    # Private methods
-    # =========================
-
-    def __extract_tar_gz_to_dict_of_files(self, data: bytes) -> ExtractedFilesDict:
-        extracted_files = {}
-
-        with tarfile.open(fileobj=io.BytesIO(data), mode="r") as tar:
-            for member in tar.getmembers():
-                if member.isfile():
-                    file = tar.extractfile(member)
-                    if file:
-                        filename = member.name
-                        try:
-                            decoded_chunks = []
-                            finished = False
-                            while not finished:
-                                chunk = file.read(8192)
-                                if not chunk:
-                                    finished = True
-                                    continue
-                                decoded_chunks.append(chunk.decode("utf-8"))
-                            extracted_files[os.path.basename(filename)] = "".join(
-                                decoded_chunks
-                            )
-                        except UnicodeDecodeError:
-                            logging.warning(f"Could not decode {filename} as UTF-8.")
-        return extracted_files
+    

@@ -12,7 +12,7 @@ SessionLocal = sessionmaker(autoflush=False, bind=engine)
 
 
 def get_db_session():
-    session: Session = SessionLocal(engine)
+    session: Session = SessionLocal()
     try:
         yield session
     finally:

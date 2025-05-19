@@ -38,7 +38,6 @@ def create_course(
 @router.put(
     "/courses/{course_id}",
     response_model=CourseResponseDTO,
-    status_code=status.HTTP_200_OK,
 )
 def update_course(
     course_id: str,
@@ -55,7 +54,6 @@ def update_course(
 @router.get(
     "/courses",
     response_model=List[CourseWithUserInformationResponseDTO],
-    status_code=status.HTTP_200_OK,
 )
 def get_all_courses_including_their_relationship_with_user(
     current_user: CurrentUserDependency,
@@ -69,7 +67,6 @@ def get_all_courses_including_their_relationship_with_user(
 @router.get(
     "/courses/{course_id}",
     response_model=CourseResponseDTO,
-    status_code=status.HTTP_200_OK,
 )
 def get_course_details(
     course_id: str,
@@ -85,7 +82,6 @@ def get_course_details(
 @router.post(
     "/courses/{course_id}/enroll",
     response_model=RoleResponseDTO,
-    status_code=status.HTTP_200_OK,
 )
 def enroll_student_in_course(
     course_id: str,
@@ -98,7 +94,6 @@ def enroll_student_in_course(
 @router.patch(
     "/courses/{course_id}/users/{user_id}",
     response_model=CourseUserResponseDTO,
-    status_code=status.HTTP_200_OK,
 )
 def update_course_user(
     course_id: str,
@@ -144,7 +139,6 @@ def delete_course_user(
 @router.get(
     "/courses/{course_id}/permissions",
     response_model=List[str],
-    status_code=status.HTTP_200_OK,
 )
 def get_user_permissions(
     course_id: str,
@@ -157,7 +151,6 @@ def get_user_permissions(
 @router.get(
     "/courses/{course_id}/users",
     response_model=List[CourseUserResponseDTO],
-    status_code=status.HTTP_200_OK,
 )
 def get_all_course_users_from_course(
     course_id: str,
@@ -170,7 +163,6 @@ def get_all_course_users_from_course(
 @router.get(
     "/users/{user_id}/courses",
     response_model=List[CourseResponseDTO],
-    status_code=status.HTTP_200_OK,
 )
 def get_all_courses_from_user(
     user_id: str,
@@ -186,7 +178,6 @@ def get_all_courses_from_user(
 @router.get(
     "/auth/roles",
     response_model=List[RoleResponseDTO],
-    status_code=status.HTTP_200_OK,
 )
 def get_all_roles(
     db: DBSessionDependency,
@@ -200,7 +191,6 @@ def get_all_roles(
 @router.get(
     "/auth/universities",
     response_model=List[UniversityResponseDTO],
-    status_code=status.HTTP_200_OK,
 )
 def get_all_universities(
     db: DBSessionDependency,

@@ -40,6 +40,8 @@ class UserProfileResponseDTO(BaseModel):
     username: str
     name: str
     surname: str
+    email: EmailStr
+    is_admin: bool
     student_id: str
     degree: str
     university: str
@@ -49,6 +51,7 @@ class UserProfileResponseDTO(BaseModel):
 class UserProfileUpdateDTO(BaseModel):
     name: Optional[str] = None
     surname: Optional[str] = None
+    student_id: Optional[str] = None
     degree: Optional[str] = None
     university: Optional[str] = None
     img_uri: Optional[str] = None

@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rpl-users-api
+spec:
+  replicas: 1 # TODO: change to 2 when deploying to gcp
+  selector:
+    matchLabels:
+      app: rpl-users-api
+      tier: backend
+      track: stable
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 3
+  template:
+    metadata:
+      labels:
+        app: rpl-users-api
+        tier: backend
+        track: stable
+    spec:
+      containers:
+      - name: rpl-users-api
+        image: rpl-users-api:local # gcr.io/rpl2-fiuba/rpl-3.0-users:latest
+        env:
+        - name: FASTAPI_PRODUCTION_PROFILE
+          value: "true"
+        - name: FRONTEND_URL
+          value: "https://myrpl.ar"
+        - name: JWT_ALGORITHM
+          valueFrom:
+            secretKeyRef:
+              name: jwt-algorithm
+              key: jwt-algorithm
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
+        - name: JWT_EXPIRE_MINUTES
+          valueFrom:
+            secretKeyRef:
+              name: jwt-expire-minutes
+              key: jwt-expire-minutes
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: users-db-url-local # TODO: change when deploying to gcp
+              key: users-db-url-local # TODO: change when deploying to gcp
+        - name: RPL_HELP_EMAIL_USER
+          valueFrom:
+            secretKeyRef:
+              name: rpl-help-email-user
+              key: rpl-help-email-user
+        - name: RPL_HELP_EMAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rpl-help-email-password
+              key: rpl-help-email-password
+        - name: SMTP_SERVER
+          value: "smtp.gmail.com"
+        - name: SMTP_PORT
+          value: "465"
+        ports:
+          - name: http
+            containerPort: 80
+        readinessProbe:
+          initialDelaySeconds: 30 #300
+          periodSeconds: 60
+          httpGet:
+            path: /api/v3/health
+            port: 80
+        livenessProbe:
+          initialDelaySeconds: 300
+          periodSeconds: 60
+          failureThreshold: 3
+          httpGet:
+            path: /api/v3/health
+            port: 80
+        resources:
+          requests:
+            cpu: 25m
+            memory: 256Mi
+          limits:
+            memory: 512Mi

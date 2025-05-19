@@ -1,7 +1,7 @@
 import json
 from fastapi.testclient import TestClient
 from fastapi import status
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session
 import logging
 
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
@@ -9,14 +9,14 @@ from rpl_activities.src.repositories.models.rpl_file import RPLFile
 
 def test_get_raw_rplfile_success(
     activities_api_client: TestClient,
-    example_rplfiles: list[RPLFile],
+    example_basic_rplfiles: list[RPLFile],
 ):
     response = activities_api_client.get(
-        f"/api/v3/RPLFile/{example_rplfiles[0].id}",
+        f"/api/v3/RPLFile/{example_basic_rplfiles[0].id}",
     )
     assert response.status_code == status.HTTP_200_OK
-    assert response.content == example_rplfiles[0].data
-    assert response.headers["Content-Type"] == example_rplfiles[0].file_type
+    assert response.content == example_basic_rplfiles[0].data
+    assert response.headers["Content-Type"] == example_basic_rplfiles[0].file_type
 
 
 def test_get_nonexistent_raw_rplfile(
@@ -30,10 +30,10 @@ def test_get_nonexistent_raw_rplfile(
 
 def test_get_extracted_rplfile_returns_all_inner_files(
     activities_api_client: TestClient,
-    example_rplfiles: list[RPLFile],
+    example_basic_rplfiles: list[RPLFile],
 ):
     response = activities_api_client.get(
-        f"/api/v3/extractedRPLFile/{example_rplfiles[0].id}",
+        f"/api/v3/extractedRPLFile/{example_basic_rplfiles[0].id}",
     )
     content = json.loads(response.content)
     assert response.status_code == status.HTTP_200_OK
@@ -43,10 +43,10 @@ def test_get_extracted_rplfile_returns_all_inner_files(
 
 def test_get_extracted_rplfile_for_student_only_returns_not_hidden_inner_files(
     activities_api_client: TestClient,
-    example_rplfiles: list[RPLFile],
+    example_basic_rplfiles: list[RPLFile],
 ):
     response = activities_api_client.get(
-        f"/api/v3/extractedRPLFileForStudent/{example_rplfiles[0].id}",
+        f"/api/v3/extractedRPLFileForStudent/{example_basic_rplfiles[0].id}",
     )
     content = json.loads(response.content)
     assert response.status_code == status.HTTP_200_OK
@@ -56,10 +56,10 @@ def test_get_extracted_rplfile_for_student_only_returns_not_hidden_inner_files(
 
 def test_get_multiple_extracted_rplfiles_returns_all_inner_files_from_all_of_them(
     activities_api_client: TestClient,
-    example_rplfiles: list[RPLFile],
+    example_basic_rplfiles: list[RPLFile],
 ):
     response = activities_api_client.get(
-        f"/api/v3/extractedRPLFiles/{example_rplfiles[0].id},{example_rplfiles[1].id}",
+        f"/api/v3/extractedRPLFiles/{example_basic_rplfiles[0].id},{example_basic_rplfiles[1].id}",
     )
     content = json.loads(response.content)
     assert response.status_code == status.HTTP_200_OK
@@ -71,10 +71,10 @@ def test_get_multiple_extracted_rplfiles_returns_all_inner_files_from_all_of_the
 
 def test_get_multiple_extracted_rplfiles_for_student_returns_only_not_hidden_inner_files_from_all_of_them(
     activities_api_client: TestClient,
-    example_rplfiles: list[RPLFile],
+    example_basic_rplfiles: list[RPLFile],
 ):
     response = activities_api_client.get(
-        f"/api/v3/extractedRPLFilesForStudent/{example_rplfiles[0].id},{example_rplfiles[1].id}",
+        f"/api/v3/extractedRPLFilesForStudent/{example_basic_rplfiles[0].id},{example_basic_rplfiles[1].id}",
     )
     content = json.loads(response.content)
     assert response.status_code == status.HTTP_200_OK

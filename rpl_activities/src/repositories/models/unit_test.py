@@ -15,9 +15,9 @@ class UnitTest(Base):
 
     id: Mapped[IntPK]
     activity_id: Mapped[BigInt] = mapped_column(ForeignKey("activities.id"))
-    test_file_id: Mapped[BigInt] = mapped_column(ForeignKey("rpl_files.id"))
+    test_rplfile_id: Mapped[BigInt] = mapped_column(ForeignKey("rpl_files.id"))
     date_created: Mapped[AutoDateTime]
     last_updated: Mapped[AutoDateTime]
 
-    activity: Mapped["Activity"] = relationship(back_populates="unit_tests")
-    test_file: Mapped["RPLFile"] = relationship(back_populates="unit_tests")
+    activity: Mapped["Activity"] = relationship(back_populates="unit_test")
+    test_rplfile: Mapped["RPLFile"] = relationship(back_populates="unit_test")

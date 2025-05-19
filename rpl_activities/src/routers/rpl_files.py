@@ -8,15 +8,15 @@ from rpl_activities.src.services.rpl_files import RPLFilesService
 router = APIRouter(prefix="/api/v3", tags=["RPLFiles"])
 
 
-@router.get("/RPLFile/{rplfile_id}", status_code=status.HTTP_200_OK)
-def get_raw_compressed_rplfile(
+@router.get("/RPLFile/{rplfile_id}")
+def get_raw_rplfile(
     rplfile_id: int,
     db: DBSessionDependency,
 ):
     return RPLFilesService(db).get_raw_rplfile(rplfile_id)
 
 
-@router.get("/extractedRPLFile/{rplfile_id}", status_code=status.HTTP_200_OK)
+@router.get("/extractedRPLFile/{rplfile_id}")
 def get_extracted_rplfile(
     rplfile_id: int,
     db: DBSessionDependency,
@@ -24,7 +24,7 @@ def get_extracted_rplfile(
     return RPLFilesService(db).get_extracted_rplfile(rplfile_id)
 
 
-@router.get("/extractedRPLFiles/{rplfiles_ids}", status_code=status.HTTP_200_OK)
+@router.get("/extractedRPLFiles/{rplfiles_ids}")
 def get_multiple_extracted_rplfiles(
     rplfiles_ids: str,
     db: DBSessionDependency,
@@ -32,7 +32,7 @@ def get_multiple_extracted_rplfiles(
     return RPLFilesService(db).get_multiple_extracted_rplfiles(rplfiles_ids)
 
 
-@router.get("/extractedRPLFileForStudent/{rplfile_id}", status_code=status.HTTP_200_OK)
+@router.get("/extractedRPLFileForStudent/{rplfile_id}")
 def get_extracted_rplfile_for_student(
     rplfile_id: int,
     db: DBSessionDependency,
@@ -40,9 +40,7 @@ def get_extracted_rplfile_for_student(
     return RPLFilesService(db).get_extracted_rplfile_for_student(rplfile_id)
 
 
-@router.get(
-    "/extractedRPLFilesForStudent/{rplfiles_ids}", status_code=status.HTTP_200_OK
-)
+@router.get("/extractedRPLFilesForStudent/{rplfiles_ids}")
 def get_multiple_extracted_rplfiles_for_student(
     rplfiles_ids: str,
     db: DBSessionDependency,

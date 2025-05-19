@@ -34,7 +34,7 @@ def register_user(
     return UsersService(db).create_user(user_data, email_handler)
 
 
-@router.post("/auth/resendValidationEmail", status_code=status.HTTP_200_OK)
+@router.post("/auth/resendValidationEmail")
 def resend_validation_email(
     user_data: ResendEmailValidationDTO,
     email_handler: EmailHandlerDependency,
@@ -43,7 +43,7 @@ def resend_validation_email(
     return UsersService(db).resend_validation_email(user_data, email_handler)
 
 
-@router.post("/auth/validateEmail", status_code=status.HTTP_200_OK)
+@router.post("/auth/validateEmail")
 def validate_email(
     validation_data: UserEmailValidationDTO,
     email_handler: EmailHandlerDependency,
@@ -61,7 +61,7 @@ def forgot_password(
     return UsersService(db).forgot_password(user_data, email_handler)
 
 
-@router.post("/auth/resetPassword", status_code=UserProfileResponseDTO)
+@router.post("/auth/resetPassword", response_model=UserProfileResponseDTO)
 def reset_password(user_data: UserPasswordResetDTO, db: DBSessionDependency):
     return UsersService(db).reset_password(user_data)
 
@@ -90,9 +90,9 @@ def update_user_profile(
 
 @router.get("/users", response_model=FindUsersResponseDTO)
 def find_users(
-    username: Optional[str],
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
+    username: Optional[str] = "",
 ):
     return UsersService(db).find_users(username, current_user)
 

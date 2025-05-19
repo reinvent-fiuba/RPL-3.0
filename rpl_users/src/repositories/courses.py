@@ -24,6 +24,21 @@ class CoursesRepository(BaseRepository):
     # ====================== MANAGING ====================== #
 
     def save_new_course(self, course_data: CourseCreationDTO) -> Course:
+        old_course = self.get_course_with_name_university_semester_and_subject_id(
+            course_data.name,
+            course_data.university,
+            course_data.semester,
+            course_data.subject_id,
+        )
+        if old_course:
+            if old_course.deleted:
+                old_course.deleted = False
+                self.db_session.commit()
+                self.db_session.refresh(old_course)
+                return old_course
+            else:
+                self._raise_http_conflict_exception()
+
         new_course = Course(
             name=course_data.name,
             university=course_data.university,
@@ -72,6 +87,27 @@ class CoursesRepository(BaseRepository):
     def get_course_with_id(self, course_id: str) -> Course:
         return (
             self.db_session.execute(sa.select(Course).where(Course.id == course_id))
+            .scalars()
+            .one_or_none()
+        )
+    
+    def get_course_with_name_university_semester_and_subject_id(
+        self,
+        name: str,
+        university: str,
+        semester: str,
+        subject_id: str,
+    ) -> Course:
+        return (
+            self.db_session.execute(
+                sa.select(Course)
+                .where(
+                    Course.name == name,
+                    Course.university == university,
+                    Course.semester == semester,
+                    Course.subject_id == subject_id,
+                )
+            )
             .scalars()
             .one_or_none()
         )

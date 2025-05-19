@@ -28,8 +28,6 @@ class TestRun(Base):
     date_created: Mapped[AutoDateTime]
     last_updated: Mapped[AutoDateTime]
 
-    activity_submission: Mapped["ActivitySubmission"] = relationship(
-        back_populates="test_run"
-    )
+    submission: Mapped["ActivitySubmission"] = relationship(back_populates="test_run")
     io_test_run: Mapped[List["IOTestRun"]] = relationship(back_populates="test_run")
     unit_test_run: Mapped[List["UnitTestRun"]] = relationship(back_populates="test_run")
