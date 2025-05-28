@@ -9,7 +9,7 @@ def set_users_api_conn(app: FastAPI):
     def startup():
         app.state.users_api_client = httpx.Client(base_url=env.USERS_API_URL)
     
-    app.on_event("shutdown")
+    @app.on_event("shutdown")
     def shutdown():
         if hasattr(app.state, 'users_api_client'):
             app.state.users_api_client.close()
