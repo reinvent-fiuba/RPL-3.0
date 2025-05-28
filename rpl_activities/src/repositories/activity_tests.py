@@ -95,7 +95,7 @@ class TestsRepository(BaseRepository):
         course_id: int
     ) -> UnitTest:
         rplfile = self.rplfiles_repo.create_rplfile(
-            file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{str(course_id)}__{str(activity.id)}__unittests",
+            file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{course_id}__{activity.id}__unittests",
             file_type=aux_models.RPLFileType.TEXT,
             data=new_unit_test_data.unit_test_code.encode()
         )
@@ -119,7 +119,7 @@ class TestsRepository(BaseRepository):
     ) -> UnitTest:
         rplfile = self.rplfiles_repo.update_rplfile(
             rplfile_id=unit_test.test_rplfile_id,
-            file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{str(course_id)}__{str(activity.id)}__unittests",
+            file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{course_id}__{activity.id}__unittests",
             file_type=aux_models.RPLFileType.TEXT,
             data=new_unit_test_data.unit_test_code.encode()
         )

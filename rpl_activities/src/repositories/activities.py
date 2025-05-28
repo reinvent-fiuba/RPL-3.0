@@ -9,6 +9,8 @@ import sqlalchemy as sa
 from rpl_activities.src.repositories.models import aux_models
 from rpl_activities.src.repositories.rpl_files import RPLFilesRepository
 from .models.activity import Activity
+MAX_ACTIVITY_NAME_LEN_FOR_TAR = 180
+
 
 class ActivitiesRepository(BaseRepository):
     def __init__(self, db_session):
@@ -77,13 +79,13 @@ class ActivitiesRepository(BaseRepository):
         course_id: int,
         new_activity_data: ActivityCreationRequestDTO
     ) -> Activity:
-        compressed_rplfile_bytes = tar_utils.compress_files_to_tar_gz(
+        compressed_rplfile_bytes = tar_utils.compress_uploadfiles_to_tar_gz(
             new_activity_data.startingFile
         )
-        tar_filename = f"{datetime.today().strftime('%Y-%m-%d')}__{str(course_id)}__ACT__{new_activity_data.name}.tar.gz"
+        truncated_act_name = new_activity_data.name.strip()[:MAX_ACTIVITY_NAME_LEN_FOR_TAR]
         rplfile = self.rplfiles_repo.create_rplfile(
-            file_name=tar_filename,
-            file_type="application/gzip",
+            file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{course_id}__ACT__{truncated_act_name}.tar.gz",
+            file_type=aux_models.RPLFileType.GZIP,
             data=compressed_rplfile_bytes,
         )
 
@@ -115,14 +117,17 @@ class ActivitiesRepository(BaseRepository):
         new_activity_data: ActivityUpdateRequestDTO
     ) -> Activity:
         if new_activity_data.startingFile:
-            compressed_rplfile_bytes = tar_utils.compress_files_to_tar_gz(
+            compressed_rplfile_bytes = tar_utils.compress_uploadfiles_to_tar_gz(
                 new_activity_data.startingFile
             )
-            tar_filename = f"{datetime.today().strftime('%Y-%m-%d')}__{str(course_id)}__ACT__{new_activity_data.name}.tar.gz"
+            if new_activity_data.name:
+                truncated_act_name = new_activity_data.name.strip()[:MAX_ACTIVITY_NAME_LEN_FOR_TAR]
+            else:
+                truncated_act_name = activity.name.strip()[:MAX_ACTIVITY_NAME_LEN_FOR_TAR]
             self.rplfiles_repo.update_rplfile(
                 rplfile_id=activity.starting_rplfile_id,
-                file_name=tar_filename,
-                file_type="application/gzip",
+                file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{course_id}__ACT__{truncated_act_name}.tar.gz",
+                file_type=aux_models.RPLFileType.GZIP,
                 data=compressed_rplfile_bytes,
             )
 

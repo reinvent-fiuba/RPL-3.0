@@ -184,7 +184,7 @@ def example_basic_rplfiles_fixture(activities_api_dbsession: Session):
     example_rplfile = RPLFile(
         id=1,
         file_name="basic_rplfile.tar.gz",
-        file_type="application/gzip",
+        file_type=aux_models.RPLFileType.GZIP,
         data=rplfile_data,
     )
     activities_api_dbsession.add(example_rplfile)
@@ -196,7 +196,7 @@ def example_basic_rplfiles_fixture(activities_api_dbsession: Session):
     example_rplfile_2 = RPLFile(
         id=2,
         file_name="basic_rplfile_copy.tar.gz",
-        file_type="application/gzip",
+        file_type=aux_models.RPLFileType.GZIP,
         data=rplfile_data,
     )
     activities_api_dbsession.add(example_rplfile_2)
@@ -205,8 +205,8 @@ def example_basic_rplfiles_fixture(activities_api_dbsession: Session):
 
     example_rplfile_3 = RPLFile(
         id=3,
-        file_name="basic_rplfile_with_text.txt",
-        file_type="text",
+        file_name="basic_rplfile_with_text.c",
+        file_type=aux_models.RPLFileType.TEXT,
         data=b"print('This is a file with many unit tests')",
     )
     activities_api_dbsession.add(example_rplfile_3)
@@ -226,7 +226,7 @@ def example_starting_rplfile_fixture(activities_api_dbsession: Session):
     example_rplfile = RPLFile(
         id=4,
         file_name="activity_1_starting_files.tar.gz",
-        file_type="application/gzip",
+        file_type=aux_models.RPLFileType.GZIP,
         data=rplfile_data,
     )
     activities_api_dbsession.add(example_rplfile)
@@ -235,6 +235,7 @@ def example_starting_rplfile_fixture(activities_api_dbsession: Session):
     yield example_rplfile
 
 
+# Format: {language: [(name_of_form_param, (file_name, file_content, file_type)]}
 type StartingFileRawRequestData = tuple[str, tuple[str, bytes, str]]
 type ExamplesOfStartingFilesRawData = dict[list[StartingFileRawRequestData]]
 @pytest.fixture(name="examples_of_starting_files_raw_data")
@@ -266,13 +267,24 @@ def example_submission_rplfile_fixture(activities_api_dbsession: Session):
     example_rplfile = RPLFile(
         id=5,
         file_name="activity_1_submission.tar.gz",
-        file_type="application/gzip",
+        file_type=aux_models.RPLFileType.GZIP,
         data=rplfile_data,
     )
     activities_api_dbsession.add(example_rplfile)
     activities_api_dbsession.commit()
     activities_api_dbsession.refresh(example_rplfile)
     yield example_rplfile
+
+
+# Format: (name_of_form_param, (file_name, file_content, file_type)
+type SubmissionRawRequestData = StartingFileRawRequestData
+type ExamplesOfSubmissionRawData = list[SubmissionRawRequestData]
+@pytest.fixture(name="example_submission_raw_data")
+def example_submission_raw_data_fixture() -> ExamplesOfSubmissionRawData:
+    return [
+        ("file", ("tiempo.c", open("rpl_activities/tests/resources/activity_1_submission/tiempo.c", "rb").read(), "application/octet-stream")),
+        ("file", ("tiempo.h", open("rpl_activities/tests/resources/activity_1_submission/tiempo.h", "rb").read(), "application/octet-stream"))
+    ]
 
 
 # ==========================================================================
@@ -339,6 +351,7 @@ def example_submission_fixture(
     activities_api_dbsession: Session,
     example_activity: Activity,
     example_submission_rplfile: RPLFile,
+    example_unit_test: UnitTest,
 ):
     submission = ActivitySubmission(
         id=1,

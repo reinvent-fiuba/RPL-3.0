@@ -38,18 +38,27 @@ def extract_tar_gz_to_dict_of_files(data: bytes) -> ExtractedFilesDict:
                         logging.warning(f"Could not decode {filename} as UTF-8.")
     return extracted_files
 
-def compress_files_to_tar_gz(files_from_request: list[UploadFile]) -> bytes:
+# =================================================================
+
+def get_raw_files_from_uploadfiles(uploadfiles_from_request: list[UploadFile]) -> dict[str, bytes]:
     files: dict[str, bytes] = {}
-    for file in files_from_request:
+    for file in uploadfiles_from_request:
         file_content = file.file.read()
         if not file_content:
             file_content = b""
         files[file.filename] = file_content
+    return files
+    
+def compress_files_dict_to_tar_gz(files_dict: dict[str, bytes]) -> bytes:
     with io.BytesIO() as tar_gz_buffer:
         with tarfile.open(fileobj=tar_gz_buffer, mode="w:gz") as tar:
-            for filename, file_content in files.items():
+            for filename, file_content in files_dict.items():
                 fileobj = io.BytesIO(file_content)
                 tarinfo = tarfile.TarInfo(name=filename)
                 tarinfo.size = len(file_content)
                 tar.addfile(tarinfo, fileobj)
         return tar_gz_buffer.getvalue()
+
+def compress_uploadfiles_to_tar_gz(uploadfiles_from_request: list[UploadFile]) -> bytes:
+    files = get_raw_files_from_uploadfiles(uploadfiles_from_request)
+    return compress_files_dict_to_tar_gz(files)

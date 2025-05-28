@@ -8,6 +8,7 @@ from rpl_activities.src.routers.categories import router as categories_router
 from rpl_activities.src.routers.rpl_files import router as rplfiles_router
 from rpl_activities.src.routers.activities import router as activities_router
 from rpl_activities.src.routers.activity_tests import router as activity_tests_router
+from rpl_activities.src.routers.submissions import router as submissions_router
 
 
 app = FastAPI(lifespan=users_api_conn_lifespan, **FASTAPI_METADATA)
@@ -24,6 +25,7 @@ app.include_router(categories_router)
 app.include_router(rplfiles_router)
 app.include_router(activities_router)
 app.include_router(activity_tests_router)
+app.include_router(submissions_router)
 
 
 # ==============================================================================

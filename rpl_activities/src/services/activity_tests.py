@@ -26,12 +26,7 @@ class TestsService:
         new_io_test_data: IOTestRequestDTO
     ) -> IOTestResponseDTO:
         self.activities_service.verify_permission_to_manage(current_course_user)
-        activity = self.activities_repo.get_activity_by_id(activity_id)
-        if not activity:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Activity not found"
-            )
+        activity = self.activities_service.verify_and_get_activity(course_id, activity_id)
         io_test = self.tests_repo.create_io_test_for_activity(new_io_test_data, activity)
         self.activities_repo.enable_iotest_mode_for_activity(activity)
         return IOTestResponseDTO(
@@ -51,12 +46,7 @@ class TestsService:
         new_io_test_data: IOTestRequestDTO
     ) -> IOTestResponseDTO:
         self.activities_service.verify_permission_to_manage(current_course_user)
-        activity = self.activities_repo.get_activity_by_id(activity_id)
-        if not activity:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Activity not found"
-            )
+        activity = self.activities_service.verify_and_get_activity(course_id, activity_id)
         io_test = self.tests_repo.get_io_test_by_id_and_activity_id(io_test_id, activity.id)
         if not io_test:
             raise HTTPException(
@@ -80,12 +70,7 @@ class TestsService:
         io_test_id: int
     ) -> ActivityResponseDTO:
         self.activities_service.verify_permission_to_manage(current_course_user)
-        activity = self.activities_repo.get_activity_by_id(activity_id)
-        if not activity:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Activity not found"
-            )
+        activity = self.activities_service.verify_and_get_activity(course_id, activity_id)
         io_test = self.tests_repo.get_io_test_by_id_and_activity_id(io_test_id, activity.id)
         if not io_test:
             raise HTTPException(
@@ -104,12 +89,7 @@ class TestsService:
         new_unit_test_data: CreateUnitTestRequestDTO
     ) -> ActivityResponseDTO:
         self.activities_service.verify_permission_to_manage(current_course_user)
-        activity = self.activities_repo.get_activity_by_id(activity_id)
-        if not activity:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Activity not found"
-            )
+        activity = self.activities_service.verify_and_get_activity(course_id, activity_id)
         unit_test = self.tests_repo.get_unit_test_by_activity_id(activity.id)
         if unit_test:
             raise HTTPException(
@@ -129,12 +109,7 @@ class TestsService:
         new_unit_test_data: CreateUnitTestRequestDTO
     ) -> ActivityResponseDTO:
         self.activities_service.verify_permission_to_manage(current_course_user)
-        activity = self.activities_repo.get_activity_by_id(activity_id)
-        if not activity:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Activity not found"
-            )
+        activity = self.activities_service.verify_and_get_activity(course_id, activity_id)
         unit_test = self.tests_repo.get_unit_test_by_activity_id(activity.id)
         if not unit_test:
             raise HTTPException(
