@@ -111,7 +111,7 @@ def get_current_course_user(
             status_code=res.status_code,
             detail=f"Failed to authenticate current course user: {res.text}",
         )
-    user_data = CourseUserResponsDTO(**res.json())
+    user_data = CourseUserResponseDTO(**res.json())
     return CurrentCourseUser(user_data)
 
 
