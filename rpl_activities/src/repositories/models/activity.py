@@ -23,9 +23,7 @@ class Activity(Base):
 
     id: Mapped[IntPK]
     course_id: Mapped[BigInt]
-    category_id: Mapped[BigInt] = mapped_column(
-        ForeignKey("activity_categories.id")
-    )
+    category_id: Mapped[BigInt] = mapped_column(ForeignKey("activity_categories.id"))
     name: Mapped[LargeStr]
     description: Mapped[Optional[TextStr]]
     language: Mapped[Str]
@@ -44,4 +42,6 @@ class Activity(Base):
         back_populates="activity", lazy="raise"
     )
     io_tests: Mapped[List["IOTest"]] = relationship(back_populates="activity")
-    unit_test: Mapped["UnitTest"] = relationship(back_populates="activity")
+    unit_test: Mapped[Optional["UnitTest"]] = relationship(
+        back_populates="activity", uselist=False
+    )

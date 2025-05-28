@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -28,5 +28,9 @@ class ActivitySubmission(Base):
 
     activity: Mapped["Activity"] = relationship(back_populates="submissions")
     response_rplfile: Mapped["RPLFile"] = relationship(back_populates="submission")
-    result: Mapped["Result"] = relationship(back_populates="submission")
-    test_run: Mapped["TestRun"] = relationship(back_populates="submission")
+    result: Mapped[Optional["Result"]] = relationship(
+        back_populates="submission", uselist=False
+    )
+    test_run: Mapped[Optional["TestRun"]] = relationship(
+        back_populates="submission", uselist=False
+    )
