@@ -31,11 +31,11 @@ class CurrentMainUser:
         self.img_uri = user_data.img_uri
 
 
-def get_current_main_user(
+async def get_current_main_user(
     auth_header: AuthDependency, request: Request
 ) -> CurrentMainUser:
-    users_api_client: httpx.Client = request.state.users_api_client
-    res = users_api_client.get(
+    users_api_client: httpx.AsyncClient = request.state.users_api_client
+    res = await users_api_client.get(
         "/api/v3/auth/externalUserMainAuth",
         headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
     )
@@ -95,13 +95,13 @@ def __basic_path_param_checks(course_id: str) -> int:
     return course_id
 
 
-def get_current_course_user(
+async def get_current_course_user(
     auth_header: AuthDependency, request: Request
 ) -> CurrentCourseUser:
-    users_api_client: httpx.Client = request.state.users_api_client
+    users_api_client: httpx.AsyncClient = request.state.users_api_client
     course_id = __basic_path_param_checks(request.path_params.get("course_id"))
 
-    res = users_api_client.get(
+    res = await users_api_client.get(
         "/api/v3/auth/externalCourseUserAuth",
         headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
         params={"course_id": course_id},

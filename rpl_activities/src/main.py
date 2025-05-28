@@ -3,16 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from rpl_activities.src.config.api_metadata import FASTAPI_METADATA
-from rpl_activities.src.config.api_lifespan import set_users_api_conn
+from rpl_activities.src.config.api_lifespan import users_api_conn_lifespan
 from rpl_activities.src.routers.categories import router as categories_router
 from rpl_activities.src.routers.rpl_files import router as rplfiles_router
 from rpl_activities.src.routers.activities import router as activities_router
 from rpl_activities.src.routers.activity_tests import router as activity_tests_router
 from rpl_activities.src.routers.submissions import router as submissions_router
 
+from rpl_activities.src.repositories.models import models_metadata
 
-app = FastAPI(**FASTAPI_METADATA)
-set_users_api_conn(app)
+app = FastAPI(lifespan=users_api_conn_lifespan, **FASTAPI_METADATA)
+
 
 app.add_middleware(
     CORSMiddleware,
