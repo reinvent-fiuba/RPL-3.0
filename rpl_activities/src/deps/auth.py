@@ -4,9 +4,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import httpx
 
 from rpl_activities.src.dtos.auth_dtos import (
+    CourseUserResponseDTO,
     ExternalCurrentMainUserDTO,
 )
-from rpl_users.src.dtos.course_dtos import CourseUserResponseDTO
 
 
 # Dependencies =============================
