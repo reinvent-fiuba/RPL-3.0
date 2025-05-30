@@ -19,7 +19,7 @@ Ver:
 Se cambió el nombre de algunas tablas para mantener consistencia de nombres en plural y evitar confusiones: 
 `unit_test_run` -> `unit_test_runs`; 
 `io_test_run` -> `io_test_runs`; 
-`test_run` -> `test_runs`; 
+`test_run` -> `tests_execution_logs`; 
 `validation_token` -> `validation_tokens`
 `unit_tests` -> `unit_test_suites`;
 `results` -> `submission_results`

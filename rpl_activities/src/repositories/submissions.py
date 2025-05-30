@@ -3,7 +3,7 @@ import json
 from fastapi import UploadFile
 
 from rpl_activities.src.deps.auth import CurrentCourseUser
-from rpl_activities.src.dtos.submission_dtos import SubmissionCreationRequestDTO, UpdateSubmissionStatusRequestDTO
+from rpl_activities.src.dtos.submission_dtos import SubmissionCreationRequestDTO
 from rpl_activities.src.repositories.base import BaseRepository
 import sqlalchemy as sa
 
@@ -136,7 +136,7 @@ class SubmissionsRepository(BaseRepository):
             is_final_solution=False,
             activity_id=activity.id,
             user_id=current_course_user.user_id,
-            response_rplfile_id=rplfile.id,
+            solution_rplfile_id=rplfile.id,
             status=aux_models.SubmissionStatus.PENDING,
             date_created=datetime.now(timezone.utc),
             last_updated=datetime.now(timezone.utc)
@@ -149,9 +149,9 @@ class SubmissionsRepository(BaseRepository):
     def update_submission_status(
         self,
         submission: ActivitySubmission,
-        new_status_data: UpdateSubmissionStatusRequestDTO
+        new_status: aux_models.SubmissionStatus
     ) -> ActivitySubmission:
-        submission.status = new_status_data.status
+        submission.status = new_status
         submission.last_updated = datetime.now(timezone.utc)
         self.db_session.commit()
         self.db_session.refresh(submission)

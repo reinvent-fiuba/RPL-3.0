@@ -29,7 +29,7 @@ class RPLFile(Base):
         back_populates="starting_rplfile"
     )
     submission: Mapped[Optional["ActivitySubmission"]] = relationship(
-        back_populates="response_rplfile"
+        back_populates="solution_rplfile"
     )
     unit_test_suite: Mapped[Optional["UnitTestSuite"]] = relationship(
         back_populates="test_rplfile"

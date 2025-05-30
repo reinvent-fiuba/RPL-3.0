@@ -42,8 +42,14 @@ class SubmissionStatus(str, Enum):
     FAILURE = "FAILURE"
     SUCCESS = "SUCCESS"
     TIME_OUT = "TIME_OUT"
+    @classmethod
+    def from_tests_execution_errored_stage(cls, tests_execution_stage: str) -> "SubmissionStatus":
+        if tests_execution_stage == "BUILD":
+            return cls.BUILD_ERROR
+        else:
+            return cls.RUNTIME_ERROR
 
-class TestRunResultStatus(str, Enum):
+class TestsExecutionResultStatus(str, Enum):
     ERROR = "ERROR"
     SUCCESS = "OK"
     TIME_OUT = "TIME_OUT"

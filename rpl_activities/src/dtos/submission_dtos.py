@@ -74,24 +74,24 @@ class UpdateSubmissionStatusRequestDTO(BaseModel):
     status: aux_models.SubmissionStatus
 
 
-class SingleUnitTestReportDTO(BaseModel):
+class SingleUnitTestRunReportDTO(BaseModel):
     name: str
     status: str
     messages: Optional[str] = None
 
-class UnitTestSuiteResultSummaryDTO(BaseModel):
+class UnitTestSuiteRunsSummaryDTO(BaseModel):
     amount_passed: int
     amount_failed: int
     amount_errored: int
-    single_test_reports: List[SingleUnitTestReportDTO]
+    single_test_reports: List[SingleUnitTestRunReportDTO]
 
-class TestRunResultCreationDTO(BaseModel):
-    test_run_result_status: aux_models.TestRunResultStatus
-    test_run_stage: str
-    test_run_exit_message: str
-    test_run_stderr: str
-    test_run_stdout: str
-    unit_test_suite_result_summary: Optional[UnitTestSuiteResultSummaryDTO] = None
+class TestsExecutionLogDTO(BaseModel):
+    tests_execution_result_status: aux_models.TestsExecutionResultStatus
+    tests_execution_stage: str
+    tests_execution_exit_message: str
+    tests_execution_stderr: str = ""
+    tests_execution_stdout: str
+    unit_test_suite_result_summary: Optional[UnitTestSuiteRunsSummaryDTO] = None
 
 
 # ==============================================================================

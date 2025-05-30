@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from rpl_activities.src.dtos.activity_dtos import CreateUnitTestSuiteRequestDTO, IOTestRequestDTO
-from rpl_activities.src.dtos.submission_dtos import TestRunResultCreationDTO
+from rpl_activities.src.dtos.submission_dtos import TestsExecutionLogDTO
 from rpl_activities.src.repositories.base import BaseRepository
 import sqlalchemy as sa
 
@@ -14,7 +14,7 @@ from .models.unit_test_suite import UnitTestSuite
 from .models.io_test import IOTest
 from .models.unit_test_run import UnitTestRun
 from .models.io_test_run import IOTestRun
-from .models.test_run import TestRun
+from .models.test_execution_log import TestsExecutionLog
 from .models.activity_submission import ActivitySubmission
 
 class TestsRepository(BaseRepository):
@@ -136,24 +136,26 @@ class TestsRepository(BaseRepository):
 
     # ==============================================================================
 
-    def create_test_run_result_for_submission(
+    def save_tests_execution_log_for_submission(
         self,
-        new_run_result_data: TestRunResultCreationDTO,
+        new_execution_log_data: TestsExecutionLogDTO,
         submission: ActivitySubmission
-    ) -> TestRun:
-        test_run = TestRun(
+    ) -> tuple[TestsExecutionLog, ActivitySubmission]:
+        test_execution_log = TestsExecutionLog(
             activity_submission_id=submission.id,
-            success=(new_run_result_data.test_run_result_status == aux_models.TestRunResultStatus.SUCCESS),
-            exit_message=new_run_result_data.test_run_exit_message,
-            stderr=new_run_result_data.test_run_stderr,
-            stdout=new_run_result_data.test_run_stdout,
+            success=(new_execution_log_data.tests_execution_result_status == aux_models.TestsExecutionResultStatus.SUCCESS),
+            exit_message=new_execution_log_data.tests_execution_exit_message,
+            stderr=new_execution_log_data.tests_execution_stderr,
+            stdout=new_execution_log_data.tests_execution_stdout,
             date_created=datetime.now(timezone.utc),
             last_updated=datetime.now(timezone.utc)
         )
-        self.db_session.add(test_run)
+        self.db_session.add(test_execution_log)
         self.db_session.commit()
-        self.db_session.refresh(test_run)
-        submission.test_run = test_run
+        self.db_session.refresh(test_execution_log)
+        self.db_session.refresh(submission)
+        return test_execution_log, submission
+
             
                 
     

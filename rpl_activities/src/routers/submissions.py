@@ -10,7 +10,7 @@ from rpl_activities.src.dtos.submission_dtos import (
     SubmissionResultResponseDTO,
     SubmissionResponseDTO,
     UpdateSubmissionStatusRequestDTO,
-    TestRunResultCreationDTO,
+    TestsExecutionLogDTO,
     SubmissionWithMetadataOnlyResponseDTO
 )
 from rpl_activities.src.services.submissions import SubmissionsService
@@ -101,19 +101,19 @@ def get_all_final_submissions_from_activity(
 
 
 @router.post(
-    "/submissions/{submission_id}/result",
+    "/submissions/{submission_id}/execLog",
     status_code=status.HTTP_201_CREATED,
 )
-def create_submission_execution_result(
+def save_tests_execution_log_for_submission(
     submission_id: int,
-    new_run_result_data: TestRunResultCreationDTO,
+    new_run_result_data: TestsExecutionLogDTO,
     db: DBSessionDependency
 ):
-    return SubmissionsService(db).create_submission_execution_result(submission_id, new_run_result_data)
+    return SubmissionsService(db).save_tests_execution_log_for_submission(submission_id, new_run_result_data)
 
 
 # @router.get(
-#     "/submissions/{submission_id}/result",
+#     "/submissions/{submission_id}/execLog",
 #     response_model=SubmissionResultResponseDTO
 # )
 # def get_submission_execution_result(

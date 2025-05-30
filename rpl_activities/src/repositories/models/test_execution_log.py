@@ -14,8 +14,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base_model import Base, BigInt, AutoDateTime, IntPK, Str, TextStr
 
 
-class TestRun(Base):
-    __tablename__ = "test_runs"
+class TestsExecutionLog(Base):
+    __tablename__ = "tests_execution_logs"
 
     id: Mapped[IntPK]
     activity_submission_id: Mapped[BigInt] = mapped_column(
@@ -28,6 +28,6 @@ class TestRun(Base):
     date_created: Mapped[AutoDateTime]
     last_updated: Mapped[AutoDateTime]
 
-    submission: Mapped["ActivitySubmission"] = relationship(back_populates="test_run")
-    io_test_runs: Mapped[List["IOTestRun"]] = relationship(back_populates="test_run")
-    unit_test_runs: Mapped[List["UnitTestRun"]] = relationship(back_populates="test_run")
+    submission: Mapped["ActivitySubmission"] = relationship(back_populates="tests_execution_log")
+    io_test_runs: Mapped[List["IOTestRun"]] = relationship(back_populates="tests_execution_log")
+    unit_test_runs: Mapped[List["UnitTestRun"]] = relationship(back_populates="tests_execution_log")

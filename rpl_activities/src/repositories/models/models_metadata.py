@@ -6,6 +6,6 @@ from .io_test_run import IOTestRun
 from .io_test import IOTest
 from .submission_result import SubmissionResult
 from .rpl_file import RPLFile
-from .test_run import TestRun
+from .test_execution_log import TestsExecutionLog
 from .unit_test_run import UnitTestRun
 from .unit_test_suite import UnitTestSuite

@@ -31,9 +31,9 @@ def test_get_submission(
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
     assert response_data["id"] == example_submission.id
-    assert response_data["submission_rplfile_name"] == example_submission.response_rplfile.file_name
-    assert response_data["submission_rplfile_type"] == example_submission.response_rplfile.file_type
-    assert response_data["submission_rplfile_id"] == example_submission.response_rplfile_id
+    assert response_data["submission_rplfile_name"] == example_submission.solution_rplfile.file_name
+    assert response_data["submission_rplfile_type"] == example_submission.solution_rplfile.file_type
+    assert response_data["submission_rplfile_id"] == example_submission.solution_rplfile_id
     assert response_data["acitivity_starting_rplfile_name"] == example_submission.activity.starting_rplfile.file_name
     assert response_data["activity_starting_rplfile_type"] == example_submission.activity.starting_rplfile.file_type
     assert response_data["activity_starting_rplfile_id"] == example_submission.activity.starting_rplfile_id

@@ -7,9 +7,9 @@ from rpl_activities.src.dtos.submission_dtos import (
     SubmissionResultResponseDTO,
     SubmissionResponseDTO,
     UpdateSubmissionStatusRequestDTO,
-    SingleUnitTestReportDTO,
-    UnitTestSuiteResultSummaryDTO,
-    TestRunResultCreationDTO,
+    SingleUnitTestRunReportDTO,
+    UnitTestSuiteRunsSummaryDTO,
+    TestsExecutionLogDTO,
     SubmissionWithMetadataOnlyResponseDTO
 )
 from rpl_activities.src.repositories.activity_tests import TestsRepository
@@ -37,9 +37,9 @@ class SubmissionsService:
         io_tests_input_data = self.submissions_repo.get_io_tests_input_data_from_submission(submission)
         return SubmissionResponseDTO(
             id=submission.id,
-            submission_rplfile_name=submission.response_rplfile.file_name,
-            submission_rplfile_type=submission.response_rplfile.file_type,
-            submission_rplfile_id=submission.response_rplfile_id,
+            submission_rplfile_name=submission.solution_rplfile.file_name,
+            submission_rplfile_type=submission.solution_rplfile.file_type,
+            submission_rplfile_id=submission.solution_rplfile_id,
             acitivity_starting_rplfile_name=submission.activity.starting_rplfile.file_name,
             activity_starting_rplfile_type=submission.activity.starting_rplfile.file_type,
             activity_starting_rplfile_id=submission.activity.starting_rplfile_id,
@@ -56,9 +56,9 @@ class SubmissionsService:
     ) -> SubmissionWithMetadataOnlyResponseDTO:
         return SubmissionWithMetadataOnlyResponseDTO(
             id=submission.id,
-            submission_rplfile_name=submission.response_rplfile.file_name,
-            submission_rplfile_type=submission.response_rplfile.file_type,
-            submission_rplfile_id=submission.response_rplfile_id,
+            submission_rplfile_name=submission.solution_rplfile.file_name,
+            submission_rplfile_type=submission.solution_rplfile.file_type,
+            submission_rplfile_id=submission.solution_rplfile_id,
             activity_starting_rplfile_name=submission.activity.starting_rplfile.file_name,
             activity_starting_rplfile_type=submission.activity.starting_rplfile.file_type,
             activity_starting_rplfile_id=submission.activity.starting_rplfile_id,
@@ -106,7 +106,7 @@ class SubmissionsService:
         new_status_data: UpdateSubmissionStatusRequestDTO
     ) -> SubmissionWithMetadataOnlyResponseDTO:
         submission = self.__verify_and_get_submission(submission_id)
-        updated_submission = self.submissions_repo.update_submission_status(submission, new_status_data)
+        updated_submission = self.submissions_repo.update_submission_status(submission, new_status_data.status)
         return self.__build_submission_with_metadata_only_response(updated_submission)
     
 
@@ -152,20 +152,31 @@ class SubmissionsService:
         final_submissions = self.submissions_repo.get_all_final_submissions_for_activity(activity_id)
         if not final_submissions:
             return AllFinalSubmissionsResponseDTO(submission_rplfile_ids=[])
-        submission_rplfile_ids = [submission.response_rplfile_id for submission in final_submissions]
+        submission_rplfile_ids = [submission.solution_rplfile_id for submission in final_submissions]
         return AllFinalSubmissionsResponseDTO(submission_rplfile_ids=submission_rplfile_ids)
     
 
-    def create_submission_execution_result(
+    def save_tests_execution_log_for_submission(
         self,
         submission_id: int,
-        new_run_result_data: TestRunResultCreationDTO
+        new_execution_result_data: TestsExecutionLogDTO
     ):
         submission = self.__verify_and_get_submission(submission_id)
-        test_run = self.tests_repo.create_test_run_result_for_submission(
-            new_run_result_data,
+        test_execution_log, submission = self.tests_repo.save_tests_execution_log_for_submission(
+            new_execution_result_data,
             submission
         )
+        if new_execution_result_data.tests_execution_result_status == aux_models.TestsExecutionResultStatus.ERROR:
+            submission = self.submissions_repo.update_submission_status(
+                submission,
+                aux_models.SubmissionStatus.from_tests_execution_errored_stage(new_execution_result_data.tests_execution_stage)
+            )
+        
+        passed_all_tests = False
+        if submission.activity.is_io_tested:
+            io_test_runs = self.tests_repo.save_io_test_runs_
+        
+
         
 
         
