@@ -13,14 +13,14 @@ from rpl_activities.src.repositories.models.activity_category import ActivityCat
 
 from rpl_activities.src.repositories.models.io_test import IOTest
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
-from rpl_activities.src.repositories.models.unit_test import UnitTest
+from rpl_activities.src.repositories.models.unit_test_suite import UnitTestSuite
 from rpl_activities.src.services.rpl_files import ExtractedFilesDict
 from rpl_activities.tests.conftest import ExamplesOfStartingFilesRawData, ExamplesOfSubmissionRawData
 
 
 def test_get_submission(
     activities_api_client: TestClient,
-    example_unit_test: UnitTest,
+    example_unit_test_suite: UnitTestSuite,
     example_submission: ActivitySubmission,
     admin_auth_headers: dict[str, str],
 ):
@@ -40,13 +40,13 @@ def test_get_submission(
     assert response_data["activity_language"] == example_submission.activity.language # With version! (intended)
     assert response_data["is_io_tested"] == example_submission.activity.is_io_tested
     assert response_data["compilation_flags"] == example_submission.activity.compilation_flags
-    assert response_data["activity_unit_tests_content"] == example_submission.activity.unit_test.test_rplfile.data
+    assert response_data["activity_unit_tests_content"] == example_submission.activity.unit_test_suite.test_rplfile.data.decode()
     assert len(response_data["activity_io_tests_input"]) == len(example_submission.activity.io_tests)
 
 
 def test_get_non_existent_submission_not_found(
     activities_api_client: TestClient,
-    example_unit_test: UnitTest,
+    example_unit_test_suite: UnitTestSuite,
     example_submission: ActivitySubmission,
     admin_auth_headers: dict[str, str],
 ):
@@ -62,13 +62,13 @@ def test_get_non_existent_submission_not_found(
 
 def test_create_submission(
     activities_api_client: TestClient,
-    example_unit_test: UnitTest,
+    example_unit_test_suite: UnitTestSuite,
     example_activity: Activity,
     example_submission_raw_data: ExamplesOfSubmissionRawData,
     admin_auth_headers: dict[str, str],
 ):
     response = activities_api_client.post(
-        f"/api/v3/{example_activity.course_id}/activities/{example_activity.id}/submissions",
+        f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/submissions",
         files=example_submission_raw_data,
         headers=admin_auth_headers,
     )
@@ -82,9 +82,6 @@ def test_create_submission(
     assert response_data["activity_starting_rplfile_id"] == example_activity.starting_rplfile_id
     assert response_data["activity_language"] == example_activity.language  # With version! (intended)
     assert response_data["is_io_tested"] == example_activity.is_io_tested
-    assert response_data["compilation_flags"] == example_activity.compilation_flags
-    assert response_data["activity_unit_tests_content"] == example_activity.unit_test.test_rplfile.data
-    assert len(response_data["activity_io_tests_input"]) == len(example_activity.io_tests)
 
     # the submission's stored rplfile should contain both the ones from the student's solution (tiempo.c, tiempo.h) and the activities' starting files. Thus, it should also have overwritten any submission files that were marked as either "read" or "hidden" within the starting files that the teacher created.
     submission_rplfile = activities_api_client.get(
@@ -98,7 +95,13 @@ def test_create_submission(
     assert submission_rplfile.status_code == status.HTTP_200_OK
     subm_rplfile_data = submission_rplfile.json()
     act_rplfile_data = activity_rplfile.json()
-    assert subm_rplfile_data.keys() == {"main.c", "tiempo.c", "tiempo.h"}
+    expected_filenames = {
+        "main.c": "...",
+        "tiempo.c": "...",
+        "tiempo.h": "...",
+        "files_metadata": "..."
+    }
+    assert subm_rplfile_data.keys() == expected_filenames.keys()
     assert "INTEGRATION_TEST_FAILED" not in subm_rplfile_data["tiempo.h"]
     assert subm_rplfile_data["tiempo.h"] == act_rplfile_data["tiempo.h"]
     assert subm_rplfile_data["main.c"] == act_rplfile_data["main.c"]

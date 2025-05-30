@@ -17,8 +17,8 @@ class IOTestResponseDTO(BaseModel):
     test_in: str
     test_out: str
 
-class CreateUnitTestRequestDTO(BaseModel):
-    unit_test_code: str
+class CreateUnitTestSuiteRequestDTO(BaseModel):
+    unit_tests_code: str
 
 
 # ==============================================================================
@@ -52,7 +52,7 @@ class ActivityCreationRequestDTO(BaseModel):
     compilation_flags: Optional[str] = None
     active: bool = True
     points: int
-    startingFile: List[UploadFile] = File(...)
+    starting_files: List[UploadFile] = File(...)
     model_config = {"extra": "forbid"}
 
 
@@ -64,7 +64,7 @@ class ActivityUpdateRequestDTO(BaseModel):
     compilation_flags: Optional[str] = None
     active: Optional[bool] = None
     points: Optional[int] = None
-    startingFile: Optional[List[UploadFile]] = File(None)
+    starting_files: Optional[List[UploadFile]] = File(None)
     model_config = {"extra": "forbid"}
 
 

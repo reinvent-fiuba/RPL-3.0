@@ -5,7 +5,7 @@ from rpl_activities.src.deps.auth import CurrentCourseUserDependency
 from rpl_activities.src.deps.database import DBSessionDependency
 from rpl_activities.src.dtos.activity_dtos import (
     IOTestRequestDTO,
-    CreateUnitTestRequestDTO,
+    CreateUnitTestSuiteRequestDTO,
     ActivityResponseDTO,
     IOTestResponseDTO
 )
@@ -70,11 +70,11 @@ def delete_io_test_case(
 def create_unit_tests(
     course_id: int,
     activity_id: int,
-    new_unit_tests_data: CreateUnitTestRequestDTO,
+    new_unit_tests_data: CreateUnitTestSuiteRequestDTO,
     db: DBSessionDependency,
     current_course_user: CurrentCourseUserDependency
 ):
-    return TestsService(db).create_unit_test_for_activity(current_course_user, course_id, activity_id, new_unit_tests_data)
+    return TestsService(db).create_unit_test_suite_for_activity(current_course_user, course_id, activity_id, new_unit_tests_data)
 
 
 @router.put(
@@ -84,8 +84,8 @@ def create_unit_tests(
 def update_unit_tests(
     course_id: int,
     activity_id: int,
-    new_unit_tests_data: CreateUnitTestRequestDTO,
+    new_unit_tests_data: CreateUnitTestSuiteRequestDTO,
     db: DBSessionDependency,
     current_course_user: CurrentCourseUserDependency
 ):
-    return TestsService(db).update_unit_test_for_activity(current_course_user, course_id, activity_id, new_unit_tests_data)
+    return TestsService(db).update_unit_test_suite_for_activity(current_course_user, course_id, activity_id, new_unit_tests_data)

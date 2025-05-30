@@ -12,7 +12,7 @@ from rpl_activities.src.repositories.models.activity_category import ActivityCat
 
 from rpl_activities.src.repositories.models.io_test import IOTest
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
-from rpl_activities.src.repositories.models.unit_test import UnitTest
+from rpl_activities.src.repositories.models.unit_test_suite import UnitTestSuite
 from rpl_activities.src.services.rpl_files import ExtractedFilesDict
 from rpl_activities.tests.conftest import ExamplesOfStartingFilesRawData
 
@@ -610,7 +610,7 @@ def test_create_io_test_for_activity_that_had_iotests_previously(
 def test_create_io_test_for_activity_that_had_unittests_previously(
     activities_api_client: TestClient,
     example_activity: Activity,
-    example_unit_test: UnitTest,
+    example_unit_test_suite: UnitTestSuite,
     admin_auth_headers,
 ):
     data = {
@@ -693,7 +693,7 @@ def test_create_unit_tests_for_activity_as_student_forbidden(
     regular_auth_headers,
 ):
     data = {
-        "unit_test_code": "print('Unit tests nuevos')",
+        "unit_tests_code": "print('Unit tests nuevos')",
     }
     response = activities_api_client.post(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",
@@ -706,11 +706,11 @@ def test_create_unit_tests_for_activity_as_student_forbidden(
 def test_update_unit_tests_for_activity_as_student_forbidden(
     activities_api_client: TestClient,
     example_activity: Activity,
-    example_unit_test: UnitTest,
+    example_unit_test_suite: UnitTestSuite,
     regular_auth_headers,
 ):
     data = {
-        "unit_test_code": "print('Unit tests que reemplazan a los anteriores')",
+        "unit_tests_code": "print('Unit tests que reemplazan a los anteriores')",
     }
     response = activities_api_client.put(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",
@@ -726,7 +726,7 @@ def test_create_unit_tests_for_activity(
     admin_auth_headers,
 ):
     data = {
-        "unit_test_code": "print('Unit tests nuevos')",
+        "unit_tests_code": "print('Unit tests nuevos')",
     }
     response = activities_api_client.post(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",
@@ -735,17 +735,17 @@ def test_create_unit_tests_for_activity(
     )
     assert response.status_code == status.HTTP_201_CREATED
     response_activity = response.json()
-    assert response_activity["activity_unittests"] == data["unit_test_code"]
+    assert response_activity["activity_unittests"] == data["unit_tests_code"]
 
 
 def test_create_unit_tests_for_activity_that_already_had_them_returns_conflict(
     activities_api_client: TestClient,
     example_activity: Activity,
-    example_unit_test: UnitTest,
+    example_unit_test_suite: UnitTestSuite,
     admin_auth_headers,
 ):
     data = {
-        "unit_test_code": "print('Unit tests nuevos')",
+        "unit_tests_code": "print('Unit tests nuevos')",
     }
     response = activities_api_client.post(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",
@@ -762,7 +762,7 @@ def test_create_unit_tests_for_activity_that_had_iotests_previously(
     admin_auth_headers,
 ):
     data = {
-        "unit_test_code": "print('Unit tests nuevos')",
+        "unit_tests_code": "print('Unit tests nuevos')",
     }
     response = activities_api_client.post(
         f"/api/v3/courses/{example_activity_with_io_tests.course_id}/activities/{example_activity_with_io_tests.id}/unittests",
@@ -774,17 +774,17 @@ def test_create_unit_tests_for_activity_that_had_iotests_previously(
     # It's mantained but the activity mode is changed and it has the new unit tests
     assert len(response_activity["activity_iotests"]) == 2
     assert response_activity["is_io_tested"] is False
-    assert response_activity["activity_unittests"] == data["unit_test_code"]
+    assert response_activity["activity_unittests"] == data["unit_tests_code"]
 
 
 def test_update_unit_tests_for_activity(
     activities_api_client: TestClient,
     example_activity: Activity,
-    example_unit_test: UnitTest,
+    example_unit_test_suite: UnitTestSuite,
     admin_auth_headers,
 ):
     data = {
-        "unit_test_code": "print('Unit tests que reemplazan a los anteriores')",
+        "unit_tests_code": "print('Unit tests que reemplazan a los anteriores')",
     }
     response = activities_api_client.put(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",
@@ -793,7 +793,7 @@ def test_update_unit_tests_for_activity(
     )
     assert response.status_code == status.HTTP_200_OK
     response_activity = response.json()
-    assert response_activity["activity_unittests"] == data["unit_test_code"]
+    assert response_activity["activity_unittests"] == data["unit_tests_code"]
 
 
 def test_update_unit_tests_for_activity_that_didnt_have_any_returns_not_found(
@@ -802,7 +802,7 @@ def test_update_unit_tests_for_activity_that_didnt_have_any_returns_not_found(
     admin_auth_headers,
 ):
     data = {
-        "unit_test_code": "print('Unit tests que reemplazan a los anteriores (que no existen)')",
+        "unit_tests_code": "print('Unit tests que reemplazan a los anteriores (que no existen)')",
     }
     response = activities_api_client.put(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",

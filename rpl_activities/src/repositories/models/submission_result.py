@@ -12,8 +12,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base_model import Base, BigInt, IntPK, Str, AutoDateTime
 
 
-class Result(Base):
-    __tablename__ = "results"
+class SubmissionResult(Base):
+    __tablename__ = "submission_results"
 
     id: Mapped[IntPK]
     activity_submission_id: Mapped[BigInt] = mapped_column(

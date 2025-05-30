@@ -7,11 +7,12 @@ from rpl_activities.src.dtos.submission_dtos import (
     SubmissionResultResponseDTO,
     SubmissionResponseDTO,
     UpdateSubmissionStatusRequestDTO,
-    TestSuiteDTO,
-    UnitTestsResultsDTO,
-    SubmissionResultCreationDTO,
+    SingleUnitTestReportDTO,
+    UnitTestSuiteResultSummaryDTO,
+    TestRunResultCreationDTO,
     SubmissionWithMetadataOnlyResponseDTO
 )
+from rpl_activities.src.repositories.activity_tests import TestsRepository
 from rpl_activities.src.repositories.submissions import SubmissionsRepository
 from rpl_activities.src.repositories.activities import ActivitiesRepository
 from rpl_activities.src.repositories.models import aux_models
@@ -23,6 +24,7 @@ from rpl_activities.src.services.activities import ActivitiesService
 class SubmissionsService:
     def __init__(self, db_session):
         self.submissions_repo = SubmissionsRepository(db_session)
+        self.tests_repo = TestsRepository(db_session)
         # self.activities_repo = ActivitiesRepository(db_session)
         self.activities_service = ActivitiesService(db_session)
 
@@ -31,6 +33,8 @@ class SubmissionsService:
         self,
         submission: ActivitySubmission,
     ) -> SubmissionResponseDTO:
+        unit_tests_data = self.submissions_repo.get_unit_tests_data_from_submission(submission)
+        io_tests_input_data = self.submissions_repo.get_io_tests_input_data_from_submission(submission)
         return SubmissionResponseDTO(
             id=submission.id,
             submission_rplfile_name=submission.response_rplfile.file_name,
@@ -42,8 +46,8 @@ class SubmissionsService:
             activity_language=submission.activity.language,
             is_io_tested=submission.activity.is_io_tested,
             compilation_flags=submission.activity.compilation_flags,
-            activity_unit_tests_content=submission.activity.unit_test.test_rplfile.data.decode() if submission.activity.unit_test else "",
-            activity_io_tests_input=[iotest.test_in for iotest in submission.activity.io_tests]
+            activity_unit_tests_content=unit_tests_data,
+            activity_io_tests_input=io_tests_input_data
         )
     
     def __build_submission_with_metadata_only_response(
@@ -55,7 +59,7 @@ class SubmissionsService:
             submission_rplfile_name=submission.response_rplfile.file_name,
             submission_rplfile_type=submission.response_rplfile.file_type,
             submission_rplfile_id=submission.response_rplfile_id,
-            acitivity_starting_rplfile_name=submission.activity.starting_rplfile.file_name,
+            activity_starting_rplfile_name=submission.activity.starting_rplfile.file_name,
             activity_starting_rplfile_type=submission.activity.starting_rplfile.file_type,
             activity_starting_rplfile_id=submission.activity.starting_rplfile_id,
             activity_language=submission.activity.language,
@@ -92,6 +96,7 @@ class SubmissionsService:
         self.activities_service.verify_permission_to_submit(current_course_user)
         activity = self.activities_service.verify_and_get_activity(course_id, activity_id)
         submission = self.submissions_repo.create_submission_for_activity(new_submission_data, activity, current_course_user)
+        # TODO self.post_submission_to_queue
         return self.__build_submission_with_metadata_only_response(submission)
     
     
@@ -137,5 +142,32 @@ class SubmissionsService:
         return self.__build_submission_with_metadata_only_response(final_submission)
 
 
+    def get_all_final_submissions_from_activity(
+        self,
+        course_id: int,
+        activity_id: int,
+        current_course_user: CurrentCourseUser
+    ) -> AllFinalSubmissionsResponseDTO:
+        self.activities_service.verify_permission_to_submit(current_course_user)
+        final_submissions = self.submissions_repo.get_all_final_submissions_for_activity(activity_id)
+        if not final_submissions:
+            return AllFinalSubmissionsResponseDTO(submission_rplfile_ids=[])
+        submission_rplfile_ids = [submission.response_rplfile_id for submission in final_submissions]
+        return AllFinalSubmissionsResponseDTO(submission_rplfile_ids=submission_rplfile_ids)
+    
+
+    def create_submission_execution_result(
+        self,
+        submission_id: int,
+        new_run_result_data: TestRunResultCreationDTO
+    ):
+        submission = self.__verify_and_get_submission(submission_id)
+        test_run = self.tests_repo.create_test_run_result_for_submission(
+            new_run_result_data,
+            submission
+        )
+        
+
+        
 
 

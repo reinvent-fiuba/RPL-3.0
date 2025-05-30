@@ -43,6 +43,11 @@ class SubmissionStatus(str, Enum):
     SUCCESS = "SUCCESS"
     TIME_OUT = "TIME_OUT"
 
+class TestRunResultStatus(str, Enum):
+    ERROR = "ERROR"
+    SUCCESS = "OK"
+    TIME_OUT = "TIME_OUT"
+
 
 class RPLFileType(str, Enum):
     GZIP = "application/gzip"

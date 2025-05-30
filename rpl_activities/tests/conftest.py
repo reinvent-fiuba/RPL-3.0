@@ -32,7 +32,7 @@ from rpl_activities.src.repositories.models.activity_category import ActivityCat
 
 from rpl_activities.src.repositories.models.io_test import IOTest
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
-from rpl_activities.src.repositories.models.unit_test import UnitTest
+from rpl_activities.src.repositories.models.unit_test_suite import UnitTestSuite
 from rpl_users.src.dtos.course_dtos import CourseUserResponseDTO
 from rpl_users.tests.conftest import (
     users_api_dbsession_fixture,
@@ -241,15 +241,15 @@ type ExamplesOfStartingFilesRawData = dict[list[StartingFileRawRequestData]]
 @pytest.fixture(name="examples_of_starting_files_raw_data")
 def examples_of_starting_files_raw_data_fixture():
     py_files = [
-        ("startingFile", ("main.py", b'print("test")', "application/octet-stream")),
-        ("startingFile", ("assignment_main.py", b"# file assignment_main.py\ndef test():\n    pass\n", "application/octet-stream")),
-        ("startingFile", ("files_metadata", b'{"assignment_main.py":{"display":"read_write"}}', "application/octet-stream")),
+        ("starting_files", ("main.py", b'print("test")', "application/octet-stream")),
+        ("starting_files", ("assignment_main.py", b"# file assignment_main.py\ndef test():\n    pass\n", "application/octet-stream")),
+        ("starting_files", ("files_metadata", b'{"assignment_main.py":{"display":"read_write"}}', "application/octet-stream")),
     ]
     c_files = [
-        ("startingFile", ("main.c", open("rpl_activities/tests/resources/activity_1_starting_files/main.c", "rb").read(), "application/octet-stream")),
-        ("startingFile", ("tiempo.c", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.c", "rb").read(), "application/octet-stream")),
-        ("startingFile", ("tiempo.h", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.h", "rb").read(), "application/octet-stream")),
-        ("startingFile", ("files_metadata", open("rpl_activities/tests/resources/activity_1_starting_files/files_metadata", "rb").read(), "application/octet-stream")),
+        ("starting_files", ("main.c", open("rpl_activities/tests/resources/activity_1_starting_files/main.c", "rb").read(), "application/octet-stream")),
+        ("starting_files", ("tiempo.c", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.c", "rb").read(), "application/octet-stream")),
+        ("starting_files", ("tiempo.h", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.h", "rb").read(), "application/octet-stream")),
+        ("starting_files", ("files_metadata", open("rpl_activities/tests/resources/activity_1_starting_files/files_metadata", "rb").read(), "application/octet-stream")),
     ]
     return {
         "python": py_files,
@@ -282,8 +282,8 @@ type ExamplesOfSubmissionRawData = list[SubmissionRawRequestData]
 @pytest.fixture(name="example_submission_raw_data")
 def example_submission_raw_data_fixture() -> ExamplesOfSubmissionRawData:
     return [
-        ("file", ("tiempo.c", open("rpl_activities/tests/resources/activity_1_submission/tiempo.c", "rb").read(), "application/octet-stream")),
-        ("file", ("tiempo.h", open("rpl_activities/tests/resources/activity_1_submission/tiempo.h", "rb").read(), "application/octet-stream"))
+        ("submission_files", ("tiempo.c", open("rpl_activities/tests/resources/activity_1_submission/tiempo.c", "rb").read(), "application/octet-stream")),
+        ("submission_files", ("tiempo.h", open("rpl_activities/tests/resources/activity_1_submission/tiempo.h", "rb").read(), "application/octet-stream"))
     ]
 
 
@@ -351,7 +351,7 @@ def example_submission_fixture(
     activities_api_dbsession: Session,
     example_activity: Activity,
     example_submission_rplfile: RPLFile,
-    example_unit_test: UnitTest,
+    example_unit_test_suite: UnitTestSuite,
 ):
     submission = ActivitySubmission(
         id=1,
@@ -456,23 +456,23 @@ def example_io_tests_fixture(
 # ==============================================================================
 
 
-@pytest.fixture(name="example_unit_test")
-def example_unit_test_fixture(
+@pytest.fixture(name="example_unit_test_suite")
+def example_unit_test_suite_fixture(
     activities_api_dbsession: Session,
     example_activity: Activity,
     example_basic_rplfiles: list[RPLFile],
 ):
-    unit_test = UnitTest(
+    unit_test_suite = UnitTestSuite(
         id=1,
         activity_id=example_activity.id,
         test_rplfile_id=example_basic_rplfiles[2].id,
         date_created=datetime.now(timezone.utc),
         last_updated=datetime.now(timezone.utc),
     )
-    activities_api_dbsession.add(unit_test)
+    activities_api_dbsession.add(unit_test_suite)
     activities_api_dbsession.commit()
-    activities_api_dbsession.refresh(unit_test)
-    yield unit_test
+    activities_api_dbsession.refresh(unit_test_suite)
+    yield unit_test_suite
 
 
 # ==============================================================================

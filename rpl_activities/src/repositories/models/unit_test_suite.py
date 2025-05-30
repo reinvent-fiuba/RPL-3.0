@@ -10,8 +10,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base_model import Base, BigInt, AutoDateTime, IntPK
 
 
-class UnitTest(Base):
-    __tablename__ = "unit_tests"
+class UnitTestSuite(Base):
+    __tablename__ = "unit_test_suites"
 
     id: Mapped[IntPK]
     activity_id: Mapped[BigInt] = mapped_column(ForeignKey("activities.id"))
@@ -19,5 +19,5 @@ class UnitTest(Base):
     date_created: Mapped[AutoDateTime]
     last_updated: Mapped[AutoDateTime]
 
-    activity: Mapped["Activity"] = relationship(back_populates="unit_test")
-    test_rplfile: Mapped["RPLFile"] = relationship(back_populates="unit_test")
+    activity: Mapped["Activity"] = relationship(back_populates="unit_test_suite")
+    test_rplfile: Mapped["RPLFile"] = relationship(back_populates="unit_test_suite")

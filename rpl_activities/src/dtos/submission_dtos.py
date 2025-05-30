@@ -12,7 +12,7 @@ from rpl_activities.src.repositories.models import aux_models
 
 class SubmissionCreationRequestDTO(BaseModel):
     description: Optional[List[str]] = None
-    file: List[UploadFile] = File(...)
+    submission_files: List[UploadFile] = File(...)
     model_config = {"extra": "forbid"}
 
 
@@ -74,24 +74,24 @@ class UpdateSubmissionStatusRequestDTO(BaseModel):
     status: aux_models.SubmissionStatus
 
 
-class TestSuiteDTO(BaseModel):
+class SingleUnitTestReportDTO(BaseModel):
     name: str
     status: str
-    messages: str
+    messages: Optional[str] = None
 
-class UnitTestsResultsDTO(BaseModel):
-    passed: int
-    failed: int
-    errored: int
-    tests: List[TestSuiteDTO]
+class UnitTestSuiteResultSummaryDTO(BaseModel):
+    amount_passed: int
+    amount_failed: int
+    amount_errored: int
+    single_test_reports: List[SingleUnitTestReportDTO]
 
-class SubmissionResultCreationDTO(BaseModel):
-    test_run_result: str
+class TestRunResultCreationDTO(BaseModel):
+    test_run_result_status: aux_models.TestRunResultStatus
     test_run_stage: str
     test_run_exit_message: str
     test_run_stderr: str
     test_run_stdout: str
-    test_run_unit_test_result: UnitTestsResultsDTO
+    unit_test_suite_result_summary: Optional[UnitTestSuiteResultSummaryDTO] = None
 
 
 # ==============================================================================
@@ -103,7 +103,7 @@ class SubmissionWithMetadataOnlyResponseDTO(BaseModel):
     submission_rplfile_name: str
     submission_rplfile_type: aux_models.RPLFileType
     submission_rplfile_id: int
-    acitivity_starting_rplfile_name: str
+    activity_starting_rplfile_name: str
     activity_starting_rplfile_type: aux_models.RPLFileType
     activity_starting_rplfile_id: int
     activity_language: aux_models.LanguageWithVersion

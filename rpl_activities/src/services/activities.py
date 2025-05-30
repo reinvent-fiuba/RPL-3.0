@@ -123,8 +123,8 @@ class ActivitiesService:
 
 
     def build_activity_response_dto(self, activity: Activity) -> ActivityResponseDTO:
-        unit_tests_data = self.activities_repo.get_unit_tests_data(activity)
-        io_tests_data = self.activities_repo.get_io_tests_data(activity)
+        unit_tests_data = self.activities_repo.get_unit_tests_data_from_activity(activity)
+        io_tests_data = self.activities_repo.get_io_tests_data_from_activity(activity)
         return ActivityResponseDTO(
             course_id=activity.course_id,
             category_id=activity.category_id,

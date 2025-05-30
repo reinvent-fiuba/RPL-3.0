@@ -21,4 +21,4 @@ class IOTestRun(Base):
     run_output: Mapped[TextStr]
     date_created: Mapped[AutoDateTime]
 
-    test_run: Mapped["TestRun"] = relationship(back_populates="io_test_run")
+    test_run: Mapped["TestRun"] = relationship(back_populates="io_test_runs")

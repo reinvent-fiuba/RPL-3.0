@@ -10,7 +10,7 @@ if TYPE_CHECKING:
         ActivitySubmission,
     )
     from rpl_activities.src.repositories.models.io_test import IOTest
-    from rpl_activities.src.repositories.models.unit_test import UnitTest
+    from rpl_activities.src.repositories.models.unit_test_suite import UnitTestSuite
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -42,6 +42,6 @@ class Activity(Base):
         back_populates="activity", lazy="raise"
     )
     io_tests: Mapped[List["IOTest"]] = relationship(back_populates="activity")
-    unit_test: Mapped[Optional["UnitTest"]] = relationship(
-        back_populates="activity", uselist=False
+    unit_test_suite: Mapped[Optional["UnitTestSuite"]] = relationship(
+        back_populates="activity"
     )

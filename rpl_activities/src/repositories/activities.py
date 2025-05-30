@@ -54,10 +54,10 @@ class ActivitiesRepository(BaseRepository):
             .one_or_none()
         )
     
-    def get_unit_tests_data(self, activity: Activity) -> str:
-        return activity.unit_test.test_rplfile.data.decode() if activity.unit_test else ""
+    def get_unit_tests_data_from_activity(self, activity: Activity) -> str:
+        return activity.unit_test_suite.test_rplfile.data.decode() if activity.unit_test_suite else ""
     
-    def get_io_tests_data(self, activity: Activity) -> list[IOTestResponseDTO]:
+    def get_io_tests_data_from_activity(self, activity: Activity) -> list[IOTestResponseDTO]:
         io_tests = activity.io_tests
         return [
             IOTestResponseDTO(
@@ -80,7 +80,7 @@ class ActivitiesRepository(BaseRepository):
         new_activity_data: ActivityCreationRequestDTO
     ) -> Activity:
         compressed_rplfile_bytes = tar_utils.compress_uploadfiles_to_tar_gz(
-            new_activity_data.startingFile
+            new_activity_data.starting_files
         )
         truncated_act_name = new_activity_data.name.strip()[:MAX_ACTIVITY_NAME_LEN_FOR_TAR]
         rplfile = self.rplfiles_repo.create_rplfile(
@@ -116,9 +116,9 @@ class ActivitiesRepository(BaseRepository):
         activity: Activity,
         new_activity_data: ActivityUpdateRequestDTO
     ) -> Activity:
-        if new_activity_data.startingFile:
+        if new_activity_data.starting_files:
             compressed_rplfile_bytes = tar_utils.compress_uploadfiles_to_tar_gz(
-                new_activity_data.startingFile
+                new_activity_data.starting_files
             )
             if new_activity_data.name:
                 truncated_act_name = new_activity_data.name.strip()[:MAX_ACTIVITY_NAME_LEN_FOR_TAR]
@@ -135,7 +135,7 @@ class ActivitiesRepository(BaseRepository):
             if new_value is not None:
                 if field == "language":
                     setattr(activity, field, new_activity_data.language.with_version())
-                elif field == "startingFile" or field == "model_config":
+                elif field == "starting_files" or field == "model_config":
                     continue
                 else:
                     setattr(activity, field, new_value)

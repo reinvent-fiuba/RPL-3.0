@@ -10,7 +10,7 @@ from rpl_activities.src.dtos.submission_dtos import (
     SubmissionResultResponseDTO,
     SubmissionResponseDTO,
     UpdateSubmissionStatusRequestDTO,
-    SubmissionResultCreationDTO,
+    TestRunResultCreationDTO,
     SubmissionWithMetadataOnlyResponseDTO
 )
 from rpl_activities.src.services.submissions import SubmissionsService
@@ -87,29 +87,29 @@ def get_final_submission_for_current_student(
     return SubmissionsService(db).get_final_submission_for_current_student(course_id, activity_id, current_course_user)
 
 
-# @router.get(
-#     "/courses/{course_id}/activities/{activity_id}/submissions/allFinalSubmissions",
-#     response_model=AllFinalSubmissionsResponseDTO,
-# )
-# def get_all_final_submissions_from_activity(
-#     course_id: int,
-#     activity_id: int,
-#     current_course_user: CurrentCourseUserDependency,
-#     db: DBSessionDependency
-# ):
-#     return SubmissionsService(db).get_all_final_submissions_from_activity(course_id, activity_id, current_course_user)
+@router.get(
+    "/courses/{course_id}/activities/{activity_id}/submissions/allFinalSubmissions",
+    response_model=AllFinalSubmissionsResponseDTO,
+)
+def get_all_final_submissions_from_activity(
+    course_id: int,
+    activity_id: int,
+    current_course_user: CurrentCourseUserDependency,
+    db: DBSessionDependency
+):
+    return SubmissionsService(db).get_all_final_submissions_from_activity(course_id, activity_id, current_course_user)
 
 
-# @router.post(
-#     "/submissions/{submission_id}/result",
-#     response_model=SubmissionResultCreationDTO,
-# )
-# def create_submission_execution_result(
-#     submission_id: int,
-#     new_submission_result_data: SubmissionResultCreationDTO,
-#     db: DBSessionDependency
-# ):
-#     return SubmissionsService(db).create_submission_execution_result(submission_id, new_submission_result_data)
+@router.post(
+    "/submissions/{submission_id}/result",
+    status_code=status.HTTP_201_CREATED,
+)
+def create_submission_execution_result(
+    submission_id: int,
+    new_run_result_data: TestRunResultCreationDTO,
+    db: DBSessionDependency
+):
+    return SubmissionsService(db).create_submission_execution_result(submission_id, new_run_result_data)
 
 
 # @router.get(

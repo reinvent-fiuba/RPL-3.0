@@ -29,5 +29,5 @@ class TestRun(Base):
     last_updated: Mapped[AutoDateTime]
 
     submission: Mapped["ActivitySubmission"] = relationship(back_populates="test_run")
-    io_test_run: Mapped[List["IOTestRun"]] = relationship(back_populates="test_run")
-    unit_test_run: Mapped[List["UnitTestRun"]] = relationship(back_populates="test_run")
+    io_test_runs: Mapped[List["IOTestRun"]] = relationship(back_populates="test_run")
+    unit_test_runs: Mapped[List["UnitTestRun"]] = relationship(back_populates="test_run")

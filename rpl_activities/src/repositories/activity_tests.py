@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
-from rpl_activities.src.dtos.activity_dtos import CreateUnitTestRequestDTO, IOTestRequestDTO
+from rpl_activities.src.dtos.activity_dtos import CreateUnitTestSuiteRequestDTO, IOTestRequestDTO
+from rpl_activities.src.dtos.submission_dtos import TestRunResultCreationDTO
 from rpl_activities.src.repositories.base import BaseRepository
 import sqlalchemy as sa
 
@@ -9,8 +10,12 @@ from rpl_activities.src.repositories.rpl_files import RPLFilesRepository
 
 from .models.activity import Activity
 from .models.rpl_file import RPLFile
-from .models.unit_test import UnitTest
+from .models.unit_test_suite import UnitTestSuite
 from .models.io_test import IOTest
+from .models.unit_test_run import UnitTestRun
+from .models.io_test_run import IOTestRun
+from .models.test_run import TestRun
+from .models.activity_submission import ActivitySubmission
 
 class TestsRepository(BaseRepository):
     def __init__(self, db):
@@ -33,14 +38,14 @@ class TestsRepository(BaseRepository):
             .one_or_none()
         )
     
-    def get_unit_test_by_activity_id(
+    def get_unit_test_suite_by_activity_id(
         self,
         activity_id: int
-    ) -> UnitTest:
+    ) -> UnitTestSuite:
         return (
             self.db_session.execute(
-                sa.select(UnitTest).where(
-                    UnitTest.activity_id == activity_id
+                sa.select(UnitTestSuite).where(
+                    UnitTestSuite.activity_id == activity_id
                 )
             )
             .scalars()
@@ -88,47 +93,68 @@ class TestsRepository(BaseRepository):
         self.db_session.refresh(activity)
         return activity
 
-    def create_unit_test_for_activity(
+    def create_unit_test_suite_for_activity(
         self,
-        new_unit_test_data: CreateUnitTestRequestDTO,
+        new_unit_test_suite_data: CreateUnitTestSuiteRequestDTO,
         activity: Activity,
         course_id: int
-    ) -> UnitTest:
+    ) -> UnitTestSuite:
         rplfile = self.rplfiles_repo.create_rplfile(
             file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{course_id}__{activity.id}__unittests",
             file_type=aux_models.RPLFileType.TEXT,
-            data=new_unit_test_data.unit_test_code.encode()
+            data=new_unit_test_suite_data.unit_tests_code.encode()
         )
-        unit_test = UnitTest(
+        unit_test_suite = UnitTestSuite(
             activity_id=activity.id,
             test_rplfile_id=rplfile.id,
             date_created=datetime.now(timezone.utc),
             last_updated=datetime.now(timezone.utc)
         )
-        self.db_session.add(unit_test)
+        self.db_session.add(unit_test_suite)
         self.db_session.commit()
-        self.db_session.refresh(unit_test)
-        return unit_test
+        self.db_session.refresh(unit_test_suite)
+        return unit_test_suite
     
-    def update_unit_test_for_activity(
+    def update_unit_test_suite_for_activity(
         self,
-        new_unit_test_data: CreateUnitTestRequestDTO,
+        new_unit_test_suite_data: CreateUnitTestSuiteRequestDTO,
         activity: Activity,
         course_id: int,
-        unit_test: UnitTest
-    ) -> UnitTest:
+        unit_test_suite: UnitTestSuite
+    ) -> UnitTestSuite:
         rplfile = self.rplfiles_repo.update_rplfile(
-            rplfile_id=unit_test.test_rplfile_id,
+            rplfile_id=unit_test_suite.test_rplfile_id,
             file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{course_id}__{activity.id}__unittests",
             file_type=aux_models.RPLFileType.TEXT,
-            data=new_unit_test_data.unit_test_code.encode()
+            data=new_unit_test_suite_data.unit_tests_code.encode()
         )
-        unit_test.test_rplfile_id = rplfile.id
-        unit_test.last_updated = datetime.now(timezone.utc)
+        unit_test_suite.test_rplfile_id = rplfile.id
+        unit_test_suite.last_updated = datetime.now(timezone.utc)
         self.db_session.commit()
-        self.db_session.refresh(unit_test)
-        return unit_test
+        self.db_session.refresh(unit_test_suite)
+        return unit_test_suite
 
-        
+    # ==============================================================================
+
+    def create_test_run_result_for_submission(
+        self,
+        new_run_result_data: TestRunResultCreationDTO,
+        submission: ActivitySubmission
+    ) -> TestRun:
+        test_run = TestRun(
+            activity_submission_id=submission.id,
+            success=(new_run_result_data.test_run_result_status == aux_models.TestRunResultStatus.SUCCESS),
+            exit_message=new_run_result_data.test_run_exit_message,
+            stderr=new_run_result_data.test_run_stderr,
+            stdout=new_run_result_data.test_run_stdout,
+            date_created=datetime.now(timezone.utc),
+            last_updated=datetime.now(timezone.utc)
+        )
+        self.db_session.add(test_run)
+        self.db_session.commit()
+        self.db_session.refresh(test_run)
+        submission.test_run = test_run
+            
+                
     
 

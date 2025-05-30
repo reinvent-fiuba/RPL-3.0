@@ -20,4 +20,4 @@ class UnitTestRun(Base):
     error_messages: Mapped[Optional[TextStr]]
     date_created: Mapped[AutoDateTime]
 
-    test_run: Mapped["TestRun"] = relationship(back_populates="unit_test_run")
+    test_run: Mapped["TestRun"] = relationship(back_populates="unit_test_runs")

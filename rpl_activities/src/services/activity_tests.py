@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from rpl_activities.src.deps.auth import CurrentCourseUser
 from rpl_activities.src.dtos.activity_dtos import (
     IOTestRequestDTO,
-    CreateUnitTestRequestDTO,
+    CreateUnitTestSuiteRequestDTO,
     ActivityResponseDTO,
     IOTestResponseDTO
 )
@@ -81,40 +81,40 @@ class TestsService:
         return self.activities_service.build_activity_response_dto(activity)
 
 
-    def create_unit_test_for_activity(
+    def create_unit_test_suite_for_activity(
         self,
         current_course_user: CurrentCourseUser,
         course_id: int,
         activity_id: int,
-        new_unit_test_data: CreateUnitTestRequestDTO
+        new_unit_test_data: CreateUnitTestSuiteRequestDTO
     ) -> ActivityResponseDTO:
         self.activities_service.verify_permission_to_manage(current_course_user)
         activity = self.activities_service.verify_and_get_activity(course_id, activity_id)
-        unit_test = self.tests_repo.get_unit_test_by_activity_id(activity.id)
-        if unit_test:
+        unit_test_suite = self.tests_repo.get_unit_test_suite_by_activity_id(activity.id)
+        if unit_test_suite:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Unit test already exists for this activity"
+                detail="Unit tests already exists for this activity"
             )
-        self.tests_repo.create_unit_test_for_activity(new_unit_test_data, activity, course_id)
+        self.tests_repo.create_unit_test_suite_for_activity(new_unit_test_data, activity, course_id)
         activity = self.activities_repo.disable_iotest_mode_for_activity(activity)
         return self.activities_service.build_activity_response_dto(activity)
         
     
-    def update_unit_test_for_activity(
+    def update_unit_test_suite_for_activity(
         self,
         current_course_user: CurrentCourseUser,
         course_id: int,
         activity_id: int,
-        new_unit_test_data: CreateUnitTestRequestDTO
+        new_unit_test_data: CreateUnitTestSuiteRequestDTO
     ) -> ActivityResponseDTO:
         self.activities_service.verify_permission_to_manage(current_course_user)
         activity = self.activities_service.verify_and_get_activity(course_id, activity_id)
-        unit_test = self.tests_repo.get_unit_test_by_activity_id(activity.id)
-        if not unit_test:
+        unit_test_suite = self.tests_repo.get_unit_test_suite_by_activity_id(activity.id)
+        if not unit_test_suite:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Unit test not found"
+                detail="Unit tests not found"
             )
-        self.tests_repo.update_unit_test_for_activity(new_unit_test_data, activity, course_id, unit_test)
+        self.tests_repo.update_unit_test_suite_for_activity(new_unit_test_data, activity, course_id, unit_test_suite)
         return self.activities_service.build_activity_response_dto(activity)

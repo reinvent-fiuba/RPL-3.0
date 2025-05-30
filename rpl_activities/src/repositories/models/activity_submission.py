@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from rpl_activities.src.repositories.models.activity import Activity
     from rpl_activities.src.repositories.models.rpl_file import RPLFile
-    from rpl_activities.src.repositories.models.result import Result
+    from rpl_activities.src.repositories.models.submission_result import SubmissionResult
     from rpl_activities.src.repositories.models.test_run import TestRun
 
 from sqlalchemy import ForeignKey
@@ -28,9 +28,9 @@ class ActivitySubmission(Base):
 
     activity: Mapped["Activity"] = relationship(back_populates="submissions")
     response_rplfile: Mapped["RPLFile"] = relationship(back_populates="submission")
-    result: Mapped[Optional["Result"]] = relationship(
-        back_populates="submission", uselist=False
+    result: Mapped[Optional["SubmissionResult"]] = relationship(
+        back_populates="submission"
     )
     test_run: Mapped[Optional["TestRun"]] = relationship(
-        back_populates="submission", uselist=False
+        back_populates="submission"
     )
