@@ -11,11 +11,13 @@ class IOTestRequestDTO(BaseModel):
     test_in: str
     test_out: str
 
+
 class IOTestResponseDTO(BaseModel):
     id: int
     name: str
     test_in: str
     test_out: str
+
 
 class CreateUnitTestRequestDTO(BaseModel):
     unit_test_code: str
@@ -25,6 +27,7 @@ class CreateUnitTestRequestDTO(BaseModel):
 
 
 class ActivityWithMetadataOnlyResponseDTO(BaseModel):
+    id: int
     course_id: int
     category_id: int
     category_name: str
@@ -41,7 +44,6 @@ class ActivityWithMetadataOnlyResponseDTO(BaseModel):
     last_submission_date: Optional[datetime] = None
     date_created: datetime
     last_updated: datetime
-
 
 
 class ActivityCreationRequestDTO(BaseModel):
@@ -69,6 +71,7 @@ class ActivityUpdateRequestDTO(BaseModel):
 
 
 class ActivityResponseDTO(BaseModel):
+    id: int
     course_id: int
     category_id: int
     category_name: str
@@ -89,4 +92,3 @@ class ActivityResponseDTO(BaseModel):
 
 
 # ==============================================================================
-
