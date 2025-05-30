@@ -16,4 +16,10 @@ Ver:
 - [SQLAlchemy Type Hierarchy](https://docs.sqlalchemy.org/en/20/core/type_basics.html).
 - [sqlacodegen repository](https://github.com/agronholm/sqlacodegen).
 
-Se cambió el nombre de algunas tablas para mantener consistencia de nombres en plural: `unit_test_run` -> `unit_test_runs`; `io_test_run` -> `io_test_runs`; `test_run` -> `test_runs`; `validation_token` -> `validation_tokens`
+Se cambió el nombre de algunas tablas para mantener consistencia de nombres en plural y evitar confusiones: 
+`unit_test_run` -> `unit_test_runs`; 
+`io_test_run` -> `io_test_runs`; 
+`test_run` -> `test_runs`; 
+`validation_token` -> `validation_tokens`
+`unit_tests` -> `unit_test_suites`;
+`results` -> `submission_results`
