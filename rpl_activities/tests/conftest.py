@@ -13,12 +13,8 @@ from rpl_activities.src.deps.auth import (
     CurrentCourseUser,
     __basic_path_param_checks,
     get_current_course_user,
-    get_current_main_user,
 )
 from rpl_activities.src.deps.database import get_db_session
-from rpl_activities.src.dtos.auth_dtos import (
-    ExternalCurrentMainUserDTO,
-)
 from rpl_activities.src.main import app
 from rpl_activities.src.repositories.models.activity import Activity
 from rpl_activities.src.repositories.models.activity_submission import (
@@ -88,7 +84,6 @@ def activities_api_http_client_fixture(
         user_data = CourseUserResponseDTO(**res.json())
         return CurrentCourseUser(user_data)
 
-    app.dependency_overrides[get_current_main_user] = override_get_current_main_user
     app.dependency_overrides[get_current_course_user] = override_get_current_course_user
 
     client = TestClient(app)

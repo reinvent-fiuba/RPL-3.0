@@ -5,7 +5,6 @@ import httpx
 
 from rpl_activities.src.dtos.auth_dtos import (
     CourseUserResponseDTO,
-    ExternalCurrentMainUserDTO,
 )
 
 
