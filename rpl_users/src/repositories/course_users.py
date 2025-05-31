@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from .base import BaseRepository
 
 from .models.course_user import CourseUser
@@ -44,6 +45,7 @@ class CourseUsersRepository(BaseRepository):
         course_user = self.get_course_user(course_id=course_id, user_id=user_id)
         course_user.role_id = role_id
         course_user.accepted = accepted
+        course_user.last_updated = datetime.now(timezone.utc)
         self.db_session.commit()
         self.db_session.refresh(course_user)
         return course_user

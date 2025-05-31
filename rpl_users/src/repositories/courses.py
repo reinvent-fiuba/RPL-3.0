@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from .base import BaseRepository
 
 from rpl_users.src.repositories.models.course import Course
@@ -72,6 +73,7 @@ class CoursesRepository(BaseRepository):
             updated_course.semester_start_date = course_data.semester_start_date
             updated_course.semester_end_date = course_data.semester_end_date
             updated_course.img_uri = course_data.img_uri
+            updated_course.last_updated = datetime.now(timezone.utc)
             self.db_session.commit()
             self.db_session.refresh(updated_course)
             return updated_course
@@ -90,7 +92,7 @@ class CoursesRepository(BaseRepository):
             .scalars()
             .one_or_none()
         )
-    
+
     def get_course_with_name_university_semester_and_subject_id(
         self,
         name: str,
@@ -100,8 +102,7 @@ class CoursesRepository(BaseRepository):
     ) -> Course:
         return (
             self.db_session.execute(
-                sa.select(Course)
-                .where(
+                sa.select(Course).where(
                     Course.name == name,
                     Course.university == university,
                     Course.semester == semester,
