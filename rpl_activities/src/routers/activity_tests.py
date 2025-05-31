@@ -5,7 +5,7 @@ from rpl_activities.src.deps.auth import CurrentCourseUserDependency
 from rpl_activities.src.deps.database import DBSessionDependency
 from rpl_activities.src.dtos.activity_dtos import (
     IOTestRequestDTO,
-    CreateUnitTestSuiteRequestDTO,
+    UnitTestSuiteCreationRequestDTO,
     ActivityResponseDTO,
     IOTestResponseDTO
 )
@@ -70,7 +70,7 @@ def delete_io_test_case(
 def create_unit_tests(
     course_id: int,
     activity_id: int,
-    new_unit_tests_data: CreateUnitTestSuiteRequestDTO,
+    new_unit_tests_data: UnitTestSuiteCreationRequestDTO,
     db: DBSessionDependency,
     current_course_user: CurrentCourseUserDependency
 ):
@@ -84,7 +84,7 @@ def create_unit_tests(
 def update_unit_tests(
     course_id: int,
     activity_id: int,
-    new_unit_tests_data: CreateUnitTestSuiteRequestDTO,
+    new_unit_tests_data: UnitTestSuiteCreationRequestDTO,
     db: DBSessionDependency,
     current_course_user: CurrentCourseUserDependency
 ):

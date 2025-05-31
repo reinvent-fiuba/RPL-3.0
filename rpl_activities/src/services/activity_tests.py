@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from rpl_activities.src.deps.auth import CurrentCourseUser
 from rpl_activities.src.dtos.activity_dtos import (
     IOTestRequestDTO,
-    CreateUnitTestSuiteRequestDTO,
+    UnitTestSuiteCreationRequestDTO,
     ActivityResponseDTO,
     IOTestResponseDTO
 )
@@ -86,7 +86,7 @@ class TestsService:
         current_course_user: CurrentCourseUser,
         course_id: int,
         activity_id: int,
-        new_unit_test_data: CreateUnitTestSuiteRequestDTO
+        new_unit_test_data: UnitTestSuiteCreationRequestDTO
     ) -> ActivityResponseDTO:
         self.activities_service.verify_permission_to_manage(current_course_user)
         activity = self.activities_service.verify_and_get_activity(course_id, activity_id)
@@ -106,7 +106,7 @@ class TestsService:
         current_course_user: CurrentCourseUser,
         course_id: int,
         activity_id: int,
-        new_unit_test_data: CreateUnitTestSuiteRequestDTO
+        new_unit_test_data: UnitTestSuiteCreationRequestDTO
     ) -> ActivityResponseDTO:
         self.activities_service.verify_permission_to_manage(current_course_user)
         activity = self.activities_service.verify_and_get_activity(course_id, activity_id)

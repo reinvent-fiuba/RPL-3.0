@@ -17,7 +17,7 @@ class IOTestResponseDTO(BaseModel):
     test_in: str
     test_out: str
 
-class CreateUnitTestSuiteRequestDTO(BaseModel):
+class UnitTestSuiteCreationRequestDTO(BaseModel):
     unit_tests_code: str
 
 

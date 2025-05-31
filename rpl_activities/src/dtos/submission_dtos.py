@@ -20,13 +20,13 @@ class AllFinalSubmissionsResponseDTO(BaseModel):
     submission_rplfile_ids: List[int]
 
 
-class IOTestRunResult(BaseModel):
+class IOTestRunResultDTO(BaseModel):
     name: str
     test_in: str
     expected_output: str
     run_output: str
 
-class UnitTestRunResult(BaseModel):
+class UnitTestRunResultDTO(BaseModel):
     name: str
     passed: bool
     error_messages: Optional[str] = None
@@ -47,10 +47,9 @@ class SubmissionResultResponseDTO(BaseModel):
     submission_status: aux_models.SubmissionStatus
     is_final_solution: bool
     submission_date: datetime
-    exit_message: str
-    iotests_run_results: Optional[List[IOTestRunResult]] = None
-    unittests_run_results: Optional[List[UnitTestRunResult]] = None
-
+    exit_message: Optional[str] = None
+    iotests_run_results: Optional[List[IOTestRunResultDTO]] = None
+    unittests_run_results: Optional[List[UnitTestRunResultDTO]] = None
 
 # ==============================================================================
 # Runner-facing DTOs

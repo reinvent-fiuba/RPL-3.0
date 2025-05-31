@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from rpl_activities.src.dtos.activity_dtos import CreateUnitTestSuiteRequestDTO, IOTestRequestDTO
+from rpl_activities.src.dtos.activity_dtos import UnitTestSuiteCreationRequestDTO, IOTestRequestDTO
 from rpl_activities.src.dtos.submission_dtos import TestsExecutionLogDTO
 from rpl_activities.src.repositories.base import BaseRepository
 import sqlalchemy as sa
@@ -16,6 +16,11 @@ from .models.unit_test_run import UnitTestRun
 from .models.io_test_run import IOTestRun
 from .models.test_execution_log import TestsExecutionLog
 from .models.activity_submission import ActivitySubmission
+
+STUDENT_OUTPUT_START_DELIMITER = "start_RUN"
+STUDENT_OUTPUT_END_DELIMITER = "end_RUN"
+IO_TEST_OUTPUT_DELIMITERS_TO_SKIP = ["assignment_main.py", "./main", "custom_IO_main.pyc"]
+UNIT_TEST_RUN_PASS = "PASSED"
 
 class TestsRepository(BaseRepository):
     def __init__(self, db):
@@ -95,7 +100,7 @@ class TestsRepository(BaseRepository):
 
     def create_unit_test_suite_for_activity(
         self,
-        new_unit_test_suite_data: CreateUnitTestSuiteRequestDTO,
+        new_unit_test_suite_data: UnitTestSuiteCreationRequestDTO,
         activity: Activity,
         course_id: int
     ) -> UnitTestSuite:
@@ -117,7 +122,7 @@ class TestsRepository(BaseRepository):
     
     def update_unit_test_suite_for_activity(
         self,
-        new_unit_test_suite_data: CreateUnitTestSuiteRequestDTO,
+        new_unit_test_suite_data: UnitTestSuiteCreationRequestDTO,
         activity: Activity,
         course_id: int,
         unit_test_suite: UnitTestSuite
@@ -156,7 +161,89 @@ class TestsRepository(BaseRepository):
         self.db_session.refresh(submission)
         return test_execution_log, submission
 
-            
-                
-    
 
+    def __parse_student_outputs_per_io_test_run(stdout: str) -> list[str]:
+        student_outputs_per_run = []
+        current_output_lines = []
+        for line in stdout.splitlines():
+            if STUDENT_OUTPUT_END_DELIMITER in line and current_output_lines:
+                # we reconstruct output and remove trailing newline if present (since it's EOF)
+                final_output = "\n".join(current_output_lines)
+                if final_output.endswith("\n"):
+                    final_output = final_output[:-1]
+                student_outputs_per_run.append(final_output)
+                current_output_lines = []
+            elif STUDENT_OUTPUT_START_DELIMITER in line:
+                current_output_lines = []
+            elif any(delimiter in line for delimiter in IO_TEST_OUTPUT_DELIMITERS_TO_SKIP):
+                continue
+            else:
+                current_output_lines.append(line)
+        return student_outputs_per_run
+
+    def __check_if_all_io_tests_passed(
+        self,
+        io_tests: list[IOTest],
+        io_test_runs: list[IOTestRun]
+    ) -> bool:
+        if len(io_tests) != len(io_test_runs):
+            # Not all IO tests were run
+            return False
+        
+        for io_test_run in io_test_runs:
+            if io_test_run.run_output != io_test_run.expected_output:
+                return False
+        return True
+
+    def save_io_test_runs_from_exec_log_and_check_if_all_passed(
+        self,
+        io_tests: list[IOTest],
+        test_execution_log_id: int,
+        new_execution_log_data: TestsExecutionLogDTO
+    ) -> bool:
+        student_outputs_per_run = self.__parse_student_outputs_per_io_test_run(new_execution_log_data.tests_execution_stdout)
+
+        io_test_runs = []
+        for io_test, student_output in zip(io_tests, student_outputs_per_run):
+            io_test_run = IOTestRun(
+                tests_execution_log_id=test_execution_log_id,
+                test_name=io_test.name,
+                test_in=io_test.test_in,
+                expected_output=io_test.test_out,
+                run_output=student_output,
+                date_created=datetime.now(timezone.utc),
+            )
+            io_test_runs.append(io_test_run)
+
+        self.db_session.add_all(io_test_runs)
+        self.db_session.commit()
+        return self.__check_if_all_io_tests_passed(io_tests, io_test_runs)
+    
+    
+    def save_unit_test_runs_from_exec_log_and_check_if_all_passed(
+        self,
+        test_execution_log_id: int,
+        new_execution_log_data: TestsExecutionLogDTO
+    ) -> bool:
+        suite_summary = new_execution_log_data.unit_test_suite_result_summary
+        if not suite_summary:
+            return [], False
+        
+        unit_test_runs = []
+        for single_test_report in suite_summary.single_test_reports:
+            unit_test_run = UnitTestRun(
+                tests_execution_log_id=test_execution_log_id,
+                name=single_test_report.name,
+                passed=(single_test_report.status == UNIT_TEST_RUN_PASS),
+                error_messages=single_test_report.messages or "",
+                date_created=datetime.now(timezone.utc)
+            )
+            unit_test_runs.append(unit_test_run)
+        self.db_session.add_all(unit_test_runs)
+        self.db_session.commit()
+
+        passed_all_tests = (
+            suite_summary.amount_failed == 0 and
+            suite_summary.amount_errored == 0
+        )
+        return passed_all_tests

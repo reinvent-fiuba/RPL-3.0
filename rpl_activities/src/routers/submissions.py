@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from fastapi import APIRouter, Form, status
 from rpl_activities.src.deps.auth import CurrentMainUserDependency
 from rpl_activities.src.deps.auth import CurrentCourseUserDependency
@@ -106,21 +106,21 @@ def get_all_final_submissions_from_activity(
 )
 def save_tests_execution_log_for_submission(
     submission_id: int,
-    new_run_result_data: TestsExecutionLogDTO,
+    new_execution_log_data: TestsExecutionLogDTO,
     db: DBSessionDependency
 ):
-    return SubmissionsService(db).save_tests_execution_log_for_submission(submission_id, new_run_result_data)
+    return SubmissionsService(db).save_tests_execution_log_for_submission(submission_id, new_execution_log_data)
 
 
-# @router.get(
-#     "/submissions/{submission_id}/execLog",
-#     response_model=SubmissionResultResponseDTO
-# )
-# def get_submission_execution_result(
-#     submission_id: int,
-#     db: DBSessionDependency
-# ):
-#     return SubmissionsService(db).get_submission_execution_result(submission_id)
+@router.get(
+    "/submissions/{submission_id}/result",
+    response_model=SubmissionResultResponseDTO
+)
+def get_submission_execution_result(
+    submission_id: int,
+    db: DBSessionDependency
+):
+    return SubmissionsService(db).get_submission_execution_result(submission_id)
 
 
 # @router.get(

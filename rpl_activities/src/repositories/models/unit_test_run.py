@@ -15,7 +15,7 @@ class UnitTestRun(Base):
 
     id: Mapped[IntPK]
     tests_execution_log_id: Mapped[BigInt] = mapped_column(ForeignKey("tests_execution_logs.id"))
-    name: Mapped[Str]
+    test_name: Mapped[Str]
     passed: Mapped[bool]
     error_messages: Mapped[Optional[TextStr]]
     date_created: Mapped[AutoDateTime]

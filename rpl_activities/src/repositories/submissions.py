@@ -3,7 +3,7 @@ import json
 from fastapi import UploadFile
 
 from rpl_activities.src.deps.auth import CurrentCourseUser
-from rpl_activities.src.dtos.submission_dtos import SubmissionCreationRequestDTO
+from rpl_activities.src.dtos.submission_dtos import IOTestRunResultDTO, SubmissionCreationRequestDTO, UnitTestRunResultDTO
 from rpl_activities.src.repositories.base import BaseRepository
 import sqlalchemy as sa
 
@@ -73,6 +73,43 @@ class SubmissionsRepository(BaseRepository):
     def get_io_tests_input_data_from_submission(self, submission: ActivitySubmission) -> list[str]:
         io_tests = submission.activity.io_tests
         return [iotest.test_in for iotest in io_tests] if io_tests else []
+    
+    def get_tests_exit_msg_from_submission(self, submission: ActivitySubmission) -> str:
+        return submission.tests_execution_log.exit_message if submission.tests_execution_log else ""
+
+    def get_io_tests_run_results_from_submission(self, submission: ActivitySubmission) -> list[IOTestRunResultDTO]:
+        if (
+            not submission.activity.is_io_tested or 
+            not submission.tests_execution_log or 
+            not submission.tests_execution_log.io_test_runs
+        ):
+            return []
+        return [
+            IOTestRunResultDTO(
+                name=run.test_name,
+                test_in=run.test_in,
+                expected_output=run.expected_output,
+                run_output=run.run_output
+            ) for run in submission.tests_execution_log.io_test_runs
+        ]
+
+
+    def get_unit_tests_run_results_from_submission(self, submission: ActivitySubmission) -> list[UnitTestRunResultDTO]:
+        if (
+            submission.activity.is_io_tested or
+            not submission.activity.unit_test_suite or 
+            not submission.tests_execution_log or 
+            not submission.tests_execution_log.unit_test_runs
+        ):
+            return []
+        return [
+            UnitTestRunResultDTO(
+                name=run.test_name,
+                passed=run.passed,
+                error_messages=run.error_messages
+            ) for run in submission.tests_execution_log.unit_test_runs
+        ]
+
 
 
     def get_by_id(
