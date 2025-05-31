@@ -334,6 +334,51 @@ def test_get_all_course_users_from_course_when_multiple_users(
     assert student_user["last_updated"] is not None
 
 
+def test_get_all_student_course_users_from_course_when_multiple_users(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+    regular_auth_headers,
+    base_roles,
+    course_with_superadmin_as_admin_user,
+):
+    course_id = course_with_superadmin_as_admin_user["course"].id
+
+    users_api_client.post(
+        f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers
+    )
+
+    response = users_api_client.get(
+        f"/api/v3/courses/{course_id}/users",
+        headers=admin_auth_headers,
+        params={"role_name": base_roles["student"].name},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    result = response.json()
+    assert len(result) == 1
+
+    student_user = next(
+        (r for r in result if r["user_id"] == example_users["regular"].id)
+    )
+    assert student_user["user_id"] == example_users["regular"].id
+    assert student_user["course_id"] == course_id
+    assert student_user["course_user_id"] is not None
+    assert student_user["name"] == example_users["regular"].name
+    assert student_user["surname"] == example_users["regular"].surname
+    assert student_user["student_id"] == example_users["regular"].student_id
+    assert student_user["username"] == example_users["regular"].username
+    assert student_user["email"] == example_users["regular"].email
+    assert student_user["email_validated"] == example_users["regular"].email_validated
+    assert student_user["university"] == example_users["regular"].university
+    assert student_user["degree"] == example_users["regular"].degree
+    assert student_user["role"] == base_roles["student"].name
+    assert student_user["accepted"] is False
+    assert student_user["date_created"] is not None
+    assert student_user["last_updated"] is not None
+
+
 def test_cannot_get_all_course_users_from_non_existing_course(
     users_api_client: TestClient,
     admin_auth_headers,
