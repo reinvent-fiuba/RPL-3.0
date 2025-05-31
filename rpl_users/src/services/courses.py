@@ -252,17 +252,35 @@ class CoursesService:
         return course_user.get_permissions()
 
     def get_all_course_users_from_course(
-        self, course_id: str, current_user: User, role_name: Optional[str]
+        self,
+        course_id: str,
+        current_user: User,
+        role_name: Optional[str],
+        student_id: Optional[str],
     ) -> List[CourseUserResponseDTO]:
         self._assert_course_exists(course_id)
         self._assert_course_user_exists_and_has_permissions(
             course_id, current_user.id, ["user_view"]
         )
 
+        course_users = self.course_users_repo.get_course_users(course_id)
+
+        if role_name is not None:
+            course_users = [
+                course_user
+                for course_user in course_users
+                if course_user.role.name == role_name
+            ]
+        if student_id is not None:
+            course_users = [
+                course_user
+                for course_user in course_users
+                if course_user.user.student_id == student_id
+            ]
+
         return [
             CourseUserResponseDTO.from_course_user(course_user)
-            for course_user in self.course_users_repo.get_course_users(course_id)
-            if role_name is None or course_user.role.name == role_name
+            for course_user in course_users
         ]
 
     def get_all_courses_from_user(
