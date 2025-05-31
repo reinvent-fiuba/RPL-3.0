@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from rpl_users.src.dtos.user_dtos import UserCreationDTO
 from .base import BaseRepository
 
@@ -28,6 +29,7 @@ class UsersRepository(BaseRepository):
         return new_user
 
     def update_user(self, user: User) -> User:
+        user.last_updated = datetime.now(timezone.utc)
         self.db_session.commit()
         self.db_session.refresh(user)
         return user
