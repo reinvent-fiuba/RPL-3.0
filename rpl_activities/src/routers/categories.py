@@ -1,6 +1,5 @@
 from typing import List, Optional
 from fastapi import APIRouter, status
-from rpl_activities.src.deps.auth import CurrentMainUserDependency
 from rpl_activities.src.deps.auth import CurrentCourseUserDependency
 
 from rpl_activities.src.deps.database import DBSessionDependency

@@ -265,7 +265,25 @@ class SubmissionsService:
                 detail=f"submission_status: {submission.status}"
             )
         return self.__build_submission_result_response(submission)
+    
+
+    def get_all_current_user_submissions_results_from_activity(
+        self,
+        course_id: int,
+        activity_id: int,
+        current_course_user: CurrentCourseUser
+    ) -> list[SubmissionResultResponseDTO]:
+        self.activities_service.verify_permission_to_submit(current_course_user)
+        submissions = self.submissions_repo.get_all_submissions_from_activity_id_and_user_id(
+            activity_id,
+            current_course_user.user_id
+        )
+        return [
+            self.__build_submission_result_response(submission)
+            for submission in submissions
+        ]
         
+    
         
         
 

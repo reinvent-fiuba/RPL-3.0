@@ -17,46 +17,6 @@ AuthDependency = Annotated[HTTPAuthorizationCredentials, Depends(auth_handler)]
 # ==========================================
 
 
-class CurrentMainUser:
-    def __init__(self, user_data: ExternalCurrentMainUserDTO):
-        self.id = user_data.id
-        self.username = user_data.username
-        self.email = user_data.email
-        self.name = user_data.name
-        self.surname = user_data.surname
-        self.student_id = user_data.student_id
-        self.degree = user_data.degree
-        self.university = user_data.university
-        self.is_admin = user_data.is_admin
-        self.img_uri = user_data.img_uri
-
-
-async def get_current_main_user(
-    auth_header: AuthDependency, request: Request
-) -> CurrentMainUser:
-    users_api_client: httpx.AsyncClient = request.state.users_api_client
-    res = await users_api_client.get(
-        "/api/v3/auth/externalUserMainAuth",
-        headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
-    )
-    if res.status_code != status.HTTP_200_OK:
-        raise HTTPException(
-            status_code=res.status_code,
-            detail=f"Failed to authenticate current user: {res.text}",
-        )
-    user_data = ExternalCurrentMainUserDTO(**res.json())
-    return CurrentMainUser(user_data)
-
-
-CurrentMainUserDependency = Annotated[
-    CurrentMainUser,
-    Depends(get_current_main_user),
-]
-
-
-# ==========================================
-
-
 class CurrentCourseUser:
     def __init__(self, user_data: CourseUserResponseDTO):
         self.id = user_data.course_user_id
@@ -121,3 +81,17 @@ CurrentCourseUserDependency = Annotated[
 ]
 
 # ==========================================
+
+# class StudentCourseUser:
+#     def __init__(self, user_data: CourseUserResponseDTO):
+#         self.id = user_data.course_user_id
+#         self.user_id = user_data.user_id
+#         self.course_id = user_data.course_id
+#         self.username = user_data.username
+#         self.student_id = user_data.student_id
+#         self.permissions = user_data.permissions
+
+# async def get_student_course_user_for_current_user(
+#     auth_header: AuthDependency, request: Request
+# ) -> StudentCourseUser:
+    

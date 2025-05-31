@@ -211,3 +211,4 @@ def course_user_auth_from_activities_api(
     db: DBSessionDependency,
 ):
     return CoursesService(db).get_course_user_for_ext_service(course_id, current_user)
+

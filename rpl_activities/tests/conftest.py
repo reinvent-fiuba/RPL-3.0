@@ -11,7 +11,6 @@ from sqlalchemy.pool import StaticPool
 from rpl_activities.src.deps.auth import (
     AuthDependency,
     CurrentCourseUser,
-    CurrentMainUser,
     __basic_path_param_checks,
     get_current_course_user,
     get_current_main_user,
@@ -71,21 +70,6 @@ def activities_api_http_client_fixture(
     course_with_teacher_as_admin_user_and_student_user,
 ):
     app.dependency_overrides[get_db_session] = lambda: activities_api_dbsession
-
-    def override_get_current_main_user(auth_header: AuthDependency, request: Request):
-        res = users_api_client.get(
-            "/api/v3/auth/externalUserMainAuth",
-            headers={
-                "Authorization": f"{auth_header.scheme} {auth_header.credentials}"
-            },
-        )
-        if res.status_code != status.HTTP_200_OK:
-            raise HTTPException(
-                status_code=res.status_code,
-                detail=f"Failed to authenticate current user: {res.text}",
-            )
-        user_data = ExternalCurrentMainUserDTO(**res.json())
-        return CurrentMainUser(user_data)
 
     def override_get_current_course_user(auth_header: AuthDependency, request: Request):
         course_id = __basic_path_param_checks(request.path_params.get("course_id"))

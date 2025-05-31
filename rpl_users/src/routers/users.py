@@ -3,7 +3,6 @@ from fastapi import APIRouter, status
 from rpl_users.src.deps.auth import CurrentUserDependency
 from rpl_users.src.deps.email import EmailHandlerDependency
 from rpl_users.src.dtos.user_dtos import (
-    CurrentMainUserResponseDTO,
     FindUsersResponseDTO,
     ResendEmailValidationDTO,
     UserCreationDTO,
@@ -99,9 +98,3 @@ def find_users(
 
 # ==============================================================================
 
-
-@router.get("/auth/externalUserMainAuth", response_model=CurrentMainUserResponseDTO)
-def user_auth_from_activities_api(
-    current_user: CurrentUserDependency, db: DBSessionDependency
-):
-    return UsersService(db).get_user_for_ext_service(current_user)

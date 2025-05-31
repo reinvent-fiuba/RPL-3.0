@@ -235,3 +235,19 @@ class SubmissionsRepository(BaseRepository):
             .scalars()
             .all()
         )
+    
+    def get_all_submissions_from_activity_id_and_user_id(
+        self,
+        activity_id: int,
+        user_id: int
+    ) -> list[ActivitySubmission]:
+        return (
+            self.db_session.execute(
+                sa.select(ActivitySubmission).where(
+                    ActivitySubmission.activity_id == activity_id,
+                    ActivitySubmission.user_id == user_id,
+                )
+            )
+            .scalars()
+            .all()
+        )
