@@ -140,5 +140,4 @@ class CategoriesService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="User does not have permission to create a category",
             )
-
         self._clone_all_categories(current_course_user, from_course_id, to_course_id)

@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 
 from rpl_activities.src.dtos.activity_dtos import (
     UnitTestSuiteCreationRequestDTO,
@@ -57,7 +58,9 @@ class TestsRepository(BaseRepository):
             .all()
         )
 
-    def get_unit_test_suite_by_activity_id(self, activity_id: int) -> UnitTestSuite:
+    def get_unit_test_suite_by_activity_id(
+        self, activity_id: int
+    ) -> Optional[UnitTestSuite]:
         return (
             self.db_session.execute(
                 sa.select(UnitTestSuite).where(UnitTestSuite.activity_id == activity_id)
