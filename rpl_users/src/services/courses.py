@@ -1,5 +1,6 @@
 from typing import List, Optional
 from fastapi import HTTPException, status
+from fastapi.security import HTTPBearer
 import httpx
 from rpl_users.src.config import env
 from rpl_users.src.deps.email import EmailHandler
@@ -27,6 +28,10 @@ from sqlalchemy.orm import Session
 
 class CoursesService:
     def __init__(self, db_session: Session):
+        self.activitiesHttpApiClient = httpx.Client(
+            base_url=f"{env.ACTIVITIES_API_URL}/api/v3",
+        )
+
         self.users_repo = UsersRepository(db_session)
         self.roles_repo = RolesRepository(db_session)
         self.courses_repo = CoursesRepository(db_session)
@@ -117,21 +122,34 @@ class CoursesService:
         return new_course
 
     def _clone_course(
-        self, course_data: CourseCreationDTO, current_user: User
+        self,
+        course_data: CourseCreationDTO,
+        auth_header: HTTPBearer,
     ) -> Course:
         course = self._assert_course_exists(course_data.id)
 
         course_data.img_uri = course_data.img_uri or course.img_uri
         course_data.description = course_data.description or course.description
 
-        httpx.Client().post(url=env.ACTIVITIES_API_URL)
+        new_course = self._create_course_as_admin(course_data)
 
-        return self._create_course_as_admin(course_data)
+        self.activitiesHttpApiClient.post(
+            url=f"/courses/{course.id}/activityCategories/clone",
+            params={"to_course_id": new_course.id},
+            headers={
+                "Authorization": f"{auth_header.scheme} {auth_header.credentials}"
+            },
+        )
+
+        return new_course
 
     # ====================== MANAGING - COURSES ====================== #
 
     def create_course(
-        self, course_data: CourseCreationDTO, current_user: User
+        self,
+        course_data: CourseCreationDTO,
+        current_user: User,
+        auth_header: HTTPBearer,
     ) -> CourseResponseDTO:
         if not current_user.is_admin:
             raise HTTPException(
@@ -142,7 +160,7 @@ class CoursesService:
         if course_data.id is None:
             new_course = self._create_course_as_admin(course_data)
         else:
-            new_course = self._clone_course(course_data, current_user)
+            new_course = self._clone_course(course_data, auth_header)
 
         return CourseResponseDTO.from_course(new_course)
 

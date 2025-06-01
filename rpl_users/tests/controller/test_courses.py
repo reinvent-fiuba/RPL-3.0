@@ -1,7 +1,6 @@
-import re
 from fastapi.testclient import TestClient
 from fastapi import status
-import pytest
+import httpx
 from pytest_httpx import HTTPXMock
 
 from rpl_users.src.config import env
@@ -236,7 +235,6 @@ def test_clone_course_with_admin_user_with_all_fields(
     example_users,
     admin_auth_headers,
 ):
-    httpx_mock.add_response(url=re.compile(env.ACTIVITIES_API_URL))
 
     course_data = {
         "name": "Algo1Mendez",
@@ -259,6 +257,16 @@ def test_clone_course_with_admin_user_with_all_fields(
 
     result = response.json()
     course_id = result["id"]
+
+    url = httpx.URL(
+        url=f"{env.ACTIVITIES_API_URL}/api/v3/courses/{course_id}/activityCategories/clone",
+        params={"to_course_id": course_id + 1},
+    )
+    httpx_mock.add_response(
+        method="POST",
+        url=url,
+        match_headers=admin_auth_headers,
+    )
 
     clone_course_data = {
         "id": course_id,
