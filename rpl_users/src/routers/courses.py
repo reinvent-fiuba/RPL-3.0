@@ -1,5 +1,6 @@
 from typing import List, Optional
 from fastapi import APIRouter, status
+from rpl_activities.src.deps.auth import AuthDependency
 from rpl_users.src.deps.auth import CurrentUserDependency
 from rpl_users.src.deps.database import DBSessionDependency
 from rpl_users.src.deps.email import EmailHandlerDependency
@@ -31,8 +32,9 @@ def create_course(
     course_data: CourseCreationDTO,
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
+    auth_header: AuthDependency,
 ):
-    return CoursesService(db).create_course(course_data, current_user)
+    return CoursesService(db).create_course(course_data, current_user, auth_header)
 
 
 @router.put(

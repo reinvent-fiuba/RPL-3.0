@@ -49,6 +49,22 @@ class CategoriesRepository(BaseRepository):
         self.db_session.refresh(new_category)
         return new_category
 
+    def clone_category(
+        self, category: ActivityCategory, to_course_id: int
+    ) -> ActivityCategory:
+        new_category = ActivityCategory(
+            course_id=to_course_id,
+            name=category.name,
+            description=category.description,
+            date_created=datetime.now(timezone.utc),
+            last_updated=datetime.now(timezone.utc),
+            active=category.active,
+        )
+        self.db_session.add(new_category)
+        self.db_session.commit()
+        self.db_session.refresh(new_category)
+        return new_category
+
     def get_category_by_id_and_course_id(
         self, category_id: int, course_id: int
     ) -> ActivityCategory:

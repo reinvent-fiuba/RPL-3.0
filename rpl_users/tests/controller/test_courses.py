@@ -1,6 +1,9 @@
 from fastapi.testclient import TestClient
 from fastapi import status
-import pytest
+import httpx
+from pytest_httpx import HTTPXMock
+
+from rpl_users.src.config import env
 
 # ====================== CREATE COURSE ====================== #
 
@@ -221,6 +224,108 @@ def test_cannot_create_the_same_course_twice(
         "Course already exists with this name, university and semester"
         in result["detail"]
     )
+
+
+# ====================== CLONE COURSE ====================== #
+
+
+def test_clone_course_with_admin_user_with_all_fields(
+    httpx_mock: HTTPXMock,
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+):
+
+    course_data = {
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "description": "course description",
+        "active": True,
+        "semester": "2019-1c",
+        "semester_start_date": "2019-03-01T00:00:00",
+        "semester_end_date": "2019-07-01T00:00:00",
+        "img_uri": "https://example.com/image.png",
+        "course_user_admin_user_id": example_users["admin"].id,
+    }
+
+    response = users_api_client.post(
+        "/api/v3/courses", json=course_data, headers=admin_auth_headers
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    result = response.json()
+    course_id = result["id"]
+
+    url = httpx.URL(
+        url=f"{env.ACTIVITIES_API_URL}/api/v3/courses/{course_id}/activityCategories/clone",
+        params={"to_course_id": course_id + 1},
+    )
+    httpx_mock.add_response(
+        status_code=status.HTTP_201_CREATED,
+        method="POST",
+        url=url,
+        match_headers=admin_auth_headers,
+    )
+
+    clone_course_data = {
+        "id": course_id,
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "active": True,
+        "semester": "2019-2c",
+        "semester_start_date": "2019-07-01T00:00:00",
+        "semester_end_date": "2019-12-01T00:00:00",
+        "course_user_admin_user_id": example_users["admin"].id,
+    }
+
+    response = users_api_client.post(
+        "/api/v3/courses", json=clone_course_data, headers=admin_auth_headers
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    result = response.json()
+    assert result["id"] is not None
+    assert result["name"] == clone_course_data["name"]
+    assert result["university"] == clone_course_data["university"]
+    assert result["description"] == course_data["description"]
+    assert result["active"] == clone_course_data["active"]
+    assert result["semester"] == clone_course_data["semester"]
+    assert result["semester_start_date"] == clone_course_data["semester_start_date"]
+    assert result["semester_end_date"] == clone_course_data["semester_end_date"]
+    assert result["img_uri"] == course_data["img_uri"]
+
+
+def test_clone_non_existing_course(
+    users_api_client: TestClient,
+    example_users,
+    admin_auth_headers,
+):
+    non_existing_course_id = 99999999
+
+    clone_course_data = {
+        "id": non_existing_course_id,
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "active": True,
+        "semester": "2019-2c",
+        "semester_start_date": "2019-07-01T00:00:00",
+        "semester_end_date": "2019-12-01T00:00:00",
+        "course_user_admin_user_id": example_users["admin"].id,
+    }
+
+    response = users_api_client.post(
+        "/api/v3/courses", json=clone_course_data, headers=admin_auth_headers
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    result = response.json()
+    assert "Course not found" in result["detail"]
 
 
 # ====================== GET ALL COURSES ====================== #

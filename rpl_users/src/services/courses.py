@@ -1,5 +1,8 @@
 from typing import List, Optional
 from fastapi import HTTPException, status
+from fastapi.security import HTTPBearer
+import httpx
+from rpl_users.src.config import env
 from rpl_users.src.deps.email import EmailHandler
 from rpl_users.src.dtos.course_dtos import (
     CourseCreationDTO,
@@ -25,6 +28,10 @@ from sqlalchemy.orm import Session
 
 class CoursesService:
     def __init__(self, db_session: Session):
+        self.activitiesHttpApiClient = httpx.Client(
+            base_url=f"{env.ACTIVITIES_API_URL}/api/v3",
+        )
+
         self.users_repo = UsersRepository(db_session)
         self.roles_repo = RolesRepository(db_session)
         self.courses_repo = CoursesRepository(db_session)
@@ -92,17 +99,9 @@ class CoursesService:
         )
         return course_user
 
-    # ====================== MANAGING - COURSES ====================== #
+    # ====================== PRIVATE - MANAGING - COURSES ====================== #
 
-    def create_course(
-        self, course_data: CourseCreationDTO, current_user: User
-    ) -> CourseResponseDTO:
-        if not current_user.is_admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only admins can create courses",
-            )
-
+    def _create_course_as_admin(self, course_data: CourseCreationDTO) -> Course:
         user_admin = self.users_repo.get_user_with_id(
             course_data.course_user_admin_user_id
         )
@@ -119,6 +118,64 @@ class CoursesService:
             role_id=self._get_role_named("course_admin").id,
             accepted=True,
         )
+
+        return new_course
+
+    def _delete_course(self, course: Course):
+        course_users = self.course_users_repo.get_course_users(course.id)
+        for course_user in course_users:
+            self.course_users_repo.delete_course_user(
+                course_id=course.id, user_id=course_user.user.id
+            )
+
+        self.courses_repo.delete_course(course.id)
+
+    def _clone_course(
+        self,
+        course_data: CourseCreationDTO,
+        auth_header: HTTPBearer,
+    ) -> Course:
+        course = self._assert_course_exists(course_data.id)
+
+        course_data.img_uri = course_data.img_uri or course.img_uri
+        course_data.description = course_data.description or course.description
+
+        new_course = self._create_course_as_admin(course_data)
+
+        response = self.activitiesHttpApiClient.post(
+            url=f"/courses/{course.id}/activityCategories/clone",
+            params={"to_course_id": new_course.id},
+            headers={
+                "Authorization": f"{auth_header.scheme} {auth_header.credentials}"
+            },
+        )
+        if response.status_code != status.HTTP_201_CREATED:
+            self._delete_course(new_course)
+            raise HTTPException(
+                status_code=response.status_code,
+                detail="Failed to clone course categories",
+            )
+
+        return new_course
+
+    # ====================== MANAGING - COURSES ====================== #
+
+    def create_course(
+        self,
+        course_data: CourseCreationDTO,
+        current_user: User,
+        auth_header: HTTPBearer,
+    ) -> CourseResponseDTO:
+        if not current_user.is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only admins can create courses",
+            )
+
+        if course_data.id is None:
+            new_course = self._create_course_as_admin(course_data)
+        else:
+            new_course = self._clone_course(course_data, auth_header)
 
         return CourseResponseDTO.from_course(new_course)
 

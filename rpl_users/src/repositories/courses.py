@@ -81,6 +81,11 @@ class CoursesRepository(BaseRepository):
             self.db_session.rollback()
             self._raise_http_conflict_exception()
 
+    def delete_course(self, course_id: str) -> Course:
+        course = self.get_course_with_id(course_id)
+        self.db_session.delete(course)
+        self.db_session.refresh(course)
+
     # ====================== QUERYING ====================== #
 
     def get_all_courses(self) -> list[Course]:

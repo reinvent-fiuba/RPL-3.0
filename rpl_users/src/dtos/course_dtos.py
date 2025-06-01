@@ -10,6 +10,7 @@ import datetime
 
 
 class CourseCreationDTO(BaseModel):
+    id: Optional[int] = None
     name: str
     university: str
     subject_id: str
