@@ -263,6 +263,7 @@ def test_clone_course_with_admin_user_with_all_fields(
         params={"to_course_id": course_id + 1},
     )
     httpx_mock.add_response(
+        status_code=status.HTTP_201_CREATED,
         method="POST",
         url=url,
         match_headers=admin_auth_headers,

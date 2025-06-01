@@ -121,6 +121,15 @@ class CoursesService:
 
         return new_course
 
+    def _delete_course(self, course: Course):
+        course_users = self.course_users_repo.get_course_users(course.id)
+        for course_user in course_users:
+            self.course_users_repo.delete_course_user(
+                course_id=course.id, user_id=course_user.user.id
+            )
+
+        self.courses_repo.delete_course(course.id)
+
     def _clone_course(
         self,
         course_data: CourseCreationDTO,
@@ -133,13 +142,19 @@ class CoursesService:
 
         new_course = self._create_course_as_admin(course_data)
 
-        self.activitiesHttpApiClient.post(
+        response = self.activitiesHttpApiClient.post(
             url=f"/courses/{course.id}/activityCategories/clone",
             params={"to_course_id": new_course.id},
             headers={
                 "Authorization": f"{auth_header.scheme} {auth_header.credentials}"
             },
         )
+        if response.status_code != status.HTTP_201_CREATED:
+            self._delete_course(new_course)
+            raise HTTPException(
+                status_code=response.status_code,
+                detail="Failed to clone course categories",
+            )
 
         return new_course
 
