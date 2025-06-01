@@ -92,17 +92,9 @@ class CoursesService:
         )
         return course_user
 
-    # ====================== MANAGING - COURSES ====================== #
+    # ====================== PRIVATE - MANAGING - COURSES ====================== #
 
-    def create_course(
-        self, course_data: CourseCreationDTO, current_user: User
-    ) -> CourseResponseDTO:
-        if not current_user.is_admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only admins can create courses",
-            )
-
+    def _create_course_as_admin(self, course_data: CourseCreationDTO) -> Course:
         user_admin = self.users_repo.get_user_with_id(
             course_data.course_user_admin_user_id
         )
@@ -119,6 +111,34 @@ class CoursesService:
             role_id=self._get_role_named("course_admin").id,
             accepted=True,
         )
+
+        return new_course
+
+    def _clone_course(
+        self, course_data: CourseCreationDTO, current_user: User
+    ) -> Course:
+        course = self._assert_course_exists(course_data.id)
+
+        course_data.img_uri = course_data.img_uri or course.img_uri
+        course_data.description = course_data.description or course.description
+
+        return self._create_course_as_admin(course_data)
+
+    # ====================== MANAGING - COURSES ====================== #
+
+    def create_course(
+        self, course_data: CourseCreationDTO, current_user: User
+    ) -> CourseResponseDTO:
+        if not current_user.is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only admins can create courses",
+            )
+
+        if course_data.id is None:
+            new_course = self._create_course_as_admin(course_data)
+        else:
+            new_course = self._clone_course(course_data, current_user)
 
         return CourseResponseDTO.from_course(new_course)
 
