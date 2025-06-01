@@ -1,6 +1,10 @@
+import re
 from fastapi.testclient import TestClient
 from fastapi import status
 import pytest
+from pytest_httpx import HTTPXMock
+
+from rpl_users.src.config import env
 
 # ====================== CREATE COURSE ====================== #
 
@@ -227,10 +231,13 @@ def test_cannot_create_the_same_course_twice(
 
 
 def test_clone_course_with_admin_user_with_all_fields(
+    httpx_mock: HTTPXMock,
     users_api_client: TestClient,
     example_users,
     admin_auth_headers,
 ):
+    httpx_mock.add_response(url=re.compile(env.ACTIVITIES_API_URL))
+
     course_data = {
         "name": "Algo1Mendez",
         "university": "FIUBA",

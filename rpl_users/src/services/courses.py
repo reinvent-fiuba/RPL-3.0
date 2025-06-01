@@ -1,5 +1,7 @@
 from typing import List, Optional
 from fastapi import HTTPException, status
+import httpx
+from rpl_users.src.config import env
 from rpl_users.src.deps.email import EmailHandler
 from rpl_users.src.dtos.course_dtos import (
     CourseCreationDTO,
@@ -121,6 +123,8 @@ class CoursesService:
 
         course_data.img_uri = course_data.img_uri or course.img_uri
         course_data.description = course_data.description or course.description
+
+        httpx.Client().post(url=env.ACTIVITIES_API_URL)
 
         return self._create_course_as_admin(course_data)
 

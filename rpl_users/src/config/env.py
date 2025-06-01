@@ -17,6 +17,8 @@ SMTP_PORT = os.getenv("SMTP_PORT")
 RPL_HELP_EMAIL_USER = os.getenv("RPL_HELP_EMAIL_USER")
 RPL_HELP_EMAIL_PASSWORD = os.getenv("RPL_HELP_EMAIL_PASSWORD")
 
+ACTIVITIES_API_URL = os.getenv("ACTIVITIES_API_URL")
+
 if not all(
     [
         FRONTEND_URL,
@@ -28,6 +30,7 @@ if not all(
         SMTP_PORT,
         RPL_HELP_EMAIL_USER,
         RPL_HELP_EMAIL_PASSWORD,
+        ACTIVITIES_API_URL,
     ]
 ):
     raise ValueError("Missing environment variables")
