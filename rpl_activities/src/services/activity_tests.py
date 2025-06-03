@@ -43,9 +43,7 @@ class TestsService:
         return activity
 
     def _build_activity_response_dto(self, activity: Activity) -> ActivityResponseDTO:
-        unit_tests_data = self.activities_repo.get_unit_tests_data_from_activity(
-            activity
-        )
+        unit_tests_data = self.activities_repo.get_unit_tests_data_from_activity(activity)
         io_tests_data = self.activities_repo.get_io_tests_data_from_activity(activity)
         return ActivityResponseDTO(
             course_id=activity.course_id,
@@ -54,9 +52,7 @@ class TestsService:
             category_description=activity.category.description,
             name=activity.name,
             description=activity.description,
-            language=aux_models.LanguageWithVersion(
-                activity.language
-            ).without_version(),
+            language=aux_models.LanguageWithVersion(activity.language).without_version(),
             is_io_tested=activity.is_io_tested,
             active=activity.active,
             deleted=activity.deleted,
@@ -80,9 +76,7 @@ class TestsService:
     ) -> IOTestResponseDTO:
         self._verify_permission_to_manage(current_course_user)
         activity = self._verify_and_get_activity(course_id, activity_id)
-        io_test = self.tests_repo.create_io_test_for_activity(
-            new_io_test_data, activity
-        )
+        io_test = self.tests_repo.create_io_test_for_activity(new_io_test_data, activity)
         self.activities_repo.enable_iotest_mode_for_activity(activity)
         return IOTestResponseDTO(
             id=io_test.id,
@@ -101,16 +95,10 @@ class TestsService:
     ) -> IOTestResponseDTO:
         self._verify_permission_to_manage(current_course_user)
         activity = self._verify_and_get_activity(course_id, activity_id)
-        io_test = self.tests_repo.get_io_test_by_id_and_activity_id(
-            io_test_id, activity.id
-        )
+        io_test = self.tests_repo.get_io_test_by_id_and_activity_id(io_test_id, activity.id)
         if not io_test:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="IO Test not found"
-            )
-        io_test = self.tests_repo.update_io_test_for_activity(
-            new_io_test_data, activity, io_test
-        )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="IO Test not found")
+        io_test = self.tests_repo.update_io_test_for_activity(new_io_test_data, activity, io_test)
         return IOTestResponseDTO(
             id=io_test.id,
             name=io_test.name,
@@ -127,13 +115,9 @@ class TestsService:
     ) -> ActivityResponseDTO:
         self._verify_permission_to_manage(current_course_user)
         activity = self._verify_and_get_activity(course_id, activity_id)
-        io_test = self.tests_repo.get_io_test_by_id_and_activity_id(
-            io_test_id, activity.id
-        )
+        io_test = self.tests_repo.get_io_test_by_id_and_activity_id(io_test_id, activity.id)
         if not io_test:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="IO Test not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="IO Test not found")
         activity = self.tests_repo.delete_io_test_for_activity(activity, io_test)
         return self._build_activity_response_dto(activity)
 
@@ -148,17 +132,13 @@ class TestsService:
     ) -> ActivityResponseDTO:
         self._verify_permission_to_manage(current_course_user)
         activity = self._verify_and_get_activity(course_id, activity_id)
-        unit_test_suite = self.tests_repo.get_unit_test_suite_by_activity_id(
-            activity.id
-        )
+        unit_test_suite = self.tests_repo.get_unit_test_suite_by_activity_id(activity.id)
         if unit_test_suite:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Unit tests already exists for this activity",
             )
-        self.tests_repo.create_unit_test_suite_for_activity(
-            new_unit_test_data, activity, course_id
-        )
+        self.tests_repo.create_unit_test_suite_for_activity(new_unit_test_data, activity, course_id)
         activity = self.activities_repo.disable_iotest_mode_for_activity(activity)
         return self._build_activity_response_dto(activity)
 
@@ -171,13 +151,9 @@ class TestsService:
     ) -> ActivityResponseDTO:
         self._verify_permission_to_manage(current_course_user)
         activity = self._verify_and_get_activity(course_id, activity_id)
-        unit_test_suite = self.tests_repo.get_unit_test_suite_by_activity_id(
-            activity.id
-        )
+        unit_test_suite = self.tests_repo.get_unit_test_suite_by_activity_id(activity.id)
         if not unit_test_suite:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Unit tests not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unit tests not found")
         self.tests_repo.update_unit_test_suite_for_activity(
             new_unit_test_data, activity, course_id, unit_test_suite
         )
@@ -197,8 +173,6 @@ class TestsService:
             for io_test in io_tests:
                 self.tests_repo.clone_io_test(io_test, to_activity)
         else:
-            unit_test_suite = self.tests_repo.get_unit_test_suite_by_activity_id(
-                from_activity.id
-            )
+            unit_test_suite = self.tests_repo.get_unit_test_suite_by_activity_id(from_activity.id)
             if unit_test_suite is not None:
                 self.tests_repo.clone_unit_test_suite(unit_test_suite, to_activity)

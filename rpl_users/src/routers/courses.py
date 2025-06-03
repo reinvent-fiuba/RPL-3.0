@@ -61,9 +61,7 @@ def get_all_courses_including_their_relationship_with_user(
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
 ):
-    return CoursesService(db).get_all_courses_including_their_relationship_with_user(
-        current_user
-    )
+    return CoursesService(db).get_all_courses_including_their_relationship_with_user(current_user)
 
 
 @router.get(
@@ -105,9 +103,7 @@ def update_course_user(
     email_handler: EmailHandlerDependency,
     db: DBSessionDependency,
 ):
-    return CoursesService(db).update_course_user(
-        course_id, user_id, course_data, current_user, email_handler
-    )
+    return CoursesService(db).update_course_user(course_id, user_id, course_data, current_user, email_handler)
 
 
 @router.post(
@@ -161,9 +157,7 @@ def get_all_course_users_from_course(
     role_name: Optional[str] = None,
     student_id: Optional[str] = None,
 ):
-    return CoursesService(db).get_all_course_users_from_course(
-        course_id, current_user, role_name, student_id
-    )
+    return CoursesService(db).get_all_course_users_from_course(course_id, current_user, role_name, student_id)
 
 
 @router.get(
@@ -217,4 +211,3 @@ def course_user_auth_from_activities_api(
     db: DBSessionDependency,
 ):
     return CoursesService(db).get_course_user_for_ext_service(course_id, current_user)
-

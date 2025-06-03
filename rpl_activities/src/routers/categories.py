@@ -16,9 +16,7 @@ router = APIRouter(prefix="/api/v3", tags=["ActivityCategories"])
 # ==============================================================================
 
 
-@router.get(
-    "/courses/{course_id}/activityCategories", response_model=List[CategoryResponseDTO]
-)
+@router.get("/courses/{course_id}/activityCategories", response_model=List[CategoryResponseDTO])
 def get_categories(
     course_id: int,
     current_course_user: CurrentCourseUserDependency,
@@ -78,6 +76,4 @@ def clone_all_info(
     to_course_id=int,
 ):
     from_course_id = course_id
-    return CategoriesService(db).clone_all_info(
-        current_course_user, from_course_id, to_course_id
-    )
+    return CategoriesService(db).clone_all_info(current_course_user, from_course_id, to_course_id)

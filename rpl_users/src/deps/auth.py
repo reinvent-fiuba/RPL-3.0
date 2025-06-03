@@ -15,9 +15,7 @@ AuthDependency = Annotated[HTTPAuthorizationCredentials, Depends(auth_handler)]
 # ==========================================
 
 
-def get_current_user(
-    auth_header: AuthDependency, db_session: DBSessionDependency
-) -> User:
+def get_current_user(auth_header: AuthDependency, db_session: DBSessionDependency) -> User:
     user_id = security.verify_access_token(auth_header.credentials)
     users_repo = UsersRepository(db_session)
     user = users_repo.get_user_with_id(user_id)

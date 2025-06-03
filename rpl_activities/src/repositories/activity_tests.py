@@ -36,14 +36,10 @@ class TestsRepository(BaseRepository):
         super().__init__(db)
         self.rplfiles_repo = RPLFilesRepository(db)
 
-    def get_io_test_by_id_and_activity_id(
-        self, io_test_id: int, activity_id: int
-    ) -> IOTest:
+    def get_io_test_by_id_and_activity_id(self, io_test_id: int, activity_id: int) -> IOTest:
         return (
             self.db_session.execute(
-                sa.select(IOTest).where(
-                    IOTest.id == io_test_id, IOTest.activity_id == activity_id
-                )
+                sa.select(IOTest).where(IOTest.id == io_test_id, IOTest.activity_id == activity_id)
             )
             .scalars()
             .one_or_none()
@@ -51,27 +47,19 @@ class TestsRepository(BaseRepository):
 
     def get_all_io_tests_by_activity_id(self, activity_id: int) -> list[IOTest]:
         return (
-            self.db_session.execute(
-                sa.select(IOTest).where(IOTest.activity_id == activity_id)
-            )
+            self.db_session.execute(sa.select(IOTest).where(IOTest.activity_id == activity_id))
             .scalars()
             .all()
         )
 
-    def get_unit_test_suite_by_activity_id(
-        self, activity_id: int
-    ) -> Optional[UnitTestSuite]:
+    def get_unit_test_suite_by_activity_id(self, activity_id: int) -> Optional[UnitTestSuite]:
         return (
-            self.db_session.execute(
-                sa.select(UnitTestSuite).where(UnitTestSuite.activity_id == activity_id)
-            )
+            self.db_session.execute(sa.select(UnitTestSuite).where(UnitTestSuite.activity_id == activity_id))
             .scalars()
             .one_or_none()
         )
 
-    def create_io_test_for_activity(
-        self, new_io_test_data: IOTestRequestDTO, activity: Activity
-    ) -> IOTest:
+    def create_io_test_for_activity(self, new_io_test_data: IOTestRequestDTO, activity: Activity) -> IOTest:
         io_test = IOTest(
             activity_id=activity.id,
             name=new_io_test_data.name,
@@ -110,9 +98,7 @@ class TestsRepository(BaseRepository):
         self.db_session.refresh(io_test)
         return io_test
 
-    def delete_io_test_for_activity(
-        self, activity: Activity, io_test: IOTest
-    ) -> Activity:
+    def delete_io_test_for_activity(self, activity: Activity, io_test: IOTest) -> Activity:
         self.db_session.delete(io_test)
         self.db_session.commit()
         self.db_session.refresh(activity)
@@ -140,9 +126,7 @@ class TestsRepository(BaseRepository):
         self.db_session.refresh(unit_test_suite)
         return unit_test_suite
 
-    def clone_unit_test_suite(
-        self, unit_test_suite: UnitTestSuite, to_activity: Activity
-    ) -> UnitTestSuite:
+    def clone_unit_test_suite(self, unit_test_suite: UnitTestSuite, to_activity: Activity) -> UnitTestSuite:
         test_rplfile = self.rplfiles_repo.get_by_id(unit_test_suite.test_rplfile_id)
         new_test_rplfile = self.rplfiles_repo.clone_rplfile(test_rplfile)
         new_unit_test_suite = UnitTestSuite(
@@ -213,17 +197,13 @@ class TestsRepository(BaseRepository):
                 current_output_lines = []
             elif STUDENT_OUTPUT_START_DELIMITER in line:
                 current_output_lines = []
-            elif any(
-                delimiter in line for delimiter in IO_TEST_OUTPUT_DELIMITERS_TO_SKIP
-            ):
+            elif any(delimiter in line for delimiter in IO_TEST_OUTPUT_DELIMITERS_TO_SKIP):
                 continue
             else:
                 current_output_lines.append(line)
         return student_outputs_per_run
 
-    def __check_if_all_io_tests_passed(
-        self, io_tests: list[IOTest], io_test_runs: list[IOTestRun]
-    ) -> bool:
+    def __check_if_all_io_tests_passed(self, io_tests: list[IOTest], io_test_runs: list[IOTestRun]) -> bool:
         if len(io_tests) != len(io_test_runs):
             # Not all IO tests were run
             return False
@@ -279,7 +259,5 @@ class TestsRepository(BaseRepository):
         self.db_session.add_all(unit_test_runs)
         self.db_session.commit()
 
-        passed_all_tests = (
-            suite_summary.amount_failed == 0 and suite_summary.amount_errored == 0
-        )
+        passed_all_tests = suite_summary.amount_failed == 0 and suite_summary.amount_errored == 0
         return passed_all_tests

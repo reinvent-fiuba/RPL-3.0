@@ -82,9 +82,7 @@ class ActivitiesService:
         if self.has_permission_to_manage(current_course_user):
             activities = self.activities_repo.get_all_activities_by_course_id(course_id)
         else:
-            activities = self.activities_repo.get_all_active_activities_by_course_id(
-                course_id
-            )
+            activities = self.activities_repo.get_all_active_activities_by_course_id(course_id)
         return activities
 
     def __group_submissions_by_activity(
@@ -112,9 +110,7 @@ class ActivitiesService:
             category_description=activity.category.description,
             name=activity.name,
             description=activity.description,
-            language=aux_models.LanguageWithVersion(
-                activity.language
-            ).without_version(),
+            language=aux_models.LanguageWithVersion(activity.language).without_version(),
             is_io_tested=activity.is_io_tested,
             active=activity.active,
             deleted=activity.deleted,
@@ -135,9 +131,7 @@ class ActivitiesService:
         )
 
     def build_activity_response_dto(self, activity: Activity) -> ActivityResponseDTO:
-        unit_tests_data = self.activities_repo.get_unit_tests_data_from_activity(
-            activity
-        )
+        unit_tests_data = self.activities_repo.get_unit_tests_data_from_activity(activity)
         io_tests_data = self.activities_repo.get_io_tests_data_from_activity(activity)
         return ActivityResponseDTO(
             course_id=activity.course_id,
@@ -146,9 +140,7 @@ class ActivitiesService:
             category_description=activity.category.description,
             name=activity.name,
             description=activity.description,
-            language=aux_models.LanguageWithVersion(
-                activity.language
-            ).without_version(),
+            language=aux_models.LanguageWithVersion(activity.language).without_version(),
             is_io_tested=activity.is_io_tested,
             active=activity.active,
             deleted=activity.deleted,
@@ -173,10 +165,8 @@ class ActivitiesService:
         if not activities:
             return []
 
-        all_submissions_by_current_user = (
-            self.submissions_repo.get_all_submissions_by_user_at_activities(
-                current_course_user.user_id, activities
-            )
+        all_submissions_by_current_user = self.submissions_repo.get_all_submissions_by_user_at_activities(
+            current_course_user.user_id, activities
         )
         current_user_submissions_by_activity = self.__group_submissions_by_activity(
             all_submissions_by_current_user
@@ -237,9 +227,7 @@ class ActivitiesService:
     ) -> ActivityResponseDTO:
         self.verify_permission_to_manage(current_course_user)
         activity = self.verify_and_get_activity(course_id, activity_id)
-        updated_activity = self.activities_repo.update_activity(
-            course_id, activity, new_activity_data
-        )
+        updated_activity = self.activities_repo.update_activity(course_id, activity, new_activity_data)
         return self.build_activity_response_dto(updated_activity)
 
     def clone_all_activities(

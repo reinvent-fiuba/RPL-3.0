@@ -95,12 +95,8 @@ class UsersService:
 
     # =============================================================================
 
-    def create_user(
-        self, user_data: UserCreationDTO, email_handler: EmailHandler
-    ) -> UserCreationResponseDTO:
-        self.__verify_username_and_email_availability(
-            user_data.username, user_data.email
-        )
+    def create_user(self, user_data: UserCreationDTO, email_handler: EmailHandler) -> UserCreationResponseDTO:
+        self.__verify_username_and_email_availability(user_data.username, user_data.email)
         hashed_password = security.hash_password(user_data.password)
         new_user = self.users_repo.save_new_user(
             user_data,
@@ -118,9 +114,7 @@ class UsersService:
             university=new_user.university,
         )
 
-    def resend_validation_email(
-        self, user_data: ResendEmailValidationDTO, email_handler: EmailHandler
-    ):
+    def resend_validation_email(self, user_data: ResendEmailValidationDTO, email_handler: EmailHandler):
         user = self.__get_user_by_username_or_email(user_data.username_or_email)
         if user.email_validated:
             raise HTTPException(
@@ -143,9 +137,7 @@ class UsersService:
         user.email_validated = True
         user = self.users_repo.update_user(user)
         self.validation_tokens_repo.delete_by_token(validation_data.token)
-        logging.info(
-            f"[users:services] User {user.username} validated email successfully"
-        )
+        logging.info(f"[users:services] User {user.username} validated email successfully")
 
     def login_user(self, user_data: UserLoginDTO) -> UserLoginResponseDTO:
         user = self.__verify_user_login(user_data)
@@ -219,17 +211,13 @@ class UsersService:
             img_uri=user.img_uri,
         )
 
-    def find_users(
-        self, username_or_fullname: str, current_user: User
-    ) -> List[FindUsersResponseDTO]:
+    def find_users(self, username_or_fullname: str, current_user: User) -> List[FindUsersResponseDTO]:
         if not current_user.is_admin:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Permission denied",
             )
-        users = self.users_repo.get_all_users_with_username_or_fullname(
-            username_or_fullname
-        )
+        users = self.users_repo.get_all_users_with_username_or_fullname(username_or_fullname)
         return [
             FindUsersResponseDTO(
                 username=user.username,

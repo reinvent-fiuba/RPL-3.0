@@ -3,10 +3,12 @@ from enum import Enum
 
 DEFAULT_GCC_FLAGS = "-g -O2 -std=c99 -Wall -Wformat=2 -Wshadow -Wpointer-arith -Wunreachable-code -Wconversion -Wno-sign-conversion -Wbad-function-cast"
 
+
 class Language(str, Enum):
     C = "C"
     PYTHON = "python"
     GO = "go"
+
     def with_version(self):
         if self == Language.C:
             return LanguageWithVersion.C
@@ -17,10 +19,12 @@ class Language(str, Enum):
         else:
             raise ValueError(f"Unsupported language: {self}")
 
+
 class LanguageWithVersion(str, Enum):
     C = "c_std11"
     PYTHON = "python_3.7"
     GO = "go_1.19"
+
     def without_version(self):
         if self == LanguageWithVersion.C:
             return Language.C
@@ -42,12 +46,14 @@ class SubmissionStatus(str, Enum):
     FAILURE = "FAILURE"
     SUCCESS = "SUCCESS"
     TIME_OUT = "TIME_OUT"
+
     @classmethod
     def from_tests_execution_errored_stage(cls, tests_execution_stage: str) -> "SubmissionStatus":
         if tests_execution_stage == "BUILD":
             return cls.BUILD_ERROR
         else:
             return cls.RUNTIME_ERROR
+
 
 class TestsExecutionResultStatus(str, Enum):
     ERROR = "ERROR"

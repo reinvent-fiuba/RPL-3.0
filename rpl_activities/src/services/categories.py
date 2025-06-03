@@ -65,9 +65,7 @@ class CategoriesService:
         categories = self._get_categories(current_course_user, from_course_id)
         for category in categories:
             new_category = self.categories_repo.clone_category(category, to_course_id)
-            self.activities_service.clone_all_activities(
-                current_course_user, category, new_category
-            )
+            self.activities_service.clone_all_activities(current_course_user, category, new_category)
 
     # ====================== MANAGING - CATEGORIES ====================== #
 
@@ -82,9 +80,7 @@ class CategoriesService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="User does not have permission to create a category",
             )
-        created_category: ActivityCategory = self.categories_repo.create_category(
-            course_id, category_data
-        )
+        created_category: ActivityCategory = self.categories_repo.create_category(course_id, category_data)
         return CategoryResponseDTO(
             id=created_category.id,
             course_id=created_category.course_id,
@@ -108,9 +104,7 @@ class CategoriesService:
                 detail="User does not have permission to update a category",
             )
 
-        category = self.categories_repo.get_category_by_id_and_course_id(
-            category_id, course_id
-        )
+        category = self.categories_repo.get_category_by_id_and_course_id(category_id, course_id)
         if not category:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

@@ -13,9 +13,7 @@ class CategoriesRepository(BaseRepository):
     def get_all_categories(self, course_id: int):
         return (
             self.db_session.execute(
-                sa.select(ActivityCategory).where(
-                    ActivityCategory.course_id == course_id
-                )
+                sa.select(ActivityCategory).where(ActivityCategory.course_id == course_id)
             )
             .scalars()
             .all()
@@ -33,9 +31,7 @@ class CategoriesRepository(BaseRepository):
             .all()
         )
 
-    def create_category(
-        self, course_id: int, category_data: CategoryResponseDTO
-    ) -> ActivityCategory:
+    def create_category(self, course_id: int, category_data: CategoryResponseDTO) -> ActivityCategory:
         new_category = ActivityCategory(
             course_id=course_id,
             name=category_data.name,
@@ -49,9 +45,7 @@ class CategoriesRepository(BaseRepository):
         self.db_session.refresh(new_category)
         return new_category
 
-    def clone_category(
-        self, category: ActivityCategory, to_course_id: int
-    ) -> ActivityCategory:
+    def clone_category(self, category: ActivityCategory, to_course_id: int) -> ActivityCategory:
         new_category = ActivityCategory(
             course_id=to_course_id,
             name=category.name,
@@ -65,9 +59,7 @@ class CategoriesRepository(BaseRepository):
         self.db_session.refresh(new_category)
         return new_category
 
-    def get_category_by_id_and_course_id(
-        self, category_id: int, course_id: int
-    ) -> ActivityCategory:
+    def get_category_by_id_and_course_id(self, category_id: int, course_id: int) -> ActivityCategory:
         category = (
             self.db_session.execute(
                 sa.select(ActivityCategory).where(

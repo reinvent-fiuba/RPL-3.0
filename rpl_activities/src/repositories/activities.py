@@ -74,15 +74,9 @@ class ActivitiesRepository(BaseRepository):
         )
 
     def get_unit_tests_data_from_activity(self, activity: Activity) -> str:
-        return (
-            activity.unit_test_suite.test_rplfile.data.decode()
-            if activity.unit_test_suite
-            else ""
-        )
+        return activity.unit_test_suite.test_rplfile.data.decode() if activity.unit_test_suite else ""
 
-    def get_io_tests_data_from_activity(
-        self, activity: Activity
-    ) -> list[IOTestResponseDTO]:
+    def get_io_tests_data_from_activity(self, activity: Activity) -> list[IOTestResponseDTO]:
         io_tests = activity.io_tests
         return (
             [
@@ -105,15 +99,9 @@ class ActivitiesRepository(BaseRepository):
         activity.last_updated = datetime.now(timezone.utc)
         self.db_session.commit()
 
-    def create_activity(
-        self, course_id: int, new_activity_data: ActivityCreationRequestDTO
-    ) -> Activity:
-        compressed_rplfile_bytes = tar_utils.compress_uploadfiles_to_tar_gz(
-            new_activity_data.starting_files
-        )
-        truncated_act_name = new_activity_data.name.strip()[
-            :MAX_ACTIVITY_NAME_LEN_FOR_TAR
-        ]
+    def create_activity(self, course_id: int, new_activity_data: ActivityCreationRequestDTO) -> Activity:
+        compressed_rplfile_bytes = tar_utils.compress_uploadfiles_to_tar_gz(new_activity_data.starting_files)
+        truncated_act_name = new_activity_data.name.strip()[:MAX_ACTIVITY_NAME_LEN_FOR_TAR]
         rplfile = self.rplfiles_repo.create_rplfile(
             file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{course_id}__ACT__{truncated_act_name}.tar.gz",
             file_type=aux_models.RPLFileType.GZIP,
@@ -143,9 +131,7 @@ class ActivitiesRepository(BaseRepository):
         self.db_session.refresh(activity)
         return activity
 
-    def clone_activity(
-        self, activity: Activity, to_category: ActivityCategory
-    ) -> Activity:
+    def clone_activity(self, activity: Activity, to_category: ActivityCategory) -> Activity:
         starting_rplfile = self.rplfiles_repo.get_by_id(activity.starting_rplfile_id)
         new_starting_rplfile = self.rplfiles_repo.clone_rplfile(starting_rplfile)
         new_activity = Activity(
@@ -177,13 +163,9 @@ class ActivitiesRepository(BaseRepository):
                 new_activity_data.starting_files
             )
             if new_activity_data.name:
-                truncated_act_name = new_activity_data.name.strip()[
-                    :MAX_ACTIVITY_NAME_LEN_FOR_TAR
-                ]
+                truncated_act_name = new_activity_data.name.strip()[:MAX_ACTIVITY_NAME_LEN_FOR_TAR]
             else:
-                truncated_act_name = activity.name.strip()[
-                    :MAX_ACTIVITY_NAME_LEN_FOR_TAR
-                ]
+                truncated_act_name = activity.name.strip()[:MAX_ACTIVITY_NAME_LEN_FOR_TAR]
             self.rplfiles_repo.update_rplfile(
                 rplfile_id=activity.starting_rplfile_id,
                 file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{course_id}__ACT__{truncated_act_name}.tar.gz",
@@ -206,9 +188,7 @@ class ActivitiesRepository(BaseRepository):
         self.db_session.refresh(activity)
         return activity
 
-    def update_iotest_mode_for_activity(
-        self, activity: Activity, is_io_tested: bool
-    ) -> Activity:
+    def update_iotest_mode_for_activity(self, activity: Activity, is_io_tested: bool) -> Activity:
         activity.is_io_tested = is_io_tested
         activity.last_updated = datetime.now(timezone.utc)
         self.db_session.commit()

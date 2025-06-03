@@ -18,9 +18,7 @@ class TestsExecutionLog(Base):
     __tablename__ = "tests_execution_logs"
 
     id: Mapped[IntPK]
-    activity_submission_id: Mapped[BigInt] = mapped_column(
-        ForeignKey("activity_submissions.id")
-    )
+    activity_submission_id: Mapped[BigInt] = mapped_column(ForeignKey("activity_submissions.id"))
     success: Mapped[bool]
     exit_message: Mapped[Str]
     stderr: Mapped[Optional[TextStr]]

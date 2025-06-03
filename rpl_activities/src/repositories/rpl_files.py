@@ -7,9 +7,7 @@ class RPLFilesRepository(BaseRepository):
 
     def get_by_id(self, file_id: int) -> RPLFile:
         return (
-            self.db_session.execute(sa.select(RPLFile).where(RPLFile.id == file_id))
-            .scalars()
-            .one_or_none()
+            self.db_session.execute(sa.select(RPLFile).where(RPLFile.id == file_id)).scalars().one_or_none()
         )
 
     def create_rplfile(

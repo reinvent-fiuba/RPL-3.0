@@ -38,10 +38,6 @@ class Activity(Base):
 
     category: Mapped["ActivityCategory"] = relationship(back_populates="activities")
     starting_rplfile: Mapped["RPLFile"] = relationship(back_populates="activity")
-    submissions: Mapped[List["ActivitySubmission"]] = relationship(
-        back_populates="activity", lazy="raise"
-    )
+    submissions: Mapped[List["ActivitySubmission"]] = relationship(back_populates="activity", lazy="raise")
     io_tests: Mapped[List["IOTest"]] = relationship(back_populates="activity")
-    unit_test_suite: Mapped[Optional["UnitTestSuite"]] = relationship(
-        back_populates="activity"
-    )
+    unit_test_suite: Mapped[Optional["UnitTestSuite"]] = relationship(back_populates="activity")

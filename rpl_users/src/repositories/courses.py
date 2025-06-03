@@ -93,9 +93,7 @@ class CoursesRepository(BaseRepository):
 
     def get_course_with_id(self, course_id: str) -> Course:
         return (
-            self.db_session.execute(sa.select(Course).where(Course.id == course_id))
-            .scalars()
-            .one_or_none()
+            self.db_session.execute(sa.select(Course).where(Course.id == course_id)).scalars().one_or_none()
         )
 
     def get_course_with_name_university_semester_and_subject_id(

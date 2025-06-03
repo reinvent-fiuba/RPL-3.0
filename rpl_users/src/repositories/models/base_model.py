@@ -19,9 +19,7 @@ class Base(DeclarativeBase):
     }
 
 
-IntPK = Annotated[
-    int, mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
-]
+IntPK = Annotated[int, mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)]
 AutoDateTime = Annotated[datetime, mapped_column(insert_default=datetime.now)]
 
 

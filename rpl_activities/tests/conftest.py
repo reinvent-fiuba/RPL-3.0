@@ -84,9 +84,7 @@ def activities_api_http_client_fixture(
         course_id = __basic_request_param_checks(request.path_params.get("course_id"))
         res = users_api_client.get(
             "/api/v3/auth/externalCourseUserAuth",
-            headers={
-                "Authorization": f"{auth_header.scheme} {auth_header.credentials}"
-            },
+            headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
             params={"course_id": course_id},
         )
         if res.status_code != status.HTTP_200_OK:
@@ -97,16 +95,12 @@ def activities_api_http_client_fixture(
         user_data = CourseUserResponseDTO(**res.json())
         return CurrentCourseUser(user_data)
 
-    def override_get_student_course_user_for_current_user(
-        auth_header: AuthDependency, request: Request
-    ):
+    def override_get_student_course_user_for_current_user(auth_header: AuthDependency, request: Request):
         student_id = request.path_params.get("student_id")
         course_id = __basic_request_param_checks(request.path_params.get("course_id"))
         res = users_api_client.get(
             f"/api/v3/courses/{course_id}/users",
-            headers={
-                "Authorization": f"{auth_header.scheme} {auth_header.credentials}"
-            },
+            headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
             params={"student_id": student_id},
         )
         if res.status_code != status.HTTP_200_OK or len(res.json()) == 0:

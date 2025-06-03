@@ -5,11 +5,10 @@ import pika
 import pika.exceptions
 from rpl_activities.src.config import env
 
+
 class MQSender:
     def __init__(self):
-        self.connection = pika.BlockingConnection(
-            [pika.URLParameters(env.QUEUE_URL)]
-        )
+        self.connection = pika.BlockingConnection([pika.URLParameters(env.QUEUE_URL)])
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue="hello", durable=True, arguments={"x-message-ttl": 3600000})
 
@@ -19,9 +18,7 @@ class MQSender:
             exchange="",
             routing_key="hello",
             body=message,
-            properties=pika.BasicProperties(
-                delivery_mode=pika.DeliveryMode.Persistent
-            )
+            properties=pika.BasicProperties(delivery_mode=pika.DeliveryMode.Persistent),
         )
         logging.info(f"Sent submission to MQ: {message}")
 
@@ -31,6 +28,7 @@ class MQSender:
         self.channel = None
         self.connection = None
 
+
 def get_mq_sender():
     try:
         mq_sender = MQSender()
@@ -39,5 +37,6 @@ def get_mq_sender():
         logging.error(f"Failed to connect to MQ: {e}")
     finally:
         mq_sender.close()
+
 
 MQSenderDependency = Annotated[MQSender, Depends(get_mq_sender)]

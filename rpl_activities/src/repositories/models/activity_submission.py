@@ -27,6 +27,4 @@ class ActivitySubmission(Base):
 
     activity: Mapped["Activity"] = relationship(back_populates="submissions")
     solution_rplfile: Mapped["RPLFile"] = relationship(back_populates="submission")
-    tests_execution_log: Mapped[Optional["TestsExecutionLog"]] = relationship(
-        back_populates="submission"
-    )
+    tests_execution_log: Mapped[Optional["TestsExecutionLog"]] = relationship(back_populates="submission")

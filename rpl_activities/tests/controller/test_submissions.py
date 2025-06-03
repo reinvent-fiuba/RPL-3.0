@@ -34,14 +34,23 @@ def test_get_submission(
     assert response_data["submission_rplfile_name"] == example_submission.solution_rplfile.file_name
     assert response_data["submission_rplfile_type"] == example_submission.solution_rplfile.file_type
     assert response_data["submission_rplfile_id"] == example_submission.solution_rplfile_id
-    assert response_data["acitivity_starting_rplfile_name"] == example_submission.activity.starting_rplfile.file_name
-    assert response_data["activity_starting_rplfile_type"] == example_submission.activity.starting_rplfile.file_type
+    assert (
+        response_data["acitivity_starting_rplfile_name"]
+        == example_submission.activity.starting_rplfile.file_name
+    )
+    assert (
+        response_data["activity_starting_rplfile_type"]
+        == example_submission.activity.starting_rplfile.file_type
+    )
     assert response_data["activity_starting_rplfile_id"] == example_submission.activity.starting_rplfile_id
-    assert response_data["activity_language"] == example_submission.activity.language  # With version! (intended)
+    assert (
+        response_data["activity_language"] == example_submission.activity.language
+    )  # With version! (intended)
     assert response_data["is_io_tested"] == example_submission.activity.is_io_tested
     assert response_data["compilation_flags"] == example_submission.activity.compilation_flags
     assert (
-        response_data["activity_unit_tests_content"] == example_submission.activity.unit_test_suite.test_rplfile.data.decode()
+        response_data["activity_unit_tests_content"]
+        == example_submission.activity.unit_test_suite.test_rplfile.data.decode()
     )
     assert len(response_data["activity_io_tests_input"]) == len(example_submission.activity.io_tests)
 
@@ -77,7 +86,9 @@ def test_create_submission(
     assert response.status_code == status.HTTP_201_CREATED
     response_data = response.json()
     # the name contains date, course_id, activity_id and user_id; finishing with a SUBM suffix
-    assert f"__{example_activity.course_id}__{example_activity.id}__" in response_data["submission_rplfile_name"]
+    assert (
+        f"__{example_activity.course_id}__{example_activity.id}__" in response_data["submission_rplfile_name"]
+    )
     assert response_data["submission_rplfile_type"] == aux_models.RPLFileType.GZIP
     assert response_data["activity_starting_rplfile_name"] == example_activity.starting_rplfile.file_name
     assert response_data["activity_starting_rplfile_type"] == example_activity.starting_rplfile.file_type

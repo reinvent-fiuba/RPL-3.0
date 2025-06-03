@@ -20,6 +20,4 @@ class ActivityCategory(Base):
     date_created: Mapped[AutoDateTime]
     last_updated: Mapped[AutoDateTime]
 
-    activities: Mapped[List["Activity"]] = relationship(
-        back_populates="category", lazy="raise"
-    )
+    activities: Mapped[List["Activity"]] = relationship(back_populates="category", lazy="raise")

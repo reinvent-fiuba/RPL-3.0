@@ -26,10 +26,12 @@ class IOTestRunResultDTO(BaseModel):
     expected_output: str
     run_output: str
 
+
 class UnitTestRunResultDTO(BaseModel):
     name: str
     passed: bool
     error_messages: Optional[str] = None
+
 
 class SubmissionResultResponseDTO(BaseModel):
     id: int
@@ -51,6 +53,7 @@ class SubmissionResultResponseDTO(BaseModel):
     iotests_run_results: Optional[List[IOTestRunResultDTO]] = None
     unittests_run_results: Optional[List[UnitTestRunResultDTO]] = None
 
+
 # ==============================================================================
 # Runner-facing DTOs
 
@@ -69,6 +72,7 @@ class SubmissionResponseDTO(BaseModel):
     activity_unit_tests_content: str = ""
     activity_io_tests_input: List[str] = []
 
+
 class UpdateSubmissionStatusRequestDTO(BaseModel):
     status: aux_models.SubmissionStatus
 
@@ -78,11 +82,13 @@ class SingleUnitTestRunReportDTO(BaseModel):
     status: str
     messages: Optional[str] = None
 
+
 class UnitTestSuiteRunsSummaryDTO(BaseModel):
     amount_passed: int
     amount_failed: int
     amount_errored: int
     single_test_reports: List[SingleUnitTestRunReportDTO]
+
 
 class TestsExecutionLogDTO(BaseModel):
     tests_execution_result_status: aux_models.TestsExecutionResultStatus
@@ -107,4 +113,3 @@ class SubmissionWithMetadataOnlyResponseDTO(BaseModel):
     activity_starting_rplfile_id: int
     activity_language: aux_models.LanguageWithVersion
     is_io_tested: bool
-

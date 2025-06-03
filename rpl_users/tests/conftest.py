@@ -137,12 +137,8 @@ def admin_auth_headers_fixture(
     )
     response_data = response.json()
     if response.status_code != status.HTTP_200_OK:
-        pytest.fail(
-            f"Failed to get [admin auth headers]: {response.status_code} - {response_data}"
-        )
-    return {
-        "Authorization": f"{response_data['token_type']} {response_data['access_token']}"
-    }
+        pytest.fail(f"Failed to get [admin auth headers]: {response.status_code} - {response_data}")
+    return {"Authorization": f"{response_data['token_type']} {response_data['access_token']}"}
 
 
 @pytest.fixture(name="regular_auth_headers", scope="function")
@@ -155,12 +151,8 @@ def regular_auth_headers_fixture(
     )
     response_data = response.json()
     if response.status_code != status.HTTP_200_OK:
-        pytest.fail(
-            f"Failed to get [regular auth headers]: {response.status_code} - {response_data}"
-        )
-    return {
-        "Authorization": f"{response_data['token_type']} {response_data['access_token']}"
-    }
+        pytest.fail(f"Failed to get [regular auth headers]: {response.status_code} - {response_data}")
+    return {"Authorization": f"{response_data['token_type']} {response_data['access_token']}"}
 
 
 # ====================== COURSE ROLES ====================== #
@@ -194,9 +186,7 @@ def base_roles_fixture(users_api_dbsession: Session):
 
 @pytest.fixture(name="course_with_superadmin_as_admin_user", scope="function")
 def course_with_superadmin_as_admin_user_fixture(
-    users_api_dbsession: Session, 
-    example_users: dict[str, User], 
-    base_roles: dict[str, Role]
+    users_api_dbsession: Session, example_users: dict[str, User], base_roles: dict[str, Role]
 ):
     course = Course(
         name="Algo1Mendez",
@@ -226,9 +216,7 @@ def course_with_superadmin_as_admin_user_fixture(
 
 @pytest.fixture(name="course_with_regular_user_as_admin_user", scope="function")
 def course_with_regular_user_as_admin_user_fixture(
-    users_api_dbsession: Session, 
-    example_users: dict[str, User],
-    base_roles: dict[str, Role]
+    users_api_dbsession: Session, example_users: dict[str, User], base_roles: dict[str, Role]
 ):
     course = Course(
         name="Algo1Mendez",
@@ -256,9 +244,7 @@ def course_with_regular_user_as_admin_user_fixture(
     yield {"course": course, "admin_course_user": admin_course_user}
 
 
-@pytest.fixture(
-    name="course_with_teacher_as_admin_user_and_student_user", scope="function"
-)
+@pytest.fixture(name="course_with_teacher_as_admin_user_and_student_user", scope="function")
 def course_with_teacher_as_admin_user_and_student_user_fixture(
     users_api_dbsession: Session,
     example_users: dict[str, User],

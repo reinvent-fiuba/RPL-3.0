@@ -34,9 +34,7 @@ class SubmissionsRepository(BaseRepository):
         if len(current_user_submissions_at_activity) == 0:
             return aux_models.SubmissionStatus.NO_SUBMISSIONS
 
-        statuses = [
-            submission.status for submission in current_user_submissions_at_activity
-        ]
+        statuses = [submission.status for submission in current_user_submissions_at_activity]
 
         status_order = list(aux_models.SubmissionStatus)
         best_status = max(statuses, key=lambda status: status_order.index(status))
@@ -65,9 +63,7 @@ class SubmissionsRepository(BaseRepository):
             self.db_session.execute(
                 sa.select(ActivitySubmission).where(
                     ActivitySubmission.user_id == user_id,
-                    ActivitySubmission.activity_id.in_(
-                        [activity.id for activity in activities]
-                    ),
+                    ActivitySubmission.activity_id.in_([activity.id for activity in activities]),
                 )
             )
             .scalars()
@@ -76,27 +72,19 @@ class SubmissionsRepository(BaseRepository):
 
     # =================================================================
 
-    def get_unit_tests_data_from_submission(
-        self, submission: ActivitySubmission
-    ) -> str:
+    def get_unit_tests_data_from_submission(self, submission: ActivitySubmission) -> str:
         return (
             submission.activity.unit_test_suite.test_rplfile.data.decode()
             if submission.activity.unit_test_suite
             else ""
         )
 
-    def get_io_tests_input_data_from_submission(
-        self, submission: ActivitySubmission
-    ) -> list[str]:
+    def get_io_tests_input_data_from_submission(self, submission: ActivitySubmission) -> list[str]:
         io_tests = submission.activity.io_tests
         return [iotest.test_in for iotest in io_tests] if io_tests else []
 
     def get_tests_exit_msg_from_submission(self, submission: ActivitySubmission) -> str:
-        return (
-            submission.tests_execution_log.exit_message
-            if submission.tests_execution_log
-            else ""
-        )
+        return submission.tests_execution_log.exit_message if submission.tests_execution_log else ""
 
     def get_io_tests_run_results_from_submission(
         self, submission: ActivitySubmission
@@ -128,18 +116,14 @@ class SubmissionsRepository(BaseRepository):
         ):
             return []
         return [
-            UnitTestRunResultDTO(
-                name=run.test_name, passed=run.passed, error_messages=run.error_messages
-            )
+            UnitTestRunResultDTO(name=run.test_name, passed=run.passed, error_messages=run.error_messages)
             for run in submission.tests_execution_log.unit_test_runs
         ]
 
     def get_by_id(self, submission_id: int) -> ActivitySubmission | None:
         return (
             self.db_session.execute(
-                sa.select(ActivitySubmission).where(
-                    ActivitySubmission.id == submission_id
-                )
+                sa.select(ActivitySubmission).where(ActivitySubmission.id == submission_id)
             )
             .scalars()
             .one_or_none()
@@ -157,10 +141,7 @@ class SubmissionsRepository(BaseRepository):
         files_to_compress = {}
         for uploadfile in submission_uploadfiles:
             if uploadfile.filename in starting_files_metadata.keys():
-                if (
-                    starting_files_metadata[uploadfile.filename]["display"]
-                    == "read_write"
-                ):
+                if starting_files_metadata[uploadfile.filename]["display"] == "read_write":
                     files_to_compress[uploadfile.filename] = uploadfile.file.read()
                 else:
                     files_to_compress[uploadfile.filename] = extracted_starting_files[
@@ -184,17 +165,11 @@ class SubmissionsRepository(BaseRepository):
         activity: Activity,
         current_course_user: CurrentCourseUser,
     ) -> ActivitySubmission:
-        extracted_starting_files = tar_utils.extract_tar_gz_to_dict_of_files(
-            activity.starting_rplfile.data
+        extracted_starting_files = tar_utils.extract_tar_gz_to_dict_of_files(activity.starting_rplfile.data)
+        verified_raw_submission_files = self.__get_verified_submission_files_to_compress(
+            extracted_starting_files, new_submission_data.submission_files
         )
-        verified_raw_submission_files = (
-            self.__get_verified_submission_files_to_compress(
-                extracted_starting_files, new_submission_data.submission_files
-            )
-        )
-        compressed_submission_files = tar_utils.compress_files_dict_to_tar_gz(
-            verified_raw_submission_files
-        )
+        compressed_submission_files = tar_utils.compress_files_dict_to_tar_gz(verified_raw_submission_files)
         rplfile = self.rplfiles_repo.create_rplfile(
             file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{current_course_user.course_id}__{activity.id}__{current_course_user.user_id}_SUBM.tar.gz",
             file_type=aux_models.RPLFileType.GZIP,
@@ -223,9 +198,7 @@ class SubmissionsRepository(BaseRepository):
         self.db_session.refresh(submission)
         return submission
 
-    def mark_submission_as_final_solution(
-        self, submission: ActivitySubmission
-    ) -> ActivitySubmission:
+    def mark_submission_as_final_solution(self, submission: ActivitySubmission) -> ActivitySubmission:
         submission.is_final_solution = True
         submission.last_updated = datetime.now(timezone.utc)
         self.db_session.commit()
@@ -247,9 +220,7 @@ class SubmissionsRepository(BaseRepository):
             .one_or_none()
         )
 
-    def get_all_final_submissions_for_activity(
-        self, activity_id: int
-    ) -> list[ActivitySubmission]:
+    def get_all_final_submissions_for_activity(self, activity_id: int) -> list[ActivitySubmission]:
         return (
             self.db_session.execute(
                 sa.select(ActivitySubmission).where(

@@ -44,12 +44,8 @@ class RPLFilesService:
             )
         return tar_utils.extract_tar_gz_to_dict_of_files(rplfile.data)
 
-    def get_multiple_extracted_rplfiles(
-        self, raw_rplfiles_ids: str
-    ) -> list[ExtractedFilesDict]:
-        rplfiles_ids: list[int] = [
-            int(rplfile_id) for rplfile_id in raw_rplfiles_ids.split(",")
-        ]
+    def get_multiple_extracted_rplfiles(self, raw_rplfiles_ids: str) -> list[ExtractedFilesDict]:
+        rplfiles_ids: list[int] = [int(rplfile_id) for rplfile_id in raw_rplfiles_ids.split(",")]
         extracted_rplfiles: list[ExtractedFilesDict] = []
         for rplfile_id in rplfiles_ids:
             files = self.get_extracted_rplfile(rplfile_id)
@@ -70,9 +66,7 @@ class RPLFilesService:
         try:
             general_metadata_dict = json.loads(raw_metadata_file)
         except json.JSONDecodeError:
-            logging.warning(
-                f"Metadata file: JSON decode error for {rplfile_id}: {raw_metadata_file}"
-            )
+            logging.warning(f"Metadata file: JSON decode error for {rplfile_id}: {raw_metadata_file}")
             return {}
 
         filtered_files: ExtractedFilesDict = {}
@@ -88,16 +82,10 @@ class RPLFilesService:
                         filtered_files[filename] = file_content
         return filtered_files
 
-    def get_multiple_extracted_rplfiles_for_student(
-        self, raw_rplfiles_ids: str
-    ) -> list[ExtractedFilesDict]:
-        rplfiles_ids: list[int] = [
-            int(rplfile_id) for rplfile_id in raw_rplfiles_ids.split(",")
-        ]
+    def get_multiple_extracted_rplfiles_for_student(self, raw_rplfiles_ids: str) -> list[ExtractedFilesDict]:
+        rplfiles_ids: list[int] = [int(rplfile_id) for rplfile_id in raw_rplfiles_ids.split(",")]
         extracted_rplfiles: list[ExtractedFilesDict] = []
         for rplfile_id in rplfiles_ids:
             extracted_rplfile = self.get_extracted_rplfile_for_student(rplfile_id)
             extracted_rplfiles.append(extracted_rplfile)
         return extracted_rplfiles
-
-    

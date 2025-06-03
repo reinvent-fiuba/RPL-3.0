@@ -33,7 +33,10 @@ def test_get_activities_as_student_returns_only_active_activities(
     assert len(response.json()) == 1
     assert response_activity["name"] == example_activity.name
     assert response_activity["description"] == example_activity.description
-    assert response_activity["language"] == aux_models.LanguageWithVersion(example_activity.language).without_version()
+    assert (
+        response_activity["language"]
+        == aux_models.LanguageWithVersion(example_activity.language).without_version()
+    )
     assert response_activity["is_io_tested"] == example_activity.is_io_tested
     assert response_activity["points"] == example_activity.points
 
@@ -96,9 +99,8 @@ def test_get_activities_with_multiple_submissions_returns_them_with_their_best_s
 
     assert response_activity["submission_status"] == example_failed_submission.status
     assert response_activity["submission_status"] == aux_models.SubmissionStatus.FAILURE
-    assert (
-        response_activity["last_submission_date"]
-        == example_submission.date_created.strftime("%Y-%m-%dT%H:%M:%S")
+    assert response_activity["last_submission_date"] == example_submission.date_created.strftime(
+        "%Y-%m-%dT%H:%M:%S"
     )
 
 
@@ -121,7 +123,10 @@ def test_get_activity(
     assert response_activity["description"] == example_activity.description
     assert response_activity["category_name"] == example_category.name
     assert response_activity["category_description"] == example_category.description
-    assert response_activity["language"] == aux_models.LanguageWithVersion(example_activity.language).without_version()
+    assert (
+        response_activity["language"]
+        == aux_models.LanguageWithVersion(example_activity.language).without_version()
+    )
     assert response_activity["active"] == example_activity.active
     assert response_activity["activity_iotests"] == []
     assert response_activity["starting_rplfile_id"] == example_activity.starting_rplfile_id
@@ -156,14 +161,10 @@ def test_get_activity_with_io_tests(
     assert len(response_activity["activity_iotests"]) == 2
     assert response_activity["activity_iotests"][0]["name"] == example_io_tests[0].name
     assert response_activity["activity_iotests"][0]["test_in"] == example_io_tests[0].test_in
-    assert (
-        response_activity["activity_iotests"][0]["test_out"] == example_io_tests[0].test_out
-    )
+    assert response_activity["activity_iotests"][0]["test_out"] == example_io_tests[0].test_out
     assert response_activity["activity_iotests"][1]["name"] == example_io_tests[1].name
     assert response_activity["activity_iotests"][1]["test_in"] == example_io_tests[1].test_in
-    assert (
-        response_activity["activity_iotests"][1]["test_out"] == example_io_tests[1].test_out
-    )
+    assert response_activity["activity_iotests"][1]["test_out"] == example_io_tests[1].test_out
 
 
 # ==============================================================================
@@ -421,9 +422,7 @@ def test_create_activity_in_wrong_existing_course_forbidden(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-
 # ==============================================================================
-
 
 
 def test_update_activity_as_teacher_success(
@@ -489,7 +488,10 @@ def test_update_activity_as_teacher_success(
     assert response_data["category_id"] == example_inactive_activity.category_id
     assert response_data["name"] == example_inactive_activity.name
     assert response_data["description"] == example_inactive_activity.description
-    assert response_data["language"] == aux_models.LanguageWithVersion(example_inactive_activity.language).without_version()
+    assert (
+        response_data["language"]
+        == aux_models.LanguageWithVersion(example_inactive_activity.language).without_version()
+    )
     assert response_data["is_io_tested"] is False
     assert response_data["active"] is True
     assert response_data["deleted"] is False
@@ -520,7 +522,6 @@ def test_update_activity_as_student_forbidden(
         files=examples_of_starting_files_raw_data["python"],
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
-
 
 
 # ==============================================================================
@@ -687,6 +688,7 @@ def test_delete_io_test_for_activity(
 
 # ==============================================================================
 
+
 def test_create_unit_tests_for_activity_as_student_forbidden(
     activities_api_client: TestClient,
     example_activity: Activity,
@@ -810,4 +812,3 @@ def test_update_unit_tests_for_activity_that_didnt_have_any_returns_not_found(
         json=data,
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
-

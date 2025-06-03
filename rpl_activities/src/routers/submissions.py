@@ -11,7 +11,7 @@ from rpl_activities.src.dtos.submission_dtos import (
     SubmissionResponseDTO,
     UpdateSubmissionStatusRequestDTO,
     TestsExecutionLogDTO,
-    SubmissionWithMetadataOnlyResponseDTO
+    SubmissionWithMetadataOnlyResponseDTO,
 )
 from rpl_activities.src.services.submissions import SubmissionsService
 
@@ -19,21 +19,15 @@ from rpl_activities.src.services.submissions import SubmissionsService
 router = APIRouter(prefix="/api/v3", tags=["Activity Submissions"])
 
 
-@router.get(
-    "/submissions/{submission_id}",
-    response_model=SubmissionResponseDTO
-)
-def get_submission(
-    submission_id: int,
-    db: DBSessionDependency
-):
+@router.get("/submissions/{submission_id}", response_model=SubmissionResponseDTO)
+def get_submission(submission_id: int, db: DBSessionDependency):
     return SubmissionsService(db).get_submission(submission_id)
 
 
 @router.post(
     "/courses/{course_id}/activities/{activity_id}/submissions",
     response_model=SubmissionWithMetadataOnlyResponseDTO,
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
 )
 def create_submission(
     course_id: int,
@@ -41,9 +35,11 @@ def create_submission(
     current_course_user: CurrentCourseUserDependency,
     db: DBSessionDependency,
     mq_sender: MQSenderDependency,
-    new_submission_data: SubmissionCreationRequestDTO = Form(..., media_type="multipart/form-data")
+    new_submission_data: SubmissionCreationRequestDTO = Form(..., media_type="multipart/form-data"),
 ):
-    return SubmissionsService(db, mq_sender).create_submission(course_id, activity_id, new_submission_data, current_course_user)
+    return SubmissionsService(db, mq_sender).create_submission(
+        course_id, activity_id, new_submission_data, current_course_user
+    )
 
 
 @router.put(
@@ -51,12 +47,9 @@ def create_submission(
     response_model=SubmissionWithMetadataOnlyResponseDTO,
 )
 def update_submission_status(
-    submission_id: int,
-    new_status_data: UpdateSubmissionStatusRequestDTO,
-    db: DBSessionDependency
+    submission_id: int, new_status_data: UpdateSubmissionStatusRequestDTO, db: DBSessionDependency
 ):
     return SubmissionsService(db).update_submission_status(submission_id, new_status_data)
-
 
 
 @router.put(
@@ -68,7 +61,7 @@ def mark_submission_as_final_solution(
     activity_id: int,
     submission_id: int,
     current_course_user: CurrentCourseUserDependency,
-    db: DBSessionDependency
+    db: DBSessionDependency,
 ):
     return SubmissionsService(db).mark_submission_as_final_solution(
         course_id, activity_id, submission_id, current_course_user
@@ -83,9 +76,11 @@ def get_final_submission_for_current_student(
     course_id: int,
     activity_id: int,
     current_course_user: CurrentCourseUserDependency,
-    db: DBSessionDependency
+    db: DBSessionDependency,
 ):
-    return SubmissionsService(db).get_final_submission_for_current_student(course_id, activity_id, current_course_user)
+    return SubmissionsService(db).get_final_submission_for_current_student(
+        course_id, activity_id, current_course_user
+    )
 
 
 @router.get(
@@ -96,9 +91,11 @@ def get_all_final_submissions_from_activity(
     course_id: int,
     activity_id: int,
     current_course_user: CurrentCourseUserDependency,
-    db: DBSessionDependency
+    db: DBSessionDependency,
 ):
-    return SubmissionsService(db).get_all_final_submissions_from_activity(course_id, activity_id, current_course_user)
+    return SubmissionsService(db).get_all_final_submissions_from_activity(
+        course_id, activity_id, current_course_user
+    )
 
 
 @router.post(
@@ -106,40 +103,36 @@ def get_all_final_submissions_from_activity(
     status_code=status.HTTP_201_CREATED,
 )
 def save_tests_execution_log_for_submission(
-    submission_id: int,
-    new_execution_log_data: TestsExecutionLogDTO,
-    db: DBSessionDependency
+    submission_id: int, new_execution_log_data: TestsExecutionLogDTO, db: DBSessionDependency
 ):
-    return SubmissionsService(db).save_tests_execution_log_for_submission(submission_id, new_execution_log_data)
+    return SubmissionsService(db).save_tests_execution_log_for_submission(
+        submission_id, new_execution_log_data
+    )
 
 
-@router.get(
-    "/submissions/{submission_id}/result",
-    response_model=SubmissionResultResponseDTO
-)
-def get_submission_execution_result(
-    submission_id: int,
-    db: DBSessionDependency
-):
+@router.get("/submissions/{submission_id}/result", response_model=SubmissionResultResponseDTO)
+def get_submission_execution_result(submission_id: int, db: DBSessionDependency):
     return SubmissionsService(db).get_submission_execution_result(submission_id)
 
 
 @router.get(
     "/courses/{course_id}/activities/{activity_id}/submissions",
-    response_model=List[SubmissionResultResponseDTO]
+    response_model=List[SubmissionResultResponseDTO],
 )
 def get_all_current_user_submissions_results_from_activity(
     course_id: int,
     activity_id: int,
     current_course_user: CurrentCourseUserDependency,
-    db: DBSessionDependency
+    db: DBSessionDependency,
 ):
-    return SubmissionsService(db).get_all_current_user_submissions_results_from_activity(course_id, activity_id, current_course_user)
+    return SubmissionsService(db).get_all_current_user_submissions_results_from_activity(
+        course_id, activity_id, current_course_user
+    )
 
 
 @router.get(
     "/courses/{course_id}/activities/{activity_id}/students/{student_id}/submissions",
-    response_model=List[SubmissionResultResponseDTO]
+    response_model=List[SubmissionResultResponseDTO],
 )
 def get_all_submissions_results_from_activity_for_student(
     course_id: int,
@@ -147,7 +140,7 @@ def get_all_submissions_results_from_activity_for_student(
     student_id: int,
     current_course_user: CurrentCourseUserDependency,
     student_course_user: StudentCourseUserDependency,
-    db: DBSessionDependency
+    db: DBSessionDependency,
 ):
     return SubmissionsService(db).get_all_submissions_results_from_activity_for_student(
         activity_id, current_course_user, student_course_user
@@ -157,10 +150,7 @@ def get_all_submissions_results_from_activity_for_student(
 @router.post(
     "/submissions/reprocessAll",
     response_model=List[SubmissionWithMetadataOnlyResponseDTO],
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
 )
-def reprocess_all_pending_submissions(
-    db: DBSessionDependency,
-    mq_sender: MQSenderDependency
-):
+def reprocess_all_pending_submissions(db: DBSessionDependency, mq_sender: MQSenderDependency):
     return SubmissionsService(db, mq_sender).reprocess_all_pending_submissions()

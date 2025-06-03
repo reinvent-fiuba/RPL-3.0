@@ -32,12 +32,8 @@ class SubmissionsService:
         self,
         submission: ActivitySubmission,
     ) -> SubmissionResponseDTO:
-        unit_tests_data = self.submissions_repo.get_unit_tests_data_from_submission(
-            submission
-        )
-        io_tests_input_data = (
-            self.submissions_repo.get_io_tests_input_data_from_submission(submission)
-        )
+        unit_tests_data = self.submissions_repo.get_unit_tests_data_from_submission(submission)
+        io_tests_input_data = self.submissions_repo.get_io_tests_input_data_from_submission(submission)
         return SubmissionResponseDTO(
             id=submission.id,
             submission_rplfile_name=submission.solution_rplfile.file_name,
@@ -72,21 +68,11 @@ class SubmissionsService:
     def __build_submission_result_response(
         self, submission: ActivitySubmission
     ) -> SubmissionResultResponseDTO:
-        unit_tests_data = self.submissions_repo.get_unit_tests_data_from_submission(
-            submission
-        )
-        io_tests_input_data = (
-            self.submissions_repo.get_io_tests_input_data_from_submission(submission)
-        )
-        submission_tests_exit_msg = (
-            self.submissions_repo.get_tests_exit_msg_from_submission(submission)
-        )
-        io_tests_run_results = (
-            self.submissions_repo.get_io_tests_run_results_from_submission(submission)
-        )
-        unit_tests_run_results = (
-            self.submissions_repo.get_unit_tests_run_results_from_submission(submission)
-        )
+        unit_tests_data = self.submissions_repo.get_unit_tests_data_from_submission(submission)
+        io_tests_input_data = self.submissions_repo.get_io_tests_input_data_from_submission(submission)
+        submission_tests_exit_msg = self.submissions_repo.get_tests_exit_msg_from_submission(submission)
+        io_tests_run_results = self.submissions_repo.get_io_tests_run_results_from_submission(submission)
+        unit_tests_run_results = self.submissions_repo.get_unit_tests_run_results_from_submission(submission)
         return SubmissionResultResponseDTO(
             id=submission.id,
             activity_id=submission.activity_id,
@@ -141,15 +127,11 @@ class SubmissionsService:
 
     def __post_submission_to_queue(self, submission: ActivitySubmission):
         if not self.mq_sender:
-            logging.warning(
-                "MQSender is not configured, skipping submission queue posting."
-            )
+            logging.warning("MQSender is not configured, skipping submission queue posting.")
             return
         try:
             self.mq_sender.send_submission(submission.id, submission.activity.language)
-            self.submissions_repo.update_submission_status(
-                submission, aux_models.SubmissionStatus.ENQUEUED
-            )
+            self.submissions_repo.update_submission_status(submission, aux_models.SubmissionStatus.ENQUEUED)
         except Exception as e:
             logging.error(f"Failed to send submission {submission.id} to MQ: {e}")
 
@@ -167,9 +149,7 @@ class SubmissionsService:
         current_course_user: CurrentCourseUser,
     ) -> SubmissionWithMetadataOnlyResponseDTO:
         self.activities_service.verify_permission_to_submit(current_course_user)
-        activity = self.activities_service.verify_and_get_activity(
-            course_id, activity_id
-        )
+        activity = self.activities_service.verify_and_get_activity(course_id, activity_id)
         submission = self.submissions_repo.create_submission_for_activity(
             new_submission_data, activity, current_course_user
         )
@@ -194,19 +174,15 @@ class SubmissionsService:
     ) -> SubmissionWithMetadataOnlyResponseDTO:
         self.activities_service.verify_permission_to_submit(current_course_user)
         submission = self.__verify_and_get_submission(submission_id)
-        updated_submission = self.submissions_repo.mark_submission_as_final_solution(
-            submission
-        )
+        updated_submission = self.submissions_repo.mark_submission_as_final_solution(submission)
         return self.__build_submission_with_metadata_only_response(updated_submission)
 
     def get_final_submission_for_current_student(
         self, course_id: int, activity_id: int, current_course_user: CurrentCourseUser
     ) -> SubmissionWithMetadataOnlyResponseDTO:
         self.activities_service.verify_permission_to_submit(current_course_user)
-        final_submission = (
-            self.submissions_repo.get_final_submission_by_current_user_from_activity(
-                activity_id, current_course_user
-            )
+        final_submission = self.submissions_repo.get_final_submission_by_current_user_from_activity(
+            activity_id, current_course_user
         )
         if not final_submission:
             raise HTTPException(
@@ -219,26 +195,18 @@ class SubmissionsService:
         self, course_id: int, activity_id: int, current_course_user: CurrentCourseUser
     ) -> AllFinalSubmissionsResponseDTO:
         self.activities_service.verify_permission_to_submit(current_course_user)
-        final_submissions = (
-            self.submissions_repo.get_all_final_submissions_for_activity(activity_id)
-        )
+        final_submissions = self.submissions_repo.get_all_final_submissions_for_activity(activity_id)
         if not final_submissions:
             return AllFinalSubmissionsResponseDTO(submission_rplfile_ids=[])
-        submission_rplfile_ids = [
-            submission.solution_rplfile_id for submission in final_submissions
-        ]
-        return AllFinalSubmissionsResponseDTO(
-            submission_rplfile_ids=submission_rplfile_ids
-        )
+        submission_rplfile_ids = [submission.solution_rplfile_id for submission in final_submissions]
+        return AllFinalSubmissionsResponseDTO(submission_rplfile_ids=submission_rplfile_ids)
 
     def save_tests_execution_log_for_submission(
         self, submission_id: int, new_execution_log_data: TestsExecutionLogDTO
     ):
         submission = self.__verify_and_get_submission(submission_id)
-        test_execution_log, submission = (
-            self.tests_repo.save_tests_execution_log_for_submission(
-                new_execution_log_data, submission
-            )
+        test_execution_log, submission = self.tests_repo.save_tests_execution_log_for_submission(
+            new_execution_log_data, submission
         )
         if (
             new_execution_log_data.tests_execution_result_status
@@ -254,12 +222,10 @@ class SubmissionsService:
 
         passed_all_tests = False
         if submission.activity.is_io_tested:
-            passed_all_tests = (
-                self.tests_repo.save_io_test_runs_from_exec_log_and_check_if_all_passed(
-                    submission.activity.io_tests,
-                    test_execution_log.id,
-                    new_execution_log_data,
-                )
+            passed_all_tests = self.tests_repo.save_io_test_runs_from_exec_log_and_check_if_all_passed(
+                submission.activity.io_tests,
+                test_execution_log.id,
+                new_execution_log_data,
             )
         elif submission.activity.unit_test_suite:
             passed_all_tests = self.tests_repo.save_unit_test_runs_from_exec_log_and_check_if_all_passed(
@@ -269,9 +235,7 @@ class SubmissionsService:
             submission, new_execution_log_data, passed_all_tests
         )
 
-    def get_submission_execution_result(
-        self, submission_id: int
-    ) -> SubmissionResultResponseDTO:
+    def get_submission_execution_result(self, submission_id: int) -> SubmissionResultResponseDTO:
         submission = self.__verify_and_get_submission(submission_id)
         if submission.status in [
             aux_models.SubmissionStatus.PENDING,
@@ -288,15 +252,10 @@ class SubmissionsService:
         self, course_id: int, activity_id: int, current_course_user: CurrentCourseUser
     ) -> list[SubmissionResultResponseDTO]:
         self.activities_service.verify_permission_to_submit(current_course_user)
-        submissions = (
-            self.submissions_repo.get_all_submissions_from_activity_id_and_user_id(
-                activity_id, current_course_user.user_id
-            )
+        submissions = self.submissions_repo.get_all_submissions_from_activity_id_and_user_id(
+            activity_id, current_course_user.user_id
         )
-        return [
-            self.__build_submission_result_response(submission)
-            for submission in submissions
-        ]
+        return [self.__build_submission_result_response(submission) for submission in submissions]
 
     def get_all_submissions_results_from_activity_for_student(
         self,
@@ -305,22 +264,15 @@ class SubmissionsService:
         student_course_user: StudentCourseUser,
     ) -> list[SubmissionResultResponseDTO]:
         self.activities_service.verify_permission_to_manage(current_course_user)
-        submissions = (
-            self.submissions_repo.get_all_submissions_from_activity_id_and_user_id(
-                activity_id, student_course_user.user_id
-            )
+        submissions = self.submissions_repo.get_all_submissions_from_activity_id_and_user_id(
+            activity_id, student_course_user.user_id
         )
-        return [
-            self.__build_submission_result_response(submission)
-            for submission in submissions
-        ]
+        return [self.__build_submission_result_response(submission) for submission in submissions]
 
     def reprocess_all_pending_submissions(
         self,
     ) -> SubmissionWithMetadataOnlyResponseDTO:
-        pending_submissions = (
-            self.submissions_repo.get_all_pending_and_stuck_submissions()
-        )
+        pending_submissions = self.submissions_repo.get_all_pending_and_stuck_submissions()
         enqueued_submissions = []
         for submission in pending_submissions:
             self.__post_submission_to_queue(submission)

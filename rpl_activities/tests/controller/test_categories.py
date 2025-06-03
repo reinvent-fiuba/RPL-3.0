@@ -26,10 +26,7 @@ def test_teacher_get_categories(
     assert "last_updated" in response_category
     inactive_response_category = response.json()[1]
     assert inactive_response_category["name"] == example_inactive_category.name
-    assert (
-        inactive_response_category["description"]
-        == example_inactive_category.description
-    )
+    assert inactive_response_category["description"] == example_inactive_category.description
     assert inactive_response_category["active"] == example_inactive_category.active
     assert "date_created" in inactive_response_category
     assert "last_updated" in inactive_response_category
@@ -82,9 +79,7 @@ def test_create_category_success(activities_api_client: TestClient, admin_auth_h
     assert "last_updated" in response_category
 
 
-def test_create_category_invalid_data(
-    activities_api_client: TestClient, admin_auth_headers
-):
+def test_create_category_invalid_data(activities_api_client: TestClient, admin_auth_headers):
     course_id = 1
     category_data = {"description": "Some new description", "active": True}
     response = activities_api_client.post(
@@ -105,9 +100,7 @@ def test_create_category_without_login(activities_api_client: TestClient):
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_create_category_without_permission(
-    activities_api_client: TestClient, regular_auth_headers
-):
+def test_create_category_without_permission(activities_api_client: TestClient, regular_auth_headers):
     course_id = 1
     category_data = {"name": "New Category", "description": "Some new description"}
     response = activities_api_client.post(
@@ -116,10 +109,7 @@ def test_create_category_without_permission(
         json=category_data,
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert (
-        "User does not have permission to create a category"
-        in response.json()["detail"]
-    )
+    assert "User does not have permission to create a category" in response.json()["detail"]
 
 
 def test_update_category(
@@ -160,10 +150,7 @@ def test_update_category_without_permission(
         json=update_data,
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert (
-        "User does not have permission to update a category"
-        in response.json()["detail"]
-    )
+    assert "User does not have permission to update a category" in response.json()["detail"]
 
 
 # ==============================================================================

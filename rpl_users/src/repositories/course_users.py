@@ -39,9 +39,7 @@ class CourseUsersRepository(BaseRepository):
                 detail="User is already enrolled in the course",
             )
 
-    def update_course_user(
-        self, course_id: int, user_id: int, role_id: int, accepted: bool
-    ):
+    def update_course_user(self, course_id: int, user_id: int, role_id: int, accepted: bool):
         course_user = self.get_course_user(course_id=course_id, user_id=user_id)
         course_user.role_id = role_id
         course_user.accepted = accepted
@@ -71,9 +69,7 @@ class CourseUsersRepository(BaseRepository):
 
     def get_course_users(self, course_id: int) -> list[CourseUser]:
         return (
-            self.db_session.execute(
-                sa.select(CourseUser).where(CourseUser.course_id == course_id)
-            )
+            self.db_session.execute(sa.select(CourseUser).where(CourseUser.course_id == course_id))
             .scalars()
             .all()
         )
