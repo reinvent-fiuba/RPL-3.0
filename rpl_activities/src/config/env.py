@@ -6,11 +6,13 @@ if FASTAPI_PRODUCTION_PROFILE is None:
     load_dotenv(override=True)
 
 DB_URL = os.getenv("DB_URL")
+QUEUE_URL = os.getenv("QUEUE_URL")
 USERS_API_URL = os.getenv("USERS_API_URL")
 
 if not all(
     [
         DB_URL,
+        QUEUE_URL,
         USERS_API_URL,
     ]
 ):

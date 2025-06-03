@@ -11,10 +11,13 @@ from sqlalchemy.pool import StaticPool
 from rpl_activities.src.deps.auth import (
     AuthDependency,
     CurrentCourseUser,
-    __basic_path_param_checks,
+    StudentCourseUser,
+    __basic_request_param_checks,
     get_current_course_user,
+    get_student_course_user_for_current_user,
 )
 from rpl_activities.src.deps.database import get_db_session
+from rpl_activities.src.deps.mq_sender import get_mq_sender
 from rpl_activities.src.main import app
 from rpl_activities.src.repositories.models.activity import Activity
 from rpl_activities.src.repositories.models.activity_submission import (
@@ -59,16 +62,26 @@ def activities_api_dbsession_fixture():
     logging.debug("[tests:conftest] DB tables dropped")
 
 
+@pytest.fixture(name="test_mq_sender", scope="function")
+def mq_sender_fixture():
+    class TestMQSender:
+        def send_submission(self, submission_id: int, language_with_version: str):
+            return
+
+    return TestMQSender()
+
+
 @pytest.fixture(name="activities_api_client", scope="function")
 def activities_api_http_client_fixture(
     activities_api_dbsession,
     users_api_client: TestClient,
     course_with_teacher_as_admin_user_and_student_user,
+    test_mq_sender,
 ):
     app.dependency_overrides[get_db_session] = lambda: activities_api_dbsession
 
     def override_get_current_course_user(auth_header: AuthDependency, request: Request):
-        course_id = __basic_path_param_checks(request.path_params.get("course_id"))
+        course_id = __basic_request_param_checks(request.path_params.get("course_id"))
         res = users_api_client.get(
             "/api/v3/auth/externalCourseUserAuth",
             headers={
@@ -84,7 +97,32 @@ def activities_api_http_client_fixture(
         user_data = CourseUserResponseDTO(**res.json())
         return CurrentCourseUser(user_data)
 
+    def override_get_student_course_user_for_current_user(
+        auth_header: AuthDependency, request: Request
+    ):
+        student_id = request.path_params.get("student_id")
+        course_id = __basic_request_param_checks(request.path_params.get("course_id"))
+        res = users_api_client.get(
+            f"/api/v3/courses/{course_id}/users",
+            headers={
+                "Authorization": f"{auth_header.scheme} {auth_header.credentials}"
+            },
+            params={"student_id": student_id},
+        )
+        if res.status_code != status.HTTP_200_OK or len(res.json()) == 0:
+            raise HTTPException(
+                status_code=res.status_code,
+                detail=f"Failed to get student: {res.text}",
+            )
+        student_course_user = res.json()[0]
+        course_user_data = CourseUserResponseDTO(**student_course_user)
+        return StudentCourseUser(course_user_data)
+
     app.dependency_overrides[get_current_course_user] = override_get_current_course_user
+    app.dependency_overrides[get_student_course_user_for_current_user] = (
+        override_get_student_course_user_for_current_user
+    )
+    app.dependency_overrides[get_mq_sender] = lambda: test_mq_sender
 
     client = TestClient(app)
     yield client
@@ -150,7 +188,6 @@ def example_category_from_another_course_fixture(
     activities_api_dbsession.commit()
     activities_api_dbsession.refresh(category)
     yield category
-    
 
 
 # ==========================================================================
@@ -217,18 +254,74 @@ def example_starting_rplfile_fixture(activities_api_dbsession: Session):
 # Format: {language: [(name_of_form_param, (file_name, file_content, file_type)]}
 type StartingFileRawRequestData = tuple[str, tuple[str, bytes, str]]
 type ExamplesOfStartingFilesRawData = dict[list[StartingFileRawRequestData]]
+
+
 @pytest.fixture(name="examples_of_starting_files_raw_data")
 def examples_of_starting_files_raw_data_fixture():
     py_files = [
         ("starting_files", ("main.py", b'print("test")', "application/octet-stream")),
-        ("starting_files", ("assignment_main.py", b"# file assignment_main.py\ndef test():\n    pass\n", "application/octet-stream")),
-        ("starting_files", ("files_metadata", b'{"assignment_main.py":{"display":"read_write"}}', "application/octet-stream")),
+        (
+            "starting_files",
+            (
+                "assignment_main.py",
+                b"# file assignment_main.py\ndef test():\n    pass\n",
+                "application/octet-stream",
+            ),
+        ),
+        (
+            "starting_files",
+            (
+                "files_metadata",
+                b'{"assignment_main.py":{"display":"read_write"}}',
+                "application/octet-stream",
+            ),
+        ),
     ]
     c_files = [
-        ("starting_files", ("main.c", open("rpl_activities/tests/resources/activity_1_starting_files/main.c", "rb").read(), "application/octet-stream")),
-        ("starting_files", ("tiempo.c", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.c", "rb").read(), "application/octet-stream")),
-        ("starting_files", ("tiempo.h", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.h", "rb").read(), "application/octet-stream")),
-        ("starting_files", ("files_metadata", open("rpl_activities/tests/resources/activity_1_starting_files/files_metadata", "rb").read(), "application/octet-stream")),
+        (
+            "starting_files",
+            (
+                "main.c",
+                open(
+                    "rpl_activities/tests/resources/activity_1_starting_files/main.c",
+                    "rb",
+                ).read(),
+                "application/octet-stream",
+            ),
+        ),
+        (
+            "starting_files",
+            (
+                "tiempo.c",
+                open(
+                    "rpl_activities/tests/resources/activity_1_starting_files/tiempo.c",
+                    "rb",
+                ).read(),
+                "application/octet-stream",
+            ),
+        ),
+        (
+            "starting_files",
+            (
+                "tiempo.h",
+                open(
+                    "rpl_activities/tests/resources/activity_1_starting_files/tiempo.h",
+                    "rb",
+                ).read(),
+                "application/octet-stream",
+            ),
+        ),
+        (
+            "starting_files",
+            (
+                "files_metadata",
+                open(
+                    "rpl_activities/tests/resources/activity_1_starting_files/files_metadata",
+                    "rb",
+                ).read(),
+                "application/octet-stream",
+            ),
+        ),
     ]
     return {
         "python": py_files,
@@ -258,11 +351,33 @@ def example_submission_rplfile_fixture(activities_api_dbsession: Session):
 # Format: (name_of_form_param, (file_name, file_content, file_type)
 type SubmissionRawRequestData = StartingFileRawRequestData
 type ExamplesOfSubmissionRawData = list[SubmissionRawRequestData]
+
+
 @pytest.fixture(name="example_submission_raw_data")
 def example_submission_raw_data_fixture() -> ExamplesOfSubmissionRawData:
     return [
-        ("submission_files", ("tiempo.c", open("rpl_activities/tests/resources/activity_1_submission/tiempo.c", "rb").read(), "application/octet-stream")),
-        ("submission_files", ("tiempo.h", open("rpl_activities/tests/resources/activity_1_submission/tiempo.h", "rb").read(), "application/octet-stream"))
+        (
+            "submission_files",
+            (
+                "tiempo.c",
+                open(
+                    "rpl_activities/tests/resources/activity_1_submission/tiempo.c",
+                    "rb",
+                ).read(),
+                "application/octet-stream",
+            ),
+        ),
+        (
+            "submission_files",
+            (
+                "tiempo.h",
+                open(
+                    "rpl_activities/tests/resources/activity_1_submission/tiempo.h",
+                    "rb",
+                ).read(),
+                "application/octet-stream",
+            ),
+        ),
     ]
 
 

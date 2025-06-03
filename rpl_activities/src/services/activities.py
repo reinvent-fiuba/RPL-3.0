@@ -174,7 +174,7 @@ class ActivitiesService:
             return []
 
         all_submissions_by_current_user = (
-            self.submissions_repo.get_all_submissions_by_current_user_at_activities(
+            self.submissions_repo.get_all_submissions_by_user_at_activities(
                 current_course_user.user_id, activities
             )
         )

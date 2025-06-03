@@ -32,7 +32,7 @@ class CurrentCourseUser:
         return authority in self.permissions
 
 
-def __basic_path_param_checks(course_id: str) -> int:
+def __basic_request_param_checks(course_id: str) -> int:
     # Note: done due to direct usage of raw request. The proper handling is also done at router level, this is just an extra precaution.
     if not course_id:
         raise HTTPException(
@@ -54,11 +54,9 @@ def __basic_path_param_checks(course_id: str) -> int:
     return course_id
 
 
-async def get_current_course_user(
-    auth_header: AuthDependency, request: Request
-) -> CurrentCourseUser:
+async def get_current_course_user(auth_header: AuthDependency, request: Request) -> CurrentCourseUser:
     users_api_client: httpx.AsyncClient = request.state.users_api_client
-    course_id = __basic_path_param_checks(request.path_params.get("course_id"))
+    course_id = __basic_request_param_checks(request.path_params.get("course_id"))
 
     res = await users_api_client.get(
         "/api/v3/auth/externalCourseUserAuth",
@@ -70,8 +68,8 @@ async def get_current_course_user(
             status_code=res.status_code,
             detail=f"Failed to authenticate current course user: {res.text}",
         )
-    user_data = CourseUserResponseDTO(**res.json())
-    return CurrentCourseUser(user_data)
+    course_user_data = CourseUserResponseDTO(**res.json())
+    return CurrentCourseUser(course_user_data)
 
 
 CurrentCourseUserDependency = Annotated[
@@ -81,16 +79,66 @@ CurrentCourseUserDependency = Annotated[
 
 # ==========================================
 
-# class StudentCourseUser:
-#     def __init__(self, user_data: CourseUserResponseDTO):
-#         self.id = user_data.course_user_id
-#         self.user_id = user_data.user_id
-#         self.course_id = user_data.course_id
-#         self.username = user_data.username
-#         self.student_id = user_data.student_id
-#         self.permissions = user_data.permissions
 
-# async def get_student_course_user_for_current_user(
-#     auth_header: AuthDependency, request: Request
-# ) -> StudentCourseUser:
-    
+class StudentCourseUser:
+    def __init__(self, user_data: CourseUserResponseDTO):
+        self.id = user_data.course_user_id
+        self.user_id = user_data.user_id
+        self.course_id = user_data.course_id
+        self.name = user_data.name
+        self.surname = user_data.surname
+        self.username = user_data.username
+        self.student_id = user_data.student_id
+
+
+async def get_student_course_user_for_current_user(
+    auth_header: AuthDependency, request: Request
+) -> StudentCourseUser:
+    users_api_client: httpx.AsyncClient = request.state.users_api_client
+    student_id = request.path_params.get("student_id")
+    course_id = __basic_request_param_checks(request.path_params.get("course_id"))
+
+    res = await users_api_client.get(
+        f"/api/v3/courses/{course_id}/users?student_id={student_id}",
+        headers=auth_header,
+    )
+    if res.status_code != status.HTTP_200_OK or len(res.json()) == 0:
+        raise HTTPException(
+            status_code=res.status_code,
+            detail=f"Failed to get student: {res.text}",
+        )
+    student_course_user = res.json()[0]
+    course_user_data = CourseUserResponseDTO(**student_course_user)
+    return StudentCourseUser(course_user_data)
+
+
+StudentCourseUserDependency = Annotated[
+    StudentCourseUser,
+    Depends(get_student_course_user_for_current_user),
+]
+
+# ==========================================
+
+
+async def get_all_students_course_users_for_current_user(
+    auth_header: AuthDependency, request: Request
+) -> list[StudentCourseUser]:
+    users_api_client: httpx.AsyncClient = request.state.users_api_client
+    course_id = __basic_request_param_checks(request.path_params.get("course_id"))
+    res = await users_api_client.get(
+        f"/api/v3/courses/{course_id}/users?role_name=student",
+        headers=auth_header,
+    )
+    if res.status_code != status.HTTP_200_OK:
+        raise HTTPException(
+            status_code=res.status_code,
+            detail=f"Failed to get students: {res.text}",
+        )
+    students_course_users = res.json()
+    return [StudentCourseUser(CourseUserResponseDTO(**student)) for student in students_course_users]
+
+
+AllStudentsCourseUsersDependency = Annotated[
+    list[StudentCourseUser],
+    Depends(get_all_students_course_users_for_current_user),
+]

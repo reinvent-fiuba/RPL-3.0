@@ -1,8 +1,9 @@
 from typing import List, Optional, Union
 from fastapi import APIRouter, Form, status
-from rpl_activities.src.deps.auth import CurrentCourseUserDependency
+from rpl_activities.src.deps.auth import CurrentCourseUserDependency, StudentCourseUserDependency
 
 from rpl_activities.src.deps.database import DBSessionDependency
+from rpl_activities.src.deps.mq_sender import MQSenderDependency
 from rpl_activities.src.dtos.submission_dtos import (
     SubmissionCreationRequestDTO,
     AllFinalSubmissionsResponseDTO,
@@ -39,9 +40,10 @@ def create_submission(
     activity_id: int,
     current_course_user: CurrentCourseUserDependency,
     db: DBSessionDependency,
+    mq_sender: MQSenderDependency,
     new_submission_data: SubmissionCreationRequestDTO = Form(..., media_type="multipart/form-data")
 ):
-    return SubmissionsService(db).create_submission(course_id, activity_id, new_submission_data, current_course_user)
+    return SubmissionsService(db, mq_sender).create_submission(course_id, activity_id, new_submission_data, current_course_user)
 
 
 @router.put(
@@ -144,18 +146,21 @@ def get_all_submissions_results_from_activity_for_student(
     activity_id: int,
     student_id: int,
     current_course_user: CurrentCourseUserDependency,
+    student_course_user: StudentCourseUserDependency,
     db: DBSessionDependency
 ):
     return SubmissionsService(db).get_all_submissions_results_from_activity_for_student(
-        course_id, activity_id, student_id, current_course_user
+        activity_id, current_course_user, student_course_user
     )
 
 
-# @router.post(
-#     "/submissions/reprocessAll",
-#     response_model=List[SubmissionWithMetadataOnlyResponseDTO]
-# )
-# def reprocess_all_pending_submissions(
-#     db: DBSessionDependency
-# ):
-#     return SubmissionsService(db).reprocess_all_pending_submissions()
+@router.post(
+    "/submissions/reprocessAll",
+    response_model=List[SubmissionWithMetadataOnlyResponseDTO],
+    status_code=status.HTTP_201_CREATED
+)
+def reprocess_all_pending_submissions(
+    db: DBSessionDependency,
+    mq_sender: MQSenderDependency
+):
+    return SubmissionsService(db, mq_sender).reprocess_all_pending_submissions()

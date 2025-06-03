@@ -49,6 +49,8 @@ spec:
             secretKeyRef:
               name: users-db-url-local # TODO: change when deploying to gcp
               key: users-db-url-local # TODO: change when deploying to gcp
+        - name: ACTIVITIES_API_URL
+          value: "http://rpl-activities-api"
         - name: RPL_HELP_EMAIL_USER
           valueFrom:
             secretKeyRef:
