@@ -10,14 +10,15 @@ import datetime
 
 
 class CourseCreationDTO(BaseModel):
+    id: Optional[int] = None
     name: str
     university: str
     subject_id: str
     description: Optional[str] = None
     active: bool
     semester: str
-    semester_start_date: datetime.datetime
-    semester_end_date: datetime.datetime
+    semester_start_date: datetime.date
+    semester_end_date: datetime.date
     img_uri: Optional[str] = None
     course_user_admin_user_id: int
 
@@ -29,8 +30,8 @@ class CourseUptateDTO(BaseModel):
     description: Optional[str] = None
     active: bool
     semester: str
-    semester_start_date: datetime.datetime
-    semester_end_date: datetime.datetime
+    semester_start_date: datetime.date
+    semester_end_date: datetime.date
     img_uri: Optional[str] = None
 
 
@@ -50,8 +51,8 @@ class CourseResponseDTO(BaseModel):
     description: Optional[str] = None
     active: bool
     semester: str
-    semester_start_date: datetime.datetime
-    semester_end_date: datetime.datetime
+    semester_start_date: datetime.date
+    semester_end_date: datetime.date
     img_uri: Optional[str] = None
 
     @classmethod
@@ -64,8 +65,8 @@ class CourseResponseDTO(BaseModel):
             description=course.description,
             active=course.active,
             semester=course.semester,
-            semester_start_date=course.semester_start_date,
-            semester_end_date=course.semester_end_date,
+            semester_start_date=course.semester_start_date.date(),
+            semester_end_date=course.semester_end_date.date(),
             img_uri=course.img_uri,
         )
 
@@ -78,8 +79,8 @@ class CourseWithUserInformationResponseDTO(BaseModel):
     description: Optional[str] = None
     active: bool
     semester: str
-    semester_start_date: datetime.datetime
-    semester_end_date: datetime.datetime
+    semester_start_date: datetime.date
+    semester_end_date: datetime.date
     img_uri: Optional[str] = None
     # user info
     enrolled: bool
@@ -87,10 +88,7 @@ class CourseWithUserInformationResponseDTO(BaseModel):
 
     @classmethod
     def from_course_and_user_info(
-        cls,
-        course: "Course",
-        enrolled: "bool",
-        accepted: "bool",
+        cls, course: "Course", enrolled: "bool", accepted: "bool"
     ) -> "CourseWithUserInformationResponseDTO":
         return cls(
             id=course.id,
@@ -100,8 +98,8 @@ class CourseWithUserInformationResponseDTO(BaseModel):
             description=course.description,
             active=course.active,
             semester=course.semester,
-            semester_start_date=course.semester_start_date,
-            semester_end_date=course.semester_end_date,
+            semester_start_date=course.semester_start_date.date(),
+            semester_end_date=course.semester_end_date.date(),
             img_uri=course.img_uri,
             enrolled=enrolled,
             accepted=accepted,
@@ -127,10 +125,7 @@ class CourseUserResponseDTO(BaseModel):
     last_updated: datetime.datetime
 
     @classmethod
-    def from_course_user(
-        cls,
-        course_user: "CourseUser",
-    ) -> "CourseUserResponseDTO":
+    def from_course_user(cls, course_user: "CourseUser") -> "CourseUserResponseDTO":
         return cls(
             user_id=course_user.user.id,
             course_id=course_user.course.id,

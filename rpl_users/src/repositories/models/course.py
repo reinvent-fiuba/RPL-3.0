@@ -31,4 +31,3 @@ class Course(Base):
     last_updated: Mapped[AutoDateTime]
 
     course_users: Mapped[List["CourseUser"]] = relationship(back_populates="course")
-

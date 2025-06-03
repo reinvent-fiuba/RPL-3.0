@@ -44,21 +44,11 @@ def email_handler_fixture():
             self._emails_sent = []
 
         def send_validation_email(self, to_address):
-            self._emails_sent.append(
-                {
-                    "type": "validation",
-                    "to_address": to_address,
-                }
-            )
+            self._emails_sent.append({"type": "validation", "to_address": to_address})
             return "fake_token"
 
         def send_password_reset_email(self, to_address):
-            self._emails_sent.append(
-                {
-                    "type": "password_reset",
-                    "to_address": to_address,
-                }
-            )
+            self._emails_sent.append({"type": "password_reset", "to_address": to_address})
             return "fake_token"
 
         def send_course_acceptance_email(self, to_address, user_data, course_data):
@@ -132,17 +122,12 @@ def admin_auth_headers_fixture(
     users_api_client: TestClient, example_users: dict[str, User]
 ) -> dict[str, str]:
     response = users_api_client.post(
-        "/api/v3/auth/login",
-        json={"username_or_email": "adminUsername", "password": "secret"},
+        "/api/v3/auth/login", json={"username_or_email": "adminUsername", "password": "secret"}
     )
     response_data = response.json()
     if response.status_code != status.HTTP_200_OK:
-        pytest.fail(
-            f"Failed to get [admin auth headers]: {response.status_code} - {response_data}"
-        )
-    return {
-        "Authorization": f"{response_data['token_type']} {response_data['access_token']}"
-    }
+        pytest.fail(f"Failed to get [admin auth headers]: {response.status_code} - {response_data}")
+    return {"Authorization": f"{response_data['token_type']} {response_data['access_token']}"}
 
 
 @pytest.fixture(name="regular_auth_headers", scope="function")
@@ -150,17 +135,12 @@ def regular_auth_headers_fixture(
     users_api_client: TestClient, example_users: dict[str, User]
 ) -> dict[str, str]:
     response = users_api_client.post(
-        "/api/v3/auth/login",
-        json={"username_or_email": "regularUsername", "password": "secret"},
+        "/api/v3/auth/login", json={"username_or_email": "regularUsername", "password": "secret"}
     )
     response_data = response.json()
     if response.status_code != status.HTTP_200_OK:
-        pytest.fail(
-            f"Failed to get [regular auth headers]: {response.status_code} - {response_data}"
-        )
-    return {
-        "Authorization": f"{response_data['token_type']} {response_data['access_token']}"
-    }
+        pytest.fail(f"Failed to get [regular auth headers]: {response.status_code} - {response_data}")
+    return {"Authorization": f"{response_data['token_type']} {response_data['access_token']}"}
 
 
 # ====================== COURSE ROLES ====================== #
@@ -177,9 +157,7 @@ def base_roles_fixture(users_api_dbsession: Session):
     users_api_dbsession.commit()
 
     student_role = Role(
-        id=2,
-        name="student",
-        permissions="course_view,activity_view,activity_submit,user_view",
+        id=2, name="student", permissions="course_view,activity_view,activity_submit,user_view"
     )
     users_api_dbsession.add(student_role)
     users_api_dbsession.commit()
@@ -194,9 +172,7 @@ def base_roles_fixture(users_api_dbsession: Session):
 
 @pytest.fixture(name="course_with_superadmin_as_admin_user", scope="function")
 def course_with_superadmin_as_admin_user_fixture(
-    users_api_dbsession: Session, 
-    example_users: dict[str, User], 
-    base_roles: dict[str, Role]
+    users_api_dbsession: Session, example_users: dict[str, User], base_roles: dict[str, Role]
 ):
     course = Course(
         name="Algo1Mendez",
@@ -226,9 +202,7 @@ def course_with_superadmin_as_admin_user_fixture(
 
 @pytest.fixture(name="course_with_regular_user_as_admin_user", scope="function")
 def course_with_regular_user_as_admin_user_fixture(
-    users_api_dbsession: Session, 
-    example_users: dict[str, User],
-    base_roles: dict[str, Role]
+    users_api_dbsession: Session, example_users: dict[str, User], base_roles: dict[str, Role]
 ):
     course = Course(
         name="Algo1Mendez",
@@ -256,9 +230,7 @@ def course_with_regular_user_as_admin_user_fixture(
     yield {"course": course, "admin_course_user": admin_course_user}
 
 
-@pytest.fixture(
-    name="course_with_teacher_as_admin_user_and_student_user", scope="function"
-)
+@pytest.fixture(name="course_with_teacher_as_admin_user_and_student_user", scope="function")
 def course_with_teacher_as_admin_user_and_student_user_fixture(
     users_api_dbsession: Session,
     example_users: dict[str, User],

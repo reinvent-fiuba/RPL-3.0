@@ -1,6 +1,5 @@
 from typing import List, Optional
 from fastapi import APIRouter, status
-from rpl_activities.src.deps.auth import CurrentMainUserDependency
 from rpl_activities.src.deps.auth import CurrentCourseUserDependency
 
 from rpl_activities.src.deps.database import DBSessionDependency
@@ -17,14 +16,8 @@ router = APIRouter(prefix="/api/v3", tags=["ActivityCategories"])
 # ==============================================================================
 
 
-@router.get(
-    "/courses/{course_id}/activityCategories", response_model=List[CategoryResponseDTO]
-)
-def get_categories(
-    course_id: int,
-    current_course_user: CurrentCourseUserDependency,
-    db: DBSessionDependency,
-):
+@router.get("/courses/{course_id}/activityCategories", response_model=List[CategoryResponseDTO])
+def get_categories(course_id: int, current_course_user: CurrentCourseUserDependency, db: DBSessionDependency):
     return CategoriesService(db).get_categories(current_course_user, course_id)
 
 
@@ -39,17 +32,10 @@ def create_category(
     current_course_user: CurrentCourseUserDependency,
     db: DBSessionDependency,
 ):
-    return CategoriesService(db).create_category(
-        current_course_user,
-        course_id,
-        category_data,
-    )
+    return CategoriesService(db).create_category(current_course_user, course_id, category_data)
 
 
-@router.patch(
-    "/courses/{course_id}/activityCategories/{category_id}",
-    response_model=CategoryResponseDTO,
-)
+@router.patch("/courses/{course_id}/activityCategories/{category_id}", response_model=CategoryResponseDTO)
 def update_category(
     course_id: int,
     category_id: int,
@@ -58,8 +44,19 @@ def update_category(
     db: DBSessionDependency,
 ):
     return CategoriesService(db).update_category(
-        current_course_user,
-        course_id,
-        category_id,
-        new_category_data,
+        current_course_user, course_id, category_id, new_category_data
     )
+
+
+# ==============================================================================
+
+
+@router.post("/courses/{course_id}/activityCategories/clone", status_code=status.HTTP_201_CREATED)
+def clone_all_info(
+    course_id: int,
+    current_course_user: CurrentCourseUserDependency,
+    db: DBSessionDependency,
+    to_course_id=int,
+):
+    from_course_id = course_id
+    return CategoriesService(db).clone_all_info(current_course_user, from_course_id, to_course_id)

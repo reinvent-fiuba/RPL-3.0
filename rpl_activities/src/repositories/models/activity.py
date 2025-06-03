@@ -2,15 +2,11 @@ from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from rpl_activities.src.repositories.models.activity_category import (
-        ActivityCategory,
-    )
+    from rpl_activities.src.repositories.models.activity_category import ActivityCategory
     from rpl_activities.src.repositories.models.rpl_file import RPLFile
-    from rpl_activities.src.repositories.models.activity_submission import (
-        ActivitySubmission,
-    )
+    from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
     from rpl_activities.src.repositories.models.io_test import IOTest
-    from rpl_activities.src.repositories.models.unit_test import UnitTest
+    from rpl_activities.src.repositories.models.unit_test_suite import UnitTestSuite
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -38,10 +34,6 @@ class Activity(Base):
 
     category: Mapped["ActivityCategory"] = relationship(back_populates="activities")
     starting_rplfile: Mapped["RPLFile"] = relationship(back_populates="activity")
-    submissions: Mapped[List["ActivitySubmission"]] = relationship(
-        back_populates="activity", lazy="raise"
-    )
+    submissions: Mapped[List["ActivitySubmission"]] = relationship(back_populates="activity", lazy="raise")
     io_tests: Mapped[List["IOTest"]] = relationship(back_populates="activity")
-    unit_test: Mapped[Optional["UnitTest"]] = relationship(
-        back_populates="activity", uselist=False
-    )
+    unit_test_suite: Mapped[Optional["UnitTestSuite"]] = relationship(back_populates="activity")

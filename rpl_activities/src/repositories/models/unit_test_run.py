@@ -2,7 +2,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from rpl_activities.src.repositories.models.test_run import TestRun
+    from rpl_activities.src.repositories.models.test_execution_log import TestsExecutionLog
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -14,10 +14,10 @@ class UnitTestRun(Base):
     __tablename__ = "unit_test_runs"
 
     id: Mapped[IntPK]
-    test_run_id: Mapped[BigInt] = mapped_column(ForeignKey("test_runs.id"))
-    name: Mapped[Str]
+    tests_execution_log_id: Mapped[BigInt] = mapped_column(ForeignKey("tests_execution_logs.id"))
+    test_name: Mapped[Str]
     passed: Mapped[bool]
     error_messages: Mapped[Optional[TextStr]]
     date_created: Mapped[AutoDateTime]
 
-    test_run: Mapped["TestRun"] = relationship(back_populates="unit_test_run")
+    tests_execution_log: Mapped["TestsExecutionLog"] = relationship(back_populates="unit_test_runs")

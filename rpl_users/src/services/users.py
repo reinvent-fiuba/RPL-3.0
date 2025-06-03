@@ -8,7 +8,6 @@ from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
 from rpl_users.src.repositories.models.user import User
 from rpl_users.src.dtos.user_dtos import (
-    CurrentMainUserResponseDTO,
     FindUsersResponseDTO,
     ResendEmailValidationDTO,
     UserCreationDTO,
@@ -36,16 +35,10 @@ class UsersService:
     def __verify_username_and_email_availability(self, username: str, email: str):
         existing_user = self.users_repo.get_user_with_username(username)
         if existing_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username already exists",
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists")
         existing_user = self.users_repo.get_user_with_email(email)
         if existing_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already exists",
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists")
 
     def __get_user_by_username_or_email(self, username_or_email: str) -> User:
         if security.is_login_via_email(username_or_email):
@@ -53,26 +46,17 @@ class UsersService:
         else:
             user = self.users_repo.get_user_with_username(username_or_email)
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found",
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         return user
 
     def __verify_user_login(self, user_data: UserLoginDTO) -> User:
         user = self.__get_user_by_username_or_email(user_data.username_or_email)
         if not user.email_validated:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Email not validated",
-            )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email not validated")
 
         valid = security.verify_password(user_data.password, user.password)
         if not valid:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials",
-            )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
         logging.info(f"[users:services] User {user.username} logged in successfully")
         return user
 
@@ -83,30 +67,17 @@ class UsersService:
     def __verify_token(self, token: str):
         token_data = self.validation_tokens_repo.get_by_token(token)
         if not token_data:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid token",
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
         if token_data.expiration_date < datetime.now(timezone.utc):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Token expired",
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token expired")
         return token_data
 
     # =============================================================================
 
-    def create_user(
-        self, user_data: UserCreationDTO, email_handler: EmailHandler
-    ) -> UserCreationResponseDTO:
-        self.__verify_username_and_email_availability(
-            user_data.username, user_data.email
-        )
+    def create_user(self, user_data: UserCreationDTO, email_handler: EmailHandler) -> UserCreationResponseDTO:
+        self.__verify_username_and_email_availability(user_data.username, user_data.email)
         hashed_password = security.hash_password(user_data.password)
-        new_user = self.users_repo.save_new_user(
-            user_data,
-            hashed_password,
-        )
+        new_user = self.users_repo.save_new_user(user_data, hashed_password)
         self.__send_validation_email(new_user.id, user_data.email, email_handler)
         return UserCreationResponseDTO(
             id=new_user.id,
@@ -119,42 +90,26 @@ class UsersService:
             university=new_user.university,
         )
 
-    def resend_validation_email(
-        self, user_data: ResendEmailValidationDTO, email_handler: EmailHandler
-    ):
+    def resend_validation_email(self, user_data: ResendEmailValidationDTO, email_handler: EmailHandler):
         user = self.__get_user_by_username_or_email(user_data.username_or_email)
         if user.email_validated:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already validated",
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already validated")
         self.__send_validation_email(user.id, user.email, email_handler)
 
-    def validate_email(
-        self,
-        validation_data: UserEmailValidationDTO,
-    ):
+    def validate_email(self, validation_data: UserEmailValidationDTO):
         token_data = self.__verify_token(validation_data.token)
         user = token_data.user
         if user.email_validated:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already validated",
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already validated")
         user.email_validated = True
         user = self.users_repo.update_user(user)
         self.validation_tokens_repo.delete_by_token(validation_data.token)
-        logging.info(
-            f"[users:services] User {user.username} validated email successfully"
-        )
+        logging.info(f"[users:services] User {user.username} validated email successfully")
 
     def login_user(self, user_data: UserLoginDTO) -> UserLoginResponseDTO:
         user = self.__verify_user_login(user_data)
         access_token = security.create_access_token(user.id)
-        return UserLoginResponseDTO(
-            access_token=access_token,
-            token_type="Bearer",
-        )
+        return UserLoginResponseDTO(access_token=access_token, token_type="Bearer")
 
     def forgot_password(
         self, user_data: UserForgotPasswordDTO, email_handler: EmailHandler
@@ -220,17 +175,10 @@ class UsersService:
             img_uri=user.img_uri,
         )
 
-    def find_users(
-        self, username_or_fullname: str, current_user: User
-    ) -> List[FindUsersResponseDTO]:
+    def find_users(self, username_or_fullname: str, current_user: User) -> List[FindUsersResponseDTO]:
         if not current_user.is_admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Permission denied",
-            )
-        users = self.users_repo.get_all_users_with_username_or_fullname(
-            username_or_fullname
-        )
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
+        users = self.users_repo.get_all_users_with_username_or_fullname(username_or_fullname)
         return [
             FindUsersResponseDTO(
                 username=user.username,
@@ -245,16 +193,3 @@ class UsersService:
         ]
 
     # =============================================================================
-
-    def get_user_for_ext_service(current_user: User) -> CurrentMainUserResponseDTO:
-        return CurrentMainUserResponseDTO(
-            id=current_user.id,
-            username=current_user.username,
-            name=current_user.name,
-            surname=current_user.surname,
-            student_id=current_user.student_id,
-            degree=current_user.degree,
-            university=current_user.university,
-            is_admin=current_user.is_admin,
-            img_uri=current_user.img_uri,
-        )

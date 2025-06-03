@@ -11,10 +11,10 @@ from rpl_activities.src.repositories.activities import ActivitiesRepository
 from rpl_activities.src.repositories.categories import CategoriesRepository
 from rpl_activities.src.repositories.models import aux_models
 from rpl_activities.src.repositories.models.activity import Activity
-from rpl_activities.src.repositories.models.activity_submission import (
-    ActivitySubmission,
-)
+from rpl_activities.src.repositories.models.activity_category import ActivityCategory
+from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
 from rpl_activities.src.repositories.submissions import SubmissionsRepository
+from rpl_activities.src.services.activity_tests import TestsService
 
 
 class ActivitiesService:
@@ -22,6 +22,9 @@ class ActivitiesService:
         self.activities_repo = ActivitiesRepository(db)
         self.submissions_repo = SubmissionsRepository(db)
         self.categories_repo = CategoriesRepository(db)
+        self.tests_service = TestsService(db)
+
+    # ====================== PRIVATE - PERMISSIONS ====================== #
 
     def verify_permission_to_view(self, current_course_user: CurrentCourseUser):
         can_view_activities = current_course_user.has_authority("activity_view")
@@ -42,15 +45,33 @@ class ActivitiesService:
     def has_permission_to_manage(self, current_course_user: CurrentCourseUser):
         return current_course_user.has_authority("activity_manage")
 
+    def verify_permission_to_submit(self, current_course_user: CurrentCourseUser):
+        can_submit_solutions = current_course_user.has_authority("activity_submit")
+        if not can_submit_solutions:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to submit activities on this course",
+            )
+
+    def verify_and_get_activity(self, course_id: int, activity_id: int) -> Activity:
+        activity = self.activities_repo.get_activity_by_id(activity_id)
+        if not activity:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
+        if activity.course_id != course_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Activity does not belong to the course"
+            )
+        return activity
+
+    # ====================== PRIVATE - QUERYING ====================== #
+
     def __get_all_activities_for_user_depending_on_permission(
         self, current_course_user: CurrentCourseUser, course_id: int
     ) -> list[Activity]:
         if self.has_permission_to_manage(current_course_user):
             activities = self.activities_repo.get_all_activities_by_course_id(course_id)
         else:
-            activities = self.activities_repo.get_all_active_activities_by_course_id(
-                course_id
-            )
+            activities = self.activities_repo.get_all_active_activities_by_course_id(course_id)
         return activities
 
     def __group_submissions_by_activity(
@@ -79,31 +100,25 @@ class ActivitiesService:
             category_description=activity.category.description,
             name=activity.name,
             description=activity.description,
-            language=aux_models.LanguageWithVersion(
-                activity.language
-            ).without_version(),
+            language=aux_models.LanguageWithVersion(activity.language).without_version(),
             is_io_tested=activity.is_io_tested,
             active=activity.active,
             deleted=activity.deleted,
             points=activity.points,
             starting_rplfile_id=activity.starting_rplfile.id,
             submission_status=self.submissions_repo.get_best_submission_status_by_user_at_activity(
-                current_course_user.user_id,
-                activity,
-                current_user_submissions_at_activity,
+                current_course_user.user_id, activity, current_user_submissions_at_activity
             ),
             last_submission_date=self.submissions_repo.get_last_submission_date_by_user_at_activity(
-                current_course_user.user_id,
-                activity,
-                current_user_submissions_at_activity,
+                current_course_user.user_id, activity, current_user_submissions_at_activity
             ),
             date_created=activity.date_created,
             last_updated=activity.last_updated,
         )
 
     def build_activity_response_dto(self, activity: Activity) -> ActivityResponseDTO:
-        unit_tests_data = self.activities_repo.get_unit_tests_data(activity)
-        io_tests_data = self.activities_repo.get_io_tests_data(activity)
+        unit_tests_data = self.activities_repo.get_unit_tests_data_from_activity(activity)
+        io_tests_data = self.activities_repo.get_io_tests_data_from_activity(activity)
         return ActivityResponseDTO(
             id=activity.id,
             course_id=activity.course_id,
@@ -112,9 +127,7 @@ class ActivitiesService:
             category_description=activity.category.description,
             name=activity.name,
             description=activity.description,
-            language=aux_models.LanguageWithVersion(
-                activity.language
-            ).without_version(),
+            language=aux_models.LanguageWithVersion(activity.language).without_version(),
             is_io_tested=activity.is_io_tested,
             active=activity.active,
             deleted=activity.deleted,
@@ -127,7 +140,7 @@ class ActivitiesService:
             last_updated=activity.last_updated,
         )
 
-    # ==============================================================================
+    # ====================== QUERYING ====================== #
 
     def get_all_activities_for_current_user(
         self, current_course_user: CurrentCourseUser, course_id: int
@@ -139,10 +152,8 @@ class ActivitiesService:
         if not activities:
             return []
 
-        all_submissions_by_current_user = (
-            self.submissions_repo.get_all_submissions_by_current_user_at_activities(
-                current_course_user.user_id, activities
-            )
+        all_submissions_by_current_user = self.submissions_repo.get_all_submissions_by_user_at_activities(
+            current_course_user.user_id, activities
         )
         current_user_submissions_by_activity = self.__group_submissions_by_activity(
             all_submissions_by_current_user
@@ -161,29 +172,18 @@ class ActivitiesService:
         self, current_course_user: CurrentCourseUser, course_id: int, activity_id: int
     ) -> ActivityResponseDTO:
         self.verify_permission_to_view(current_course_user)
-        activity = self.activities_repo.get_activity_by_id(activity_id)
-        if not activity:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Activity not found",
-            )
+        activity = self.verify_and_get_activity(course_id, activity_id)
         return self.build_activity_response_dto(activity)
+
+    # ====================== PRIVATE - MANAGING ====================== #
+
+    # ====================== MANAGING ====================== #
 
     def delete_activity(
         self, current_course_user: CurrentCourseUser, course_id: int, activity_id: int
     ) -> ActivityResponseDTO:
         self.verify_permission_to_manage(current_course_user)
-        activity = self.activities_repo.get_activity_by_id(activity_id)
-        if not activity:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Activity not found",
-            )
-        if activity.course_id != course_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to delete this activity",
-            )
+        activity = self.verify_and_get_activity(course_id, activity_id)
         self.activities_repo.delete_activity(activity)
         return self.build_activity_response_dto(activity)
 
@@ -198,10 +198,7 @@ class ActivitiesService:
             new_activity_data.category_id, course_id
         )
         if not category:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Category not found",
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
         activity = self.activities_repo.create_activity(course_id, new_activity_data)
         return self.build_activity_response_dto(activity)
 
@@ -213,18 +210,23 @@ class ActivitiesService:
         new_activity_data: ActivityUpdateRequestDTO,
     ) -> ActivityResponseDTO:
         self.verify_permission_to_manage(current_course_user)
-        activity = self.activities_repo.get_activity_by_id(activity_id)
-        if not activity:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Activity not found",
-            )
-        if activity.course_id != course_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to update this activity",
-            )
-        updated_activity = self.activities_repo.update_activity(
-            course_id, activity, new_activity_data
-        )
+        activity = self.verify_and_get_activity(course_id, activity_id)
+        updated_activity = self.activities_repo.update_activity(course_id, activity, new_activity_data)
         return self.build_activity_response_dto(updated_activity)
+
+    def clone_all_activities(
+        self,
+        current_course_user: CurrentCourseUser,
+        from_category: ActivityCategory,
+        to_category: ActivityCategory,
+    ) -> dict[int, Activity]:
+        self.verify_permission_to_manage(current_course_user)
+
+        activities = self.activities_repo.get_all_activities_by_category_id(from_category.id)
+        for activity in activities:
+            if not activity.deleted:
+                continue
+            new_activity = self.activities_repo.clone_activity(
+                activity, to_category.course_id, to_category.id
+            )
+            self.tests_service.clone_all_activity_tests(current_course_user, activity, new_activity)

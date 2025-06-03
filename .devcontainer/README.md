@@ -4,18 +4,16 @@ La db configurada en metaservices.dev.yml es distinta a la del dir root  (metase
 
 - Dentro del devcontainer, para correr los tests:
 
-[TODO]
+```bash
+python -m pytest
+```
 
-
-<!-- ```bash
-pytest
-``` -->
-
-
-- Dentro del devcontainer, para correr el servidor (acceso en `http://localhost:9000/docs`):
+- Dentro del devcontainer, para correr el servidor (acceso en `http://localhost:<puerto>/docs`):
 
 ```bash
-fastapi run --reload --port 80
+fastapi run rpl_activities/src/main.py --port 9000
+# o
+fastapi run rpl_users/src/main.py --port 9001
 ``` 
 
 

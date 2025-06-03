@@ -11,20 +11,16 @@ from sqlalchemy.pool import StaticPool
 from rpl_activities.src.deps.auth import (
     AuthDependency,
     CurrentCourseUser,
-    CurrentMainUser,
-    __basic_path_param_checks,
+    StudentCourseUser,
+    __basic_request_param_checks,
     get_current_course_user,
-    get_current_main_user,
+    get_student_course_user_for_current_user,
 )
 from rpl_activities.src.deps.database import get_db_session
-from rpl_activities.src.dtos.auth_dtos import (
-    ExternalCurrentMainUserDTO,
-)
+from rpl_activities.src.deps.mq_sender import get_mq_sender
 from rpl_activities.src.main import app
 from rpl_activities.src.repositories.models.activity import Activity
-from rpl_activities.src.repositories.models.activity_submission import (
-    ActivitySubmission,
-)
+from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
 from rpl_activities.src.repositories.models.base_model import Base
 from rpl_activities.src.repositories.models import aux_models, models_metadata
 from rpl_activities.src.config import env
@@ -32,7 +28,7 @@ from rpl_activities.src.repositories.models.activity_category import ActivityCat
 
 from rpl_activities.src.repositories.models.io_test import IOTest
 from rpl_activities.src.repositories.models.rpl_file import RPLFile
-from rpl_activities.src.repositories.models.unit_test import UnitTest
+from rpl_activities.src.repositories.models.unit_test_suite import UnitTestSuite
 from rpl_users.src.dtos.course_dtos import CourseUserResponseDTO
 from rpl_users.tests.conftest import (
     users_api_dbsession_fixture,
@@ -64,48 +60,57 @@ def activities_api_dbsession_fixture():
     logging.debug("[tests:conftest] DB tables dropped")
 
 
+@pytest.fixture(name="test_mq_sender", scope="function")
+def mq_sender_fixture():
+    class TestMQSender:
+        def send_submission(self, submission_id: int, language_with_version: str):
+            return
+
+    return TestMQSender()
+
+
 @pytest.fixture(name="activities_api_client", scope="function")
 def activities_api_http_client_fixture(
     activities_api_dbsession,
     users_api_client: TestClient,
     course_with_teacher_as_admin_user_and_student_user,
+    test_mq_sender,
 ):
     app.dependency_overrides[get_db_session] = lambda: activities_api_dbsession
 
-    def override_get_current_main_user(auth_header: AuthDependency, request: Request):
-        res = users_api_client.get(
-            "/api/v3/auth/externalUserMainAuth",
-            headers={
-                "Authorization": f"{auth_header.scheme} {auth_header.credentials}"
-            },
-        )
-        if res.status_code != status.HTTP_200_OK:
-            raise HTTPException(
-                status_code=res.status_code,
-                detail=f"Failed to authenticate current user: {res.text}",
-            )
-        user_data = ExternalCurrentMainUserDTO(**res.json())
-        return CurrentMainUser(user_data)
-
     def override_get_current_course_user(auth_header: AuthDependency, request: Request):
-        course_id = __basic_path_param_checks(request.path_params.get("course_id"))
+        course_id = __basic_request_param_checks(request.path_params.get("course_id"))
         res = users_api_client.get(
             "/api/v3/auth/externalCourseUserAuth",
-            headers={
-                "Authorization": f"{auth_header.scheme} {auth_header.credentials}"
-            },
+            headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
             params={"course_id": course_id},
         )
         if res.status_code != status.HTTP_200_OK:
             raise HTTPException(
-                status_code=res.status_code,
-                detail=f"Failed to authenticate current course user: {res.text}",
+                status_code=res.status_code, detail=f"Failed to authenticate current course user: {res.text}"
             )
         user_data = CourseUserResponseDTO(**res.json())
         return CurrentCourseUser(user_data)
 
-    app.dependency_overrides[get_current_main_user] = override_get_current_main_user
+    def override_get_student_course_user_for_current_user(auth_header: AuthDependency, request: Request):
+        student_id = request.path_params.get("student_id")
+        course_id = __basic_request_param_checks(request.path_params.get("course_id"))
+        res = users_api_client.get(
+            f"/api/v3/courses/{course_id}/users",
+            headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
+            params={"student_id": student_id},
+        )
+        if res.status_code != status.HTTP_200_OK or len(res.json()) == 0:
+            raise HTTPException(status_code=res.status_code, detail=f"Failed to get student: {res.text}")
+        student_course_user = res.json()[0]
+        course_user_data = CourseUserResponseDTO(**student_course_user)
+        return StudentCourseUser(course_user_data)
+
     app.dependency_overrides[get_current_course_user] = override_get_current_course_user
+    app.dependency_overrides[get_student_course_user_for_current_user] = (
+        override_get_student_course_user_for_current_user
+    )
+    app.dependency_overrides[get_mq_sender] = lambda: test_mq_sender
 
     client = TestClient(app)
     yield client
@@ -116,9 +121,7 @@ def activities_api_http_client_fixture(
 
 
 @pytest.fixture(name="example_category")
-def example_category_fixture(
-    activities_api_dbsession: Session,
-):
+def example_category_fixture(activities_api_dbsession: Session):
     category = ActivityCategory(
         id=1,
         course_id=1,
@@ -135,9 +138,7 @@ def example_category_fixture(
 
 
 @pytest.fixture(name="example_inactive_category")
-def example_inactive_category_fixture(
-    activities_api_dbsession: Session,
-):
+def example_inactive_category_fixture(activities_api_dbsession: Session):
     category = ActivityCategory(
         id=2,
         course_id=1,
@@ -155,8 +156,7 @@ def example_inactive_category_fixture(
 
 @pytest.fixture(name="example_category_from_another_course")
 def example_category_from_another_course_fixture(
-    course_with_regular_user_as_admin_user,
-    activities_api_dbsession: Session,
+    course_with_regular_user_as_admin_user, activities_api_dbsession: Session
 ):
     category = ActivityCategory(
         id=3,
@@ -171,7 +171,6 @@ def example_category_from_another_course_fixture(
     activities_api_dbsession.commit()
     activities_api_dbsession.refresh(category)
     yield category
-    
 
 
 # ==========================================================================
@@ -182,10 +181,7 @@ def example_basic_rplfiles_fixture(activities_api_dbsession: Session):
     with open("rpl_activities/tests/resources/basic_rplfile.tar.gz", "rb") as f:
         rplfile_data = f.read()
     example_rplfile = RPLFile(
-        id=1,
-        file_name="basic_rplfile.tar.gz",
-        file_type="application/gzip",
-        data=rplfile_data,
+        id=1, file_name="basic_rplfile.tar.gz", file_type=aux_models.RPLFileType.GZIP, data=rplfile_data
     )
     activities_api_dbsession.add(example_rplfile)
     activities_api_dbsession.commit()
@@ -194,10 +190,7 @@ def example_basic_rplfiles_fixture(activities_api_dbsession: Session):
     with open("rpl_activities/tests/resources/basic_rplfile_copy.tar.gz", "rb") as f:
         rplfile_data = f.read()
     example_rplfile_2 = RPLFile(
-        id=2,
-        file_name="basic_rplfile_copy.tar.gz",
-        file_type="application/gzip",
-        data=rplfile_data,
+        id=2, file_name="basic_rplfile_copy.tar.gz", file_type=aux_models.RPLFileType.GZIP, data=rplfile_data
     )
     activities_api_dbsession.add(example_rplfile_2)
     activities_api_dbsession.commit()
@@ -205,8 +198,8 @@ def example_basic_rplfiles_fixture(activities_api_dbsession: Session):
 
     example_rplfile_3 = RPLFile(
         id=3,
-        file_name="basic_rplfile_with_text.txt",
-        file_type="text",
+        file_name="basic_rplfile_with_text.c",
+        file_type=aux_models.RPLFileType.TEXT,
         data=b"print('This is a file with many unit tests')",
     )
     activities_api_dbsession.add(example_rplfile_3)
@@ -219,14 +212,13 @@ def example_basic_rplfiles_fixture(activities_api_dbsession: Session):
 @pytest.fixture(name="example_starting_rplfile")
 def example_starting_rplfile_fixture(activities_api_dbsession: Session):
     with open(
-        "rpl_activities/tests/resources/activity_1_starting_files/activity_1_starting_files.tar.gz",
-        "rb",
+        "rpl_activities/tests/resources/activity_1_starting_files/activity_1_starting_files.tar.gz", "rb"
     ) as f:
         rplfile_data = f.read()
     example_rplfile = RPLFile(
         id=4,
         file_name="activity_1_starting_files.tar.gz",
-        file_type="application/gzip",
+        file_type=aux_models.RPLFileType.GZIP,
         data=rplfile_data,
     )
     activities_api_dbsession.add(example_rplfile)
@@ -235,44 +227,110 @@ def example_starting_rplfile_fixture(activities_api_dbsession: Session):
     yield example_rplfile
 
 
+# Format: {language: [(name_of_form_param, (file_name, file_content, file_type)]}
 type StartingFileRawRequestData = tuple[str, tuple[str, bytes, str]]
 type ExamplesOfStartingFilesRawData = dict[list[StartingFileRawRequestData]]
+
+
 @pytest.fixture(name="examples_of_starting_files_raw_data")
 def examples_of_starting_files_raw_data_fixture():
     py_files = [
-        ("startingFile", ("main.py", b'print("test")', "application/octet-stream")),
-        ("startingFile", ("assignment_main.py", b"# file assignment_main.py\ndef test():\n    pass\n", "application/octet-stream")),
-        ("startingFile", ("files_metadata", b'{"assignment_main.py":{"display":"read_write"}}', "application/octet-stream")),
+        ("starting_files", ("main.py", b'print("test")', "application/octet-stream")),
+        (
+            "starting_files",
+            (
+                "assignment_main.py",
+                b"# file assignment_main.py\ndef test():\n    pass\n",
+                "application/octet-stream",
+            ),
+        ),
+        (
+            "starting_files",
+            (
+                "files_metadata",
+                b'{"assignment_main.py":{"display":"read_write"}}',
+                "application/octet-stream",
+            ),
+        ),
     ]
     c_files = [
-        ("startingFile", ("main.c", open("rpl_activities/tests/resources/activity_1_starting_files/main.c", "rb").read(), "application/octet-stream")),
-        ("startingFile", ("tiempo.c", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.c", "rb").read(), "application/octet-stream")),
-        ("startingFile", ("tiempo.h", open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.h", "rb").read(), "application/octet-stream")),
-        ("startingFile", ("files_metadata", open("rpl_activities/tests/resources/activity_1_starting_files/files_metadata", "rb").read(), "application/octet-stream")),
+        (
+            "starting_files",
+            (
+                "main.c",
+                open("rpl_activities/tests/resources/activity_1_starting_files/main.c", "rb").read(),
+                "application/octet-stream",
+            ),
+        ),
+        (
+            "starting_files",
+            (
+                "tiempo.c",
+                open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.c", "rb").read(),
+                "application/octet-stream",
+            ),
+        ),
+        (
+            "starting_files",
+            (
+                "tiempo.h",
+                open("rpl_activities/tests/resources/activity_1_starting_files/tiempo.h", "rb").read(),
+                "application/octet-stream",
+            ),
+        ),
+        (
+            "starting_files",
+            (
+                "files_metadata",
+                open("rpl_activities/tests/resources/activity_1_starting_files/files_metadata", "rb").read(),
+                "application/octet-stream",
+            ),
+        ),
     ]
-    return {
-        "python": py_files,
-        "c": c_files,
-    }
+    return {"python": py_files, "c": c_files}
 
 
 @pytest.fixture(name="example_submission_rplfile")
 def example_submission_rplfile_fixture(activities_api_dbsession: Session):
-    with open(
-        "rpl_activities/tests/resources/activity_1_submission/activity_1_submission.tar.gz",
-        "rb",
-    ) as f:
+    with open("rpl_activities/tests/resources/activity_1_submission/activity_1_submission.tar.gz", "rb") as f:
         rplfile_data = f.read()
     example_rplfile = RPLFile(
         id=5,
         file_name="activity_1_submission.tar.gz",
-        file_type="application/gzip",
+        file_type=aux_models.RPLFileType.GZIP,
         data=rplfile_data,
     )
     activities_api_dbsession.add(example_rplfile)
     activities_api_dbsession.commit()
     activities_api_dbsession.refresh(example_rplfile)
     yield example_rplfile
+
+
+# Format: (name_of_form_param, (file_name, file_content, file_type)
+type SubmissionRawRequestData = StartingFileRawRequestData
+type ExamplesOfSubmissionRawData = list[SubmissionRawRequestData]
+
+
+@pytest.fixture(name="example_submission_raw_data")
+def example_submission_raw_data_fixture() -> ExamplesOfSubmissionRawData:
+    return [
+        (
+            "submission_files",
+            (
+                "tiempo.c",
+                open("rpl_activities/tests/resources/activity_1_submission/tiempo.c", "rb").read(),
+                "application/octet-stream",
+            ),
+        ),
+        (
+            "submission_files",
+            (
+                "tiempo.h",
+                open("rpl_activities/tests/resources/activity_1_submission/tiempo.h", "rb").read(),
+                "application/octet-stream",
+            ),
+        ),
+    ]
 
 
 # ==========================================================================
@@ -280,9 +338,7 @@ def example_submission_rplfile_fixture(activities_api_dbsession: Session):
 
 @pytest.fixture(name="example_activity")
 def example_activity_fixture(
-    activities_api_dbsession: Session,
-    example_category: ActivityCategory,
-    example_starting_rplfile: RPLFile,
+    activities_api_dbsession: Session, example_category: ActivityCategory, example_starting_rplfile: RPLFile
 ):
     activity = Activity(
         id=1,
@@ -339,13 +395,14 @@ def example_submission_fixture(
     activities_api_dbsession: Session,
     example_activity: Activity,
     example_submission_rplfile: RPLFile,
+    example_unit_test_suite: UnitTestSuite,
 ):
     submission = ActivitySubmission(
         id=1,
         is_final_solution=False,
         activity_id=example_activity.id,
         user_id=2,
-        response_rplfile_id=example_submission_rplfile.id,
+        solution_rplfile_id=example_submission_rplfile.id,
         status=aux_models.SubmissionStatus.PENDING,
         date_created=datetime.now(timezone.utc),
         last_updated=datetime.now(timezone.utc),
@@ -358,16 +415,14 @@ def example_submission_fixture(
 
 @pytest.fixture(name="example_failed_submission")
 def example_failed_submission_fixture(
-    activities_api_dbsession: Session,
-    example_activity: Activity,
-    example_submission_rplfile: RPLFile,
+    activities_api_dbsession: Session, example_activity: Activity, example_submission_rplfile: RPLFile
 ):
     submission = ActivitySubmission(
         id=2,
         is_final_solution=False,
         activity_id=example_activity.id,
         user_id=2,
-        response_rplfile_id=example_submission_rplfile.id,
+        solution_rplfile_id=example_submission_rplfile.id,
         status=aux_models.SubmissionStatus.FAILURE,
         date_created=datetime.now(timezone.utc) - timedelta(days=1),
         last_updated=datetime.now(timezone.utc) - timedelta(days=1),
@@ -410,10 +465,7 @@ def example_activity_with_io_tests_fixture(
 
 
 @pytest.fixture(name="example_io_tests")
-def example_io_tests_fixture(
-    activities_api_dbsession: Session,
-    example_activity_with_io_tests: Activity,
-):
+def example_io_tests_fixture(activities_api_dbsession: Session, example_activity_with_io_tests: Activity):
     io_test1 = IOTest(
         id=1,
         activity_id=example_activity_with_io_tests.id,
@@ -443,23 +495,21 @@ def example_io_tests_fixture(
 # ==============================================================================
 
 
-@pytest.fixture(name="example_unit_test")
-def example_unit_test_fixture(
-    activities_api_dbsession: Session,
-    example_activity: Activity,
-    example_basic_rplfiles: list[RPLFile],
+@pytest.fixture(name="example_unit_test_suite")
+def example_unit_test_suite_fixture(
+    activities_api_dbsession: Session, example_activity: Activity, example_basic_rplfiles: list[RPLFile]
 ):
-    unit_test = UnitTest(
+    unit_test_suite = UnitTestSuite(
         id=1,
         activity_id=example_activity.id,
         test_rplfile_id=example_basic_rplfiles[2].id,
         date_created=datetime.now(timezone.utc),
         last_updated=datetime.now(timezone.utc),
     )
-    activities_api_dbsession.add(unit_test)
+    activities_api_dbsession.add(unit_test_suite)
     activities_api_dbsession.commit()
-    activities_api_dbsession.refresh(unit_test)
-    yield unit_test
+    activities_api_dbsession.refresh(unit_test_suite)
+    yield unit_test_suite
 
 
 # ==============================================================================

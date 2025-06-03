@@ -31,6 +31,8 @@ spec:
           value: "https://myrpl.ar"
         - name: USERS_API_URL
           value: "http://rpl-users-api"
+        - name: QUEUE_URL
+          value: "amqp://guest:guest@queue:5672"
         - name: DB_URL
           valueFrom:
             secretKeyRef:

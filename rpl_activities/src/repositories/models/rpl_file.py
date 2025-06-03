@@ -3,10 +3,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from rpl_activities.src.repositories.models.activity import Activity
-    from rpl_activities.src.repositories.models.activity_submission import (
-        ActivitySubmission,
-    )
-    from rpl_activities.src.repositories.models.unit_test import UnitTest
+    from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
+    from rpl_activities.src.repositories.models.unit_test_suite import UnitTestSuite
 
 
 from sqlalchemy.orm import Mapped, relationship
@@ -25,12 +23,6 @@ class RPLFile(Base):
     date_created: Mapped[AutoDateTime]
     last_updated: Mapped[AutoDateTime]
 
-    activity: Mapped[Optional["Activity"]] = relationship(
-        back_populates="starting_rplfile", uselist=False
-    )
-    submission: Mapped[Optional["ActivitySubmission"]] = relationship(
-        back_populates="response_rplfile", uselist=False
-    )
-    unit_test: Mapped[Optional["UnitTest"]] = relationship(
-        back_populates="test_rplfile", uselist=False
-    )
+    activity: Mapped[Optional["Activity"]] = relationship(back_populates="starting_rplfile")
+    submission: Mapped[Optional["ActivitySubmission"]] = relationship(back_populates="solution_rplfile")
+    unit_test_suite: Mapped[Optional["UnitTestSuite"]] = relationship(back_populates="test_rplfile")

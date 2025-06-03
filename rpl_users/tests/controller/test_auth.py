@@ -39,15 +39,9 @@ def test_create_user_success(users_api_client: TestClient):
 
 @pytest.mark.parametrize(
     "test_name,missing_field",
-    [
-        ("missing_username", "username"),
-        ("missing_email", "email"),
-        ("missing_password", "password"),
-    ],
+    [("missing_username", "username"), ("missing_email", "email"), ("missing_password", "password")],
 )
-def test_create_user_missing_fields(
-    users_api_client: TestClient, test_name, missing_field
-):
+def test_create_user_missing_fields(users_api_client: TestClient, test_name, missing_field):
     new_user_data = {
         "username": "asd1234",
         "email": "asd@asd.com",
@@ -77,9 +71,7 @@ def test_create_user_missing_fields(
         ("null_password", "asdoxxx", "asd@asdddd.com", ""),
     ],
 )
-def test_create_user_validation_errors(
-    users_api_client: TestClient, test_name, username, email, password
-):
+def test_create_user_validation_errors(users_api_client: TestClient, test_name, username, email, password):
     new_user_data = {
         "username": username,
         "email": email,
@@ -99,9 +91,7 @@ def test_create_user_validation_errors(
     assert "too_short" or "value_error" in result["detail"][0]["type"]
 
 
-def test_login_wrong_credentials(
-    users_api_client: TestClient, example_users: dict[str, User]
-):
+def test_login_wrong_credentials(users_api_client: TestClient, example_users: dict[str, User]):
     login_data = {"username_or_email": "regularUsername", "password": "1"}
 
     response = users_api_client.post("/api/v3/auth/login", json=login_data)
@@ -113,9 +103,7 @@ def test_login_wrong_credentials(
 
 
 @pytest.mark.parametrize("username_or_email", ["regularUsername", "regular@mail.com"])
-def test_login_success(
-    users_api_client: TestClient, example_users: dict[str, User], username_or_email
-):
+def test_login_success(users_api_client: TestClient, example_users: dict[str, User], username_or_email):
     login_data = {"username_or_email": username_or_email, "password": "secret"}
 
     response = users_api_client.post("/api/v3/auth/login", json=login_data)
@@ -127,12 +115,8 @@ def test_login_success(
     assert result["token_type"] == "Bearer"
 
 
-def test_get_profile(
-    users_api_client: TestClient, example_users: dict[str, User], regular_auth_headers
-):
-    response = users_api_client.get(
-        "/api/v3/auth/profile", headers=regular_auth_headers
-    )
+def test_get_profile(users_api_client: TestClient, example_users: dict[str, User], regular_auth_headers):
+    response = users_api_client.get("/api/v3/auth/profile", headers=regular_auth_headers)
 
     assert response.status_code == 200
 
@@ -152,10 +136,7 @@ def test_get_profile(
     ],
 )
 def test_update_profile(
-    users_api_client: TestClient,
-    example_users: dict[str, User],
-    regular_auth_headers,
-    fields_to_update,
+    users_api_client: TestClient, example_users: dict[str, User], regular_auth_headers, fields_to_update
 ):
     response = users_api_client.patch(
         "/api/v3/auth/profile", json=fields_to_update, headers=regular_auth_headers
@@ -172,9 +153,7 @@ def test_update_profile(
 
 
 def test_update_immutable_fields(
-    users_api_client: TestClient,
-    example_users: dict[str, User],
-    regular_auth_headers,
+    users_api_client: TestClient, example_users: dict[str, User], regular_auth_headers
 ):
     immutable_fields = {"username": "regularUsername"}
     response = users_api_client.patch(
