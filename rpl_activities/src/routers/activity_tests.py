@@ -34,8 +34,7 @@ def create_io_test_case(
 
 
 @router.put(
-    "/courses/{course_id}/activities/{activity_id}/iotests/{io_test_id}",
-    response_model=IOTestResponseDTO,
+    "/courses/{course_id}/activities/{activity_id}/iotests/{io_test_id}", response_model=IOTestResponseDTO
 )
 def update_io_test_case(
     course_id: int,
@@ -51,8 +50,7 @@ def update_io_test_case(
 
 
 @router.delete(
-    "/courses/{course_id}/activities/{activity_id}/iotests/{io_test_id}",
-    response_model=ActivityResponseDTO,
+    "/courses/{course_id}/activities/{activity_id}/iotests/{io_test_id}", response_model=ActivityResponseDTO
 )
 def delete_io_test_case(
     course_id: int,
@@ -83,10 +81,7 @@ def create_unit_tests(
     )
 
 
-@router.put(
-    "/courses/{course_id}/activities/{activity_id}/unittests",
-    response_model=ActivityResponseDTO,
-)
+@router.put("/courses/{course_id}/activities/{activity_id}/unittests", response_model=ActivityResponseDTO)
 def update_unit_tests(
     course_id: int,
     activity_id: int,

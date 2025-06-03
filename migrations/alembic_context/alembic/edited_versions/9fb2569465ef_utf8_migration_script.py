@@ -29,11 +29,7 @@ def upgrade() -> None:
         existing_nullable=True,
     )
     op.alter_column(
-        "activities",
-        "points",
-        existing_type=mysql.BIGINT(),
-        type_=sa.Integer(),
-        existing_nullable=True,
+        "activities", "points", existing_type=mysql.BIGINT(), type_=sa.Integer(), existing_nullable=True
     )
     op.alter_column(
         "io_test_run",
@@ -154,11 +150,7 @@ def downgrade() -> None:
         existing_nullable=True,
     )
     op.alter_column(
-        "activities",
-        "points",
-        existing_type=sa.Integer(),
-        type_=mysql.BIGINT(),
-        existing_nullable=True,
+        "activities", "points", existing_type=sa.Integer(), type_=mysql.BIGINT(), existing_nullable=True
     )
     op.alter_column(
         "activities",

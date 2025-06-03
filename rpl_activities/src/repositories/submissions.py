@@ -26,10 +26,7 @@ class SubmissionsRepository(BaseRepository):
     # =================================================================
 
     def get_best_submission_status_by_user_at_activity(
-        self,
-        user_id: int,
-        activity: Activity,
-        current_user_submissions_at_activity: list[ActivitySubmission],
+        self, user_id: int, activity: Activity, current_user_submissions_at_activity: list[ActivitySubmission]
     ) -> aux_models.SubmissionStatus:
         if len(current_user_submissions_at_activity) == 0:
             return aux_models.SubmissionStatus.NO_SUBMISSIONS
@@ -41,16 +38,12 @@ class SubmissionsRepository(BaseRepository):
         return best_status
 
     def get_last_submission_date_by_user_at_activity(
-        self,
-        user_id: int,
-        activity: Activity,
-        current_user_submissions_at_activity: list[ActivitySubmission],
+        self, user_id: int, activity: Activity, current_user_submissions_at_activity: list[ActivitySubmission]
     ) -> datetime:
         if len(current_user_submissions_at_activity) == 0:
             return None
         last_submission = max(
-            current_user_submissions_at_activity,
-            key=lambda submission: submission.date_created,
+            current_user_submissions_at_activity, key=lambda submission: submission.date_created
         )
         return last_submission.date_created
 
@@ -130,9 +123,7 @@ class SubmissionsRepository(BaseRepository):
         )
 
     def __get_verified_submission_files_to_compress(
-        self,
-        extracted_starting_files: tar_utils.ExtractedFilesDict,
-        submission_uploadfiles: list[UploadFile],
+        self, extracted_starting_files: tar_utils.ExtractedFilesDict, submission_uploadfiles: list[UploadFile]
     ) -> dict[str, bytes]:
         starting_files_metadata = extracted_starting_files.get("files_metadata")
         if not starting_files_metadata:
@@ -150,10 +141,7 @@ class SubmissionsRepository(BaseRepository):
             else:
                 files_to_compress[uploadfile.filename] = uploadfile.file.read()
 
-        for (
-            starting_file_name,
-            starting_file_content,
-        ) in extracted_starting_files.items():
+        for starting_file_name, starting_file_content in extracted_starting_files.items():
             if starting_file_name not in files_to_compress.keys():
                 files_to_compress[starting_file_name] = starting_file_content.encode()
 
@@ -238,8 +226,7 @@ class SubmissionsRepository(BaseRepository):
         return (
             self.db_session.execute(
                 sa.select(ActivitySubmission).where(
-                    ActivitySubmission.activity_id == activity_id,
-                    ActivitySubmission.user_id == user_id,
+                    ActivitySubmission.activity_id == activity_id, ActivitySubmission.user_id == user_id
                 )
             )
             .scalars()
@@ -251,10 +238,7 @@ class SubmissionsRepository(BaseRepository):
             self.db_session.execute(
                 sa.select(ActivitySubmission).where(
                     ActivitySubmission.status.in_(
-                        [
-                            aux_models.SubmissionStatus.PENDING,
-                            aux_models.SubmissionStatus.PROCESSING,
-                        ]
+                        [aux_models.SubmissionStatus.PENDING, aux_models.SubmissionStatus.PROCESSING]
                     )
                 )
             )

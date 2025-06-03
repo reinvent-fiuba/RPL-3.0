@@ -15,9 +15,7 @@ from rpl_activities.src.dtos.submission_dtos import (
 from rpl_activities.src.repositories.activity_tests import TestsRepository
 from rpl_activities.src.repositories.submissions import SubmissionsRepository
 from rpl_activities.src.repositories.models import aux_models
-from rpl_activities.src.repositories.models.activity_submission import (
-    ActivitySubmission,
-)
+from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
 from rpl_activities.src.services.activities import ActivitiesService
 
 
@@ -28,10 +26,7 @@ class SubmissionsService:
         self.activities_service = ActivitiesService(db_session)
         self.mq_sender = mq_sender
 
-    def __build_submission_response(
-        self,
-        submission: ActivitySubmission,
-    ) -> SubmissionResponseDTO:
+    def __build_submission_response(self, submission: ActivitySubmission) -> SubmissionResponseDTO:
         unit_tests_data = self.submissions_repo.get_unit_tests_data_from_submission(submission)
         io_tests_input_data = self.submissions_repo.get_io_tests_input_data_from_submission(submission)
         return SubmissionResponseDTO(
@@ -50,8 +45,7 @@ class SubmissionsService:
         )
 
     def __build_submission_with_metadata_only_response(
-        self,
-        submission: ActivitySubmission,
+        self, submission: ActivitySubmission
     ) -> SubmissionWithMetadataOnlyResponseDTO:
         return SubmissionWithMetadataOnlyResponseDTO(
             id=submission.id,
@@ -98,8 +92,7 @@ class SubmissionsService:
         submission = self.submissions_repo.get_by_id(submission_id)
         if not submission:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Submission with id {submission_id} not found.",
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Submission with id {submission_id} not found."
             )
         return submission
 
@@ -166,11 +159,7 @@ class SubmissionsService:
         return self.__build_submission_with_metadata_only_response(updated_submission)
 
     def mark_submission_as_final_solution(
-        self,
-        course_id: int,
-        activity_id: int,
-        submission_id: int,
-        current_course_user: CurrentCourseUser,
+        self, course_id: int, activity_id: int, submission_id: int, current_course_user: CurrentCourseUser
     ) -> SubmissionWithMetadataOnlyResponseDTO:
         self.activities_service.verify_permission_to_submit(current_course_user)
         submission = self.__verify_and_get_submission(submission_id)
@@ -223,9 +212,7 @@ class SubmissionsService:
         passed_all_tests = False
         if submission.activity.is_io_tested:
             passed_all_tests = self.tests_repo.save_io_test_runs_from_exec_log_and_check_if_all_passed(
-                submission.activity.io_tests,
-                test_execution_log.id,
-                new_execution_log_data,
+                submission.activity.io_tests, test_execution_log.id, new_execution_log_data
             )
         elif submission.activity.unit_test_suite:
             passed_all_tests = self.tests_repo.save_unit_test_runs_from_exec_log_and_check_if_all_passed(
@@ -243,8 +230,7 @@ class SubmissionsService:
             aux_models.SubmissionStatus.PROCESSING,
         ]:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"submission_status: {submission.status}",
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"submission_status: {submission.status}"
             )
         return self.__build_submission_result_response(submission)
 
@@ -258,10 +244,7 @@ class SubmissionsService:
         return [self.__build_submission_result_response(submission) for submission in submissions]
 
     def get_all_submissions_results_from_activity_for_student(
-        self,
-        activity_id: int,
-        current_course_user: CurrentCourseUser,
-        student_course_user: StudentCourseUser,
+        self, activity_id: int, current_course_user: CurrentCourseUser, student_course_user: StudentCourseUser
     ) -> list[SubmissionResultResponseDTO]:
         self.activities_service.verify_permission_to_manage(current_course_user)
         submissions = self.submissions_repo.get_all_submissions_from_activity_id_and_user_id(
@@ -269,9 +252,7 @@ class SubmissionsService:
         )
         return [self.__build_submission_result_response(submission) for submission in submissions]
 
-    def reprocess_all_pending_submissions(
-        self,
-    ) -> SubmissionWithMetadataOnlyResponseDTO:
+    def reprocess_all_pending_submissions(self) -> SubmissionWithMetadataOnlyResponseDTO:
         pending_submissions = self.submissions_repo.get_all_pending_and_stuck_submissions()
         enqueued_submissions = []
         for submission in pending_submissions:

@@ -3,9 +3,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from rpl_activities.src.repositories.models.activity import Activity
-    from rpl_activities.src.repositories.models.activity_submission import (
-        ActivitySubmission,
-    )
+    from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
     from rpl_activities.src.repositories.models.unit_test_suite import UnitTestSuite
 
 

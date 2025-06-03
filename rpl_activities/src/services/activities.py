@@ -12,9 +12,7 @@ from rpl_activities.src.repositories.categories import CategoriesRepository
 from rpl_activities.src.repositories.models import aux_models
 from rpl_activities.src.repositories.models.activity import Activity
 from rpl_activities.src.repositories.models.activity_category import ActivityCategory
-from rpl_activities.src.repositories.models.activity_submission import (
-    ActivitySubmission,
-)
+from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
 from rpl_activities.src.repositories.submissions import SubmissionsRepository
 from rpl_activities.src.services.activity_tests import TestsService
 
@@ -24,7 +22,6 @@ class ActivitiesService:
         self.activities_repo = ActivitiesRepository(db)
         self.submissions_repo = SubmissionsRepository(db)
         self.categories_repo = CategoriesRepository(db)
-
         self.tests_service = TestsService(db)
 
     # ====================== PRIVATE - PERMISSIONS ====================== #
@@ -56,21 +53,13 @@ class ActivitiesService:
                 detail="You do not have permission to submit activities on this course",
             )
 
-    def verify_and_get_activity(
-        self,
-        course_id: int,
-        activity_id: int,
-    ) -> Activity:
+    def verify_and_get_activity(self, course_id: int, activity_id: int) -> Activity:
         activity = self.activities_repo.get_activity_by_id(activity_id)
         if not activity:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Activity not found",
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
         if activity.course_id != course_id:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Activity does not belong to the course",
+                status_code=status.HTTP_403_FORBIDDEN, detail="Activity does not belong to the course"
             )
         return activity
 
@@ -104,6 +93,7 @@ class ActivitiesService:
         current_user_submissions_at_activity: list[ActivitySubmission],
     ) -> ActivityWithMetadataOnlyResponseDTO:
         return ActivityWithMetadataOnlyResponseDTO(
+            id=activity.id,
             course_id=course_id,
             category_id=activity.category_id,
             category_name=activity.category.name,
@@ -117,14 +107,10 @@ class ActivitiesService:
             points=activity.points,
             starting_rplfile_id=activity.starting_rplfile.id,
             submission_status=self.submissions_repo.get_best_submission_status_by_user_at_activity(
-                current_course_user.user_id,
-                activity,
-                current_user_submissions_at_activity,
+                current_course_user.user_id, activity, current_user_submissions_at_activity
             ),
             last_submission_date=self.submissions_repo.get_last_submission_date_by_user_at_activity(
-                current_course_user.user_id,
-                activity,
-                current_user_submissions_at_activity,
+                current_course_user.user_id, activity, current_user_submissions_at_activity
             ),
             date_created=activity.date_created,
             last_updated=activity.last_updated,
@@ -134,6 +120,7 @@ class ActivitiesService:
         unit_tests_data = self.activities_repo.get_unit_tests_data_from_activity(activity)
         io_tests_data = self.activities_repo.get_io_tests_data_from_activity(activity)
         return ActivityResponseDTO(
+            id=activity.id,
             course_id=activity.course_id,
             category_id=activity.category_id,
             category_name=activity.category.name,
@@ -211,10 +198,7 @@ class ActivitiesService:
             new_activity_data.category_id, course_id
         )
         if not category:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Category not found",
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
         activity = self.activities_repo.create_activity(course_id, new_activity_data)
         return self.build_activity_response_dto(activity)
 
@@ -238,17 +222,11 @@ class ActivitiesService:
     ) -> dict[int, Activity]:
         self.verify_permission_to_manage(current_course_user)
 
-        activities = self.activities_repo.get_all_activities_by_category_id(
-            from_category.id,
-        )
+        activities = self.activities_repo.get_all_activities_by_category_id(from_category.id)
         for activity in activities:
             if not activity.deleted:
                 continue
             new_activity = self.activities_repo.clone_activity(
                 activity, to_category.course_id, to_category.id
             )
-            self.tests_service.clone_all_activity_tests(
-                current_course_user,
-                activity,
-                new_activity,
-            )
+            self.tests_service.clone_all_activity_tests(current_course_user, activity, new_activity)

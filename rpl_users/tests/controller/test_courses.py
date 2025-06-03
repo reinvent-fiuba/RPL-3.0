@@ -9,9 +9,7 @@ from rpl_users.src.config import env
 
 
 def test_create_course_with_admin_user_without_optional_fields(
-    users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
+    users_api_client: TestClient, example_users, admin_auth_headers
 ):
     course_data = {
         "name": "Algo1Mendez",
@@ -39,9 +37,7 @@ def test_create_course_with_admin_user_without_optional_fields(
 
 
 def test_create_course_with_admin_user_with_all_fields(
-    users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
+    users_api_client: TestClient, example_users, admin_auth_headers
 ):
     course_data = {
         "name": "Algo1Mendez",
@@ -73,9 +69,7 @@ def test_create_course_with_admin_user_with_all_fields(
 
 
 def test_cannot_create_course_with_regular_user(
-    users_api_client: TestClient,
-    example_users,
-    regular_auth_headers,
+    users_api_client: TestClient, example_users, regular_auth_headers
 ):
     course_data = {
         "name": "Algo1Mendez",
@@ -97,9 +91,7 @@ def test_cannot_create_course_with_regular_user(
 
 
 def test_cannot_create_course_with_admin_user_using_non_existing_user_as_admin(
-    users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
+    users_api_client: TestClient, example_users, admin_auth_headers
 ):
     non_existing_user_id = example_users["admin"].id + 12345
     course_data = {
@@ -122,9 +114,7 @@ def test_cannot_create_course_with_admin_user_using_non_existing_user_as_admin(
 
 
 def test_create_course_with_admin_user_using_admin_user_as_admin(
-    users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
+    users_api_client: TestClient, example_users, admin_auth_headers
 ):
     course_data = {
         "name": "Algo1Mendez",
@@ -152,9 +142,7 @@ def test_create_course_with_admin_user_using_admin_user_as_admin(
 
 
 def test_create_course_with_admin_user_using_regular_user_as_admin(
-    users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
+    users_api_client: TestClient, example_users, admin_auth_headers
 ):
     course_data = {
         "name": "Algo1Mendez",
@@ -181,11 +169,7 @@ def test_create_course_with_admin_user_using_regular_user_as_admin(
     assert result["semester_end_date"] == course_data["semester_end_date"]
 
 
-def test_cannot_create_the_same_course_twice(
-    users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
-):
+def test_cannot_create_the_same_course_twice(users_api_client: TestClient, example_users, admin_auth_headers):
     course_data = {
         "name": "Algo1Mendez",
         "university": "FIUBA",
@@ -211,10 +195,7 @@ def test_cannot_create_the_same_course_twice(
 
 
 def test_clone_course_with_admin_user_with_all_fields(
-    httpx_mock: HTTPXMock,
-    users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
+    httpx_mock: HTTPXMock, users_api_client: TestClient, example_users, admin_auth_headers
 ):
 
     course_data = {
@@ -242,10 +223,7 @@ def test_clone_course_with_admin_user_with_all_fields(
         params={"to_course_id": course_id + 1},
     )
     httpx_mock.add_response(
-        status_code=status.HTTP_201_CREATED,
-        method="POST",
-        url=url,
-        match_headers=admin_auth_headers,
+        status_code=status.HTTP_201_CREATED, method="POST", url=url, match_headers=admin_auth_headers
     )
 
     clone_course_data = {
@@ -276,11 +254,7 @@ def test_clone_course_with_admin_user_with_all_fields(
     assert result["img_uri"] == course_data["img_uri"]
 
 
-def test_clone_non_existing_course(
-    users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
-):
+def test_clone_non_existing_course(users_api_client: TestClient, example_users, admin_auth_headers):
     non_existing_course_id = 99999999
 
     clone_course_data = {
@@ -316,9 +290,7 @@ def test_get_all_courses_when_no_courses_created(users_api_client: TestClient, a
 
 
 def test_get_all_courses_of_admin_course_user(
-    users_api_client: TestClient,
-    admin_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, admin_auth_headers, course_with_superadmin_as_admin_user
 ):
     course = course_with_superadmin_as_admin_user["course"]
 
@@ -340,9 +312,7 @@ def test_get_all_courses_of_admin_course_user(
 
 
 def test_get_all_courses_of_user_that_has_not_been_enrolled_to_a_course_yet(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     course = course_with_superadmin_as_admin_user["course"]
 
@@ -364,9 +334,7 @@ def test_get_all_courses_of_user_that_has_not_been_enrolled_to_a_course_yet(
 
 
 def test_get_all_courses_of_user_that_has_been_enrolled_to_a_course(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     course = course_with_superadmin_as_admin_user["course"]
     course_id = course.id
@@ -391,10 +359,7 @@ def test_get_all_courses_of_user_that_has_been_enrolled_to_a_course(
 
 
 def test_get_all_courses_of_admin_course_user_when_multiple_courses(
-    users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, example_users, admin_auth_headers, course_with_superadmin_as_admin_user
 ):
     superadmin_course = course_with_superadmin_as_admin_user["course"]
 
@@ -457,9 +422,7 @@ def test_get_all_courses_of_admin_course_user_when_multiple_courses(
 
 
 def test_get_course_details_using_super_admin_user(
-    users_api_client: TestClient,
-    admin_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, admin_auth_headers, course_with_superadmin_as_admin_user
 ):
     course = course_with_superadmin_as_admin_user["course"]
     course_id = course.id
@@ -479,9 +442,7 @@ def test_get_course_details_using_super_admin_user(
 
 
 def test_get_course_details_using_user_with_admin_role_permissions(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_regular_user_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_regular_user_as_admin_user
 ):
     course = course_with_regular_user_as_admin_user["course"]
     course_id = course.id
@@ -501,9 +462,7 @@ def test_get_course_details_using_user_with_admin_role_permissions(
 
 
 def test_get_course_details_using_user_with_student_role_permissions(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     course = course_with_superadmin_as_admin_user["course"]
     course_id = course.id
@@ -524,10 +483,7 @@ def test_get_course_details_using_user_with_student_role_permissions(
     assert result["semester_end_date"] == course.semester_end_date.date().isoformat()
 
 
-def test_cannot_get_course_details_from_non_existing_course(
-    users_api_client: TestClient,
-    admin_auth_headers,
-):
+def test_cannot_get_course_details_from_non_existing_course(users_api_client: TestClient, admin_auth_headers):
     non_existing_course_id = 99999999
 
     response = users_api_client.get(f"/api/v3/courses/{non_existing_course_id}", headers=admin_auth_headers)
@@ -539,9 +495,7 @@ def test_cannot_get_course_details_from_non_existing_course(
 
 
 def test_cannot_get_course_details_using_user_that_has_not_been_enrolled_yet(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     course = course_with_superadmin_as_admin_user["course"]
     course_id = course.id
@@ -558,9 +512,7 @@ def test_cannot_get_course_details_using_user_that_has_not_been_enrolled_yet(
 
 
 def test_update_course_with_super_admin_user_without_optional_fields(
-    users_api_client: TestClient,
-    admin_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, admin_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
@@ -590,9 +542,7 @@ def test_update_course_with_super_admin_user_without_optional_fields(
 
 
 def test_update_course_with_super_admin_user_with_all_fields(
-    users_api_client: TestClient,
-    admin_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, admin_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
@@ -626,9 +576,7 @@ def test_update_course_with_super_admin_user_with_all_fields(
 
 
 def test_cannot_update_course_with_user_that_has_not_been_enrolled(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
@@ -652,9 +600,7 @@ def test_cannot_update_course_with_user_that_has_not_been_enrolled(
 
 
 def test_cannot_update_course_using_user_with_student_role_permissions(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
@@ -680,9 +626,7 @@ def test_cannot_update_course_using_user_with_student_role_permissions(
 
 
 def test_update_course_using_user_with_admin_role_permissions(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_regular_user_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_regular_user_as_admin_user
 ):
     course_id = course_with_regular_user_as_admin_user["course"].id
 
@@ -712,9 +656,7 @@ def test_update_course_using_user_with_admin_role_permissions(
 
 
 def test_get_updated_course_of_user(
-    users_api_client: TestClient,
-    admin_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, admin_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
@@ -747,10 +689,7 @@ def test_get_updated_course_of_user(
     assert result[0]["accepted"] is True
 
 
-def test_cannot_update_non_existing_course(
-    users_api_client: TestClient,
-    admin_auth_headers,
-):
+def test_cannot_update_non_existing_course(users_api_client: TestClient, admin_auth_headers):
     non_existing_course_id = 99999999
 
     course_data = {
@@ -763,9 +702,7 @@ def test_cannot_update_non_existing_course(
         "semester_end_date": "2019-12-01",
     }
     response = users_api_client.put(
-        f"/api/v3/courses/{non_existing_course_id}",
-        json=course_data,
-        headers=admin_auth_headers,
+        f"/api/v3/courses/{non_existing_course_id}", json=course_data, headers=admin_auth_headers
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST

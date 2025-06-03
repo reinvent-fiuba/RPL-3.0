@@ -10,11 +10,7 @@ BigInt = Annotated[int, BigInteger]
 
 
 class Base(DeclarativeBase):
-    type_annotation_map = {
-        BigInt: BigInteger(),
-        Str: String(255),
-        LargeStr: String(500),
-    }
+    type_annotation_map = {BigInt: BigInteger(), Str: String(255), LargeStr: String(500)}
 
 
 IntPK = Annotated[int, mapped_column(BigInteger, primary_key=True)]

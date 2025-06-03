@@ -28,9 +28,7 @@ from sqlalchemy.orm import Session
 
 class CoursesService:
     def __init__(self, db_session: Session):
-        self.activitiesHttpApiClient = httpx.Client(
-            base_url=f"{env.ACTIVITIES_API_URL}/api/v3",
-        )
+        self.activitiesHttpApiClient = httpx.Client(base_url=f"{env.ACTIVITIES_API_URL}/api/v3")
 
         self.users_repo = UsersRepository(db_session)
         self.roles_repo = RolesRepository(db_session)
@@ -58,27 +56,21 @@ class CoursesService:
     def _assert_course_exists(self, course_id: str) -> Course:
         course = self.courses_repo.get_course_with_id(course_id)
         self._assert_or_else_raise_http_exception(
-            course is not None,
-            status.HTTP_400_BAD_REQUEST,
-            "Course not found",
+            course is not None, status.HTTP_400_BAD_REQUEST, "Course not found"
         )
         return course
 
     def _assert_user_exists(self, user_id: str) -> User:
         user = self.users_repo.get_user_with_id(user_id)
         self._assert_or_else_raise_http_exception(
-            user is not None,
-            status.HTTP_400_BAD_REQUEST,
-            "User not found",
+            user is not None, status.HTTP_400_BAD_REQUEST, "User not found"
         )
         return user
 
     def _assert_role_exists(self, role_name: str) -> Role:
         role = self._get_role_named(role_name)
         self._assert_or_else_raise_http_exception(
-            role is not None,
-            status.HTTP_400_BAD_REQUEST,
-            "Role not found",
+            role is not None, status.HTTP_400_BAD_REQUEST, "Role not found"
         )
         return role
 
@@ -98,10 +90,7 @@ class CoursesService:
     def _create_course_as_admin(self, course_data: CourseCreationDTO) -> Course:
         user_admin = self.users_repo.get_user_with_id(course_data.course_user_admin_user_id)
         if user_admin is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User not found",
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
 
         new_course = self.courses_repo.save_new_course(course_data)
         self.course_users_repo.save_new_course_user(
@@ -120,11 +109,7 @@ class CoursesService:
 
         self.courses_repo.delete_course(course.id)
 
-    def _clone_course(
-        self,
-        course_data: CourseCreationDTO,
-        auth_header: HTTPBearer,
-    ) -> Course:
+    def _clone_course(self, course_data: CourseCreationDTO, auth_header: HTTPBearer) -> Course:
         course = self._assert_course_exists(course_data.id)
 
         course_data.img_uri = course_data.img_uri or course.img_uri
@@ -139,25 +124,18 @@ class CoursesService:
         )
         if response.status_code != status.HTTP_201_CREATED:
             self._delete_course(new_course)
-            raise HTTPException(
-                status_code=response.status_code,
-                detail="Failed to clone course categories",
-            )
+            raise HTTPException(status_code=response.status_code, detail="Failed to clone course categories")
 
         return new_course
 
     # ====================== MANAGING - COURSES ====================== #
 
     def create_course(
-        self,
-        course_data: CourseCreationDTO,
-        current_user: User,
-        auth_header: HTTPBearer,
+        self, course_data: CourseCreationDTO, current_user: User, auth_header: HTTPBearer
     ) -> CourseResponseDTO:
         if not current_user.is_admin:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only admins can create courses",
+                status_code=status.HTTP_403_FORBIDDEN, detail="Only admins can create courses"
             )
 
         if course_data.id is None:
@@ -184,10 +162,7 @@ class CoursesService:
     ) -> List[CourseWithUserInformationResponseDTO]:
         courses_with_user_info = []
         for course in self.courses_repo.get_all_courses():
-            course_user = self.course_users_repo.get_course_user(
-                course.id,
-                current_user.id,
-            )
+            course_user = self.course_users_repo.get_course_user(course.id, current_user.id)
             if course_user:
                 courses_with_user_info.append(
                     CourseWithUserInformationResponseDTO.from_course_and_user_info(
@@ -234,18 +209,11 @@ class CoursesService:
         self._assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["user_manage"])
         course_user = self._assert_course_user_exists_and_has_permissions(course_id, user_id)
 
-        self.course_users_repo.update_course_user(
-            course_id,
-            user_id,
-            role.id,
-            course_data.accepted,
-        )
+        self.course_users_repo.update_course_user(course_id, user_id, role.id, course_data.accepted)
 
         if course_data.accepted:
             email_handler.send_course_acceptance_email(
-                course_user.user.email,
-                course_user.user,
-                course_user.course,
+                course_user.user.email, course_user.user, course_user.course
             )
 
         return CourseUserResponseDTO.from_course_user(course_user)
@@ -254,10 +222,7 @@ class CoursesService:
         self._assert_course_exists(course_id)
         self._assert_course_user_exists_and_has_permissions(course_id, current_user.id)
 
-        self.course_users_repo.delete_course_user(
-            course_id=course_id,
-            user_id=current_user.id,
-        )
+        self.course_users_repo.delete_course_user(course_id=course_id, user_id=current_user.id)
 
     def delete_course_user(self, course_id: str, user_id: str, current_user: User):
         self._assert_user_exists(user_id)
@@ -265,10 +230,7 @@ class CoursesService:
         self._assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["user_manage"])
         self._assert_course_user_exists_and_has_permissions(course_id, user_id)
 
-        self.course_users_repo.delete_course_user(
-            course_id=course_id,
-            user_id=user_id,
-        )
+        self.course_users_repo.delete_course_user(course_id=course_id, user_id=user_id)
 
     # ====================== QUERYING - COURSE USERS ====================== #
 
@@ -279,11 +241,7 @@ class CoursesService:
         return course_user.get_permissions()
 
     def get_all_course_users_from_course(
-        self,
-        course_id: str,
-        current_user: User,
-        role_name: Optional[str],
-        student_id: Optional[str],
+        self, course_id: str, current_user: User, role_name: Optional[str], student_id: Optional[str]
     ) -> List[CourseUserResponseDTO]:
         self._assert_course_exists(course_id)
         self._assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["user_view"])
@@ -302,9 +260,7 @@ class CoursesService:
     def get_all_courses_from_user(self, user_id: str, current_user: User) -> List[CourseResponseDTO]:
         self._assert_user_exists(user_id)
         self._assert_or_else_raise_http_exception(
-            user_id == str(current_user.id),
-            status.HTTP_403_FORBIDDEN,
-            "User can only view its own courses",
+            user_id == str(current_user.id), status.HTTP_403_FORBIDDEN, "User can only view its own courses"
         )
 
         return [
@@ -333,9 +289,6 @@ class CoursesService:
     # ====================== QUERYING - EXTERNAL COURSE USER AUTH ====================== #
 
     def get_course_user_for_ext_service(self, course_id, current_user: User) -> CourseUserResponseDTO:
-        course_user = self._assert_course_user_exists_and_has_permissions(
-            course_id,
-            current_user.id,
-        )
+        course_user = self._assert_course_user_exists_and_has_permissions(course_id, current_user.id)
 
         return CourseUserResponseDTO.from_course_user(course_user)

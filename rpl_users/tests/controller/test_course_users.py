@@ -7,10 +7,7 @@ from rpl_users.src.repositories.models.role import Role
 
 
 def test_enroll_regular_user_into_course(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    base_roles,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, base_roles, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
@@ -27,9 +24,7 @@ def test_enroll_regular_user_into_course(
 
 
 def test_cannot_enroll_an_user_twice(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
@@ -43,10 +38,7 @@ def test_cannot_enroll_an_user_twice(
     assert "User is already enrolled in the course" in result["detail"]
 
 
-def test_cannot_enroll_an_user_to_non_existing_course(
-    users_api_client: TestClient,
-    admin_auth_headers,
-):
+def test_cannot_enroll_an_user_to_non_existing_course(users_api_client: TestClient, admin_auth_headers):
     non_existing_course_id = 99999999
 
     response = users_api_client.post(
@@ -78,10 +70,7 @@ def test_unenroll_course_user_from_course(
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = users_api_client.get(
-        f"/api/v3/courses/{course_id}/users",
-        headers=admin_auth_headers,
-    )
+    response = users_api_client.get(f"/api/v3/courses/{course_id}/users", headers=admin_auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -107,9 +96,7 @@ def test_unenroll_course_user_from_course(
 
 
 def test_cannot_unenroll_course_user_from_course_that_has_not_been_enrolled_yet(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
@@ -122,8 +109,7 @@ def test_cannot_unenroll_course_user_from_course_that_has_not_been_enrolled_yet(
 
 
 def test_cannot_unenroll_course_user_from_non_existing_course(
-    users_api_client: TestClient,
-    admin_auth_headers,
+    users_api_client: TestClient, admin_auth_headers
 ):
     non_existing_course_id = 99999999
 
@@ -175,14 +161,12 @@ def test_get_course_user_permissions_of_user_with_student_role(
 
 
 def test_cannot_get_course_user_permissions_using_non_existing_course(
-    users_api_client: TestClient,
-    admin_auth_headers,
+    users_api_client: TestClient, admin_auth_headers
 ):
     non_existing_course_id = 99999999
 
     response = users_api_client.get(
-        f"/api/v3/courses/{non_existing_course_id}/permissions",
-        headers=admin_auth_headers,
+        f"/api/v3/courses/{non_existing_course_id}/permissions", headers=admin_auth_headers
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -192,9 +176,7 @@ def test_cannot_get_course_user_permissions_using_non_existing_course(
 
 
 def test_cannot_get_course_user_permissions_using_user_that_has_not_been_enrolled_yet(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
@@ -218,10 +200,7 @@ def test_get_all_course_users_from_course_when_only_admin_user(
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
-    response = users_api_client.get(
-        f"/api/v3/courses/{course_id}/users",
-        headers=admin_auth_headers,
-    )
+    response = users_api_client.get(f"/api/v3/courses/{course_id}/users", headers=admin_auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -258,10 +237,7 @@ def test_get_all_course_users_from_course_when_multiple_users(
 
     users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers)
 
-    response = users_api_client.get(
-        f"/api/v3/courses/{course_id}/users",
-        headers=admin_auth_headers,
-    )
+    response = users_api_client.get(f"/api/v3/courses/{course_id}/users", headers=admin_auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -386,14 +362,12 @@ def test_get_course_user_with_student_id_from_course_when_multiple_users(
 
 
 def test_cannot_get_all_course_users_from_non_existing_course(
-    users_api_client: TestClient,
-    admin_auth_headers,
+    users_api_client: TestClient, admin_auth_headers
 ):
     non_existing_course_id = 99999999
 
     response = users_api_client.get(
-        f"/api/v3/courses/{non_existing_course_id}/users",
-        headers=admin_auth_headers,
+        f"/api/v3/courses/{non_existing_course_id}/users", headers=admin_auth_headers
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -403,9 +377,7 @@ def test_cannot_get_all_course_users_from_non_existing_course(
 
 
 def test_cannot_get_all_course_users_from_course_using_user_that_has_not_been_enrolled_yet(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
@@ -429,10 +401,7 @@ def test_get_all_course_users_from_course_when_multiple_users_after_updating(
 
     users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers)
 
-    course_user_data = {
-        "accepted": True,
-        "role": base_roles["student"].name,
-    }
+    course_user_data = {"accepted": True, "role": base_roles["student"].name}
 
     users_api_client.patch(
         f"/api/v3/courses/{course_id}/users/{example_users["regular"].id}",
@@ -440,10 +409,7 @@ def test_get_all_course_users_from_course_when_multiple_users_after_updating(
         headers=admin_auth_headers,
     )
 
-    response = users_api_client.get(
-        f"/api/v3/courses/{course_id}/users",
-        headers=admin_auth_headers,
-    )
+    response = users_api_client.get(f"/api/v3/courses/{course_id}/users", headers=admin_auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -499,10 +465,7 @@ def test_update_course_user_using_super_admin_user(
 
     response = users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers)
 
-    course_user_data = {
-        "accepted": True,
-        "role": base_roles["course_admin"].name,
-    }
+    course_user_data = {"accepted": True, "role": base_roles["course_admin"].name}
 
     response = users_api_client.patch(
         f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}",
@@ -542,10 +505,7 @@ def test_update_course_user_using_admin_user(
 
     response = users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers)
 
-    course_user_data = {
-        "accepted": True,
-        "role": base_roles["course_admin"].name,
-    }
+    course_user_data = {"accepted": True, "role": base_roles["course_admin"].name}
 
     response = users_api_client.patch(
         f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}",
@@ -586,10 +546,7 @@ def test_accept_user_should_send_course_acceptance_email(
 
     response = users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers)
 
-    course_user_data = {
-        "accepted": True,
-        "role": base_roles["course_admin"].name,
-    }
+    course_user_data = {"accepted": True, "role": base_roles["course_admin"].name}
 
     response = users_api_client.patch(
         f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}",
@@ -620,10 +577,7 @@ def test_not_accept_user_should_not_send_course_acceptance_email(
 
     response = users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers)
 
-    course_user_data = {
-        "accepted": False,
-        "role": base_roles["course_admin"].name,
-    }
+    course_user_data = {"accepted": False, "role": base_roles["course_admin"].name}
 
     response = users_api_client.patch(
         f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}",
@@ -665,10 +619,7 @@ def test_cannot_update_user_that_has_not_been_enrolled_yet(
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
-    course_user_data = {
-        "accepted": True,
-        "role": base_roles["course_admin"].name,
-    }
+    course_user_data = {"accepted": True, "role": base_roles["course_admin"].name}
 
     response = users_api_client.patch(
         f"/api/v3/courses/{course_id}/users/{example_users["regular"].id}",
@@ -696,10 +647,7 @@ def test_cannot_update_course_user_using_student_user(
 
     response = users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers)
 
-    course_user_data = {
-        "accepted": True,
-        "role": base_roles["course_admin"].name,
-    }
+    course_user_data = {"accepted": True, "role": base_roles["course_admin"].name}
 
     response = users_api_client.patch(
         f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}",
@@ -724,10 +672,7 @@ def test_cannot_update_course_user_to_non_existing_role(
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
-    course_user_data = {
-        "accepted": True,
-        "role": "non existing role",
-    }
+    course_user_data = {"accepted": True, "role": "non existing role"}
 
     response = users_api_client.patch(
         f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}",
@@ -744,18 +689,11 @@ def test_cannot_update_course_user_to_non_existing_role(
 
 
 def test_cannot_update_course_user_of_non_existing_course(
-    users_api_client: TestClient,
-    email_handler,
-    example_users,
-    admin_auth_headers,
-    base_roles,
+    users_api_client: TestClient, email_handler, example_users, admin_auth_headers, base_roles
 ):
     non_existing_course_id = 99999999
 
-    course_user_data = {
-        "accepted": True,
-        "role": base_roles["course_admin"].name,
-    }
+    course_user_data = {"accepted": True, "role": base_roles["course_admin"].name}
 
     response = users_api_client.patch(
         f"/api/v3/courses/{non_existing_course_id}/users/{example_users["admin"].id}",
@@ -781,10 +719,7 @@ def test_cannot_update_course_user_of_non_existing_user(
     course_id = course_with_superadmin_as_admin_user["course"].id
     non_existing_user_id = 99999999
 
-    course_user_data = {
-        "accepted": True,
-        "role": base_roles["course_admin"].name,
-    }
+    course_user_data = {"accepted": True, "role": base_roles["course_admin"].name}
 
     response = users_api_client.patch(
         f"/api/v3/courses/{course_id}/users/{non_existing_user_id}",
@@ -816,16 +751,12 @@ def test_delete_course_user_from_course_using_super_admin_user(
     response = users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers)
 
     response = users_api_client.delete(
-        f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}",
-        headers=admin_auth_headers,
+        f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}", headers=admin_auth_headers
     )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = users_api_client.get(
-        f"/api/v3/courses/{course_id}/users",
-        headers=regular_auth_headers,
-    )
+    response = users_api_client.get(f"/api/v3/courses/{course_id}/users", headers=regular_auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -863,16 +794,12 @@ def test_delete_course_user_from_course_using_admin_user(
     response = users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers)
 
     response = users_api_client.delete(
-        f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}",
-        headers=regular_auth_headers,
+        f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}", headers=regular_auth_headers
     )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = users_api_client.get(
-        f"/api/v3/courses/{course_id}/users",
-        headers=regular_auth_headers,
-    )
+    response = users_api_client.get(f"/api/v3/courses/{course_id}/users", headers=regular_auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -898,16 +825,12 @@ def test_delete_course_user_from_course_using_admin_user(
 
 
 def test_cannot_delete_course_user_from_course_that_has_not_been_enrolled_yet(
-    users_api_client: TestClient,
-    example_users,
-    regular_auth_headers,
-    course_with_regular_user_as_admin_user,
+    users_api_client: TestClient, example_users, regular_auth_headers, course_with_regular_user_as_admin_user
 ):
     course_id = course_with_regular_user_as_admin_user["course"].id
 
     response = users_api_client.delete(
-        f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}",
-        headers=regular_auth_headers,
+        f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}", headers=regular_auth_headers
     )
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -917,18 +840,14 @@ def test_cannot_delete_course_user_from_course_that_has_not_been_enrolled_yet(
 
 
 def test_cannot_delete_course_user_using_student_user(
-    users_api_client: TestClient,
-    example_users,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, example_users, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
 
     response = users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers)
 
     response = users_api_client.delete(
-        f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}",
-        headers=regular_auth_headers,
+        f"/api/v3/courses/{course_id}/users/{example_users["admin"].id}", headers=regular_auth_headers
     )
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -938,9 +857,7 @@ def test_cannot_delete_course_user_using_student_user(
 
 
 def test_cannot_delete_course_user_from_non_existing_course(
-    users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
+    users_api_client: TestClient, example_users, admin_auth_headers
 ):
     non_existing_course_id = 99999999
 
@@ -956,16 +873,13 @@ def test_cannot_delete_course_user_from_non_existing_course(
 
 
 def test_cannot_delete_course_user_of_non_existing_user(
-    users_api_client: TestClient,
-    admin_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, admin_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
     non_existing_user_id = 99999999
 
     response = users_api_client.delete(
-        f"/api/v3/courses/{course_id}/users/{non_existing_user_id}",
-        headers=admin_auth_headers,
+        f"/api/v3/courses/{course_id}/users/{non_existing_user_id}", headers=admin_auth_headers
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -978,13 +892,10 @@ def test_cannot_delete_course_user_of_non_existing_user(
 
 
 def test_get_courses_of_user_when_user_has_not_been_enrolled_yet(
-    users_api_client: TestClient,
-    example_users,
-    admin_auth_headers,
+    users_api_client: TestClient, example_users, admin_auth_headers
 ):
     response = users_api_client.get(
-        f"/api/v3/users/{example_users["admin"].id}/courses",
-        headers=admin_auth_headers,
+        f"/api/v3/users/{example_users["admin"].id}/courses", headers=admin_auth_headers
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -994,17 +905,12 @@ def test_get_courses_of_user_when_user_has_not_been_enrolled_yet(
 
 
 def test_get_courses_of_user_when_user_is_enrolled_on_one_course(
-    users_api_client: TestClient,
-    admin_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, admin_auth_headers, course_with_superadmin_as_admin_user
 ):
     course = course_with_superadmin_as_admin_user["course"]
     admin_user = course_with_superadmin_as_admin_user["admin_course_user"]
 
-    response = users_api_client.get(
-        f"/api/v3/users/{admin_user.id}/courses",
-        headers=admin_auth_headers,
-    )
+    response = users_api_client.get(f"/api/v3/users/{admin_user.id}/courses", headers=admin_auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -1020,9 +926,7 @@ def test_get_courses_of_user_when_user_is_enrolled_on_one_course(
 
 
 def test_get_courses_of_user_when_user_is_enrolled_on_multiple_courses(
-    users_api_client: TestClient,
-    admin_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, admin_auth_headers, course_with_superadmin_as_admin_user
 ):
     course_1 = course_with_superadmin_as_admin_user["course"]
     admin_user = course_with_superadmin_as_admin_user["admin_course_user"]
@@ -1041,10 +945,7 @@ def test_get_courses_of_user_when_user_is_enrolled_on_multiple_courses(
         "/api/v3/courses", json=course_data, headers=admin_auth_headers
     ).json()
 
-    response = users_api_client.get(
-        f"/api/v3/users/{admin_user.id}/courses",
-        headers=admin_auth_headers,
-    )
+    response = users_api_client.get(f"/api/v3/users/{admin_user.id}/courses", headers=admin_auth_headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -1070,15 +971,11 @@ def test_get_courses_of_user_when_user_is_enrolled_on_multiple_courses(
     assert result_course_2["semester_end_date"] == course_2_response["semester_end_date"]
 
 
-def test_cannot_get_courses_of_non_existing_user(
-    users_api_client: TestClient,
-    admin_auth_headers,
-):
+def test_cannot_get_courses_of_non_existing_user(users_api_client: TestClient, admin_auth_headers):
     non_existing_user_id = 99999999
 
     response = users_api_client.get(
-        f"/api/v3/users/{non_existing_user_id}/courses",
-        headers=admin_auth_headers,
+        f"/api/v3/users/{non_existing_user_id}/courses", headers=admin_auth_headers
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -1088,16 +985,11 @@ def test_cannot_get_courses_of_non_existing_user(
 
 
 def test_cannot_get_courses_of_another_user(
-    users_api_client: TestClient,
-    regular_auth_headers,
-    course_with_superadmin_as_admin_user,
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
 ):
     admin_user = course_with_superadmin_as_admin_user["admin_course_user"]
 
-    response = users_api_client.get(
-        f"/api/v3/users/{admin_user.id}/courses",
-        headers=regular_auth_headers,
-    )
+    response = users_api_client.get(f"/api/v3/users/{admin_user.id}/courses", headers=regular_auth_headers)
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
 

@@ -9,11 +9,5 @@ DB_URL = os.getenv("DB_URL")
 QUEUE_URL = os.getenv("QUEUE_URL")
 USERS_API_URL = os.getenv("USERS_API_URL")
 
-if not all(
-    [
-        DB_URL,
-        QUEUE_URL,
-        USERS_API_URL,
-    ]
-):
+if not all([DB_URL, QUEUE_URL, USERS_API_URL]):
     raise ValueError("Missing environment variables")

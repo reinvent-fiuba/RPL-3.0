@@ -27,10 +27,7 @@ class ActivitiesRepository(BaseRepository):
     def get_all_activities_by_course_id(self, course_id: int):
         return (
             self.db_session.execute(
-                sa.select(Activity).where(
-                    Activity.course_id == course_id,
-                    Activity.deleted == False,
-                )
+                sa.select(Activity).where(Activity.course_id == course_id, Activity.deleted == False)
             )
             .scalars()
             .all()
@@ -40,9 +37,7 @@ class ActivitiesRepository(BaseRepository):
         return (
             self.db_session.execute(
                 sa.select(Activity).where(
-                    Activity.course_id == course_id,
-                    Activity.deleted == False,
-                    Activity.active == True,
+                    Activity.course_id == course_id, Activity.deleted == False, Activity.active == True
                 )
             )
             .scalars()
@@ -52,10 +47,7 @@ class ActivitiesRepository(BaseRepository):
     def get_activity_by_id(self, activity_id: int):
         return (
             self.db_session.execute(
-                sa.select(Activity).where(
-                    Activity.id == activity_id,
-                    Activity.deleted == False,
-                )
+                sa.select(Activity).where(Activity.id == activity_id, Activity.deleted == False)
             )
             .scalars()
             .one_or_none()
@@ -64,10 +56,7 @@ class ActivitiesRepository(BaseRepository):
     def get_all_activities_by_category_id(self, category_id: int) -> list[Activity]:
         return (
             self.db_session.execute(
-                sa.select(Activity).where(
-                    Activity.category_id == category_id,
-                    Activity.deleted == False,
-                )
+                sa.select(Activity).where(Activity.category_id == category_id, Activity.deleted == False)
             )
             .scalars()
             .all()
@@ -81,10 +70,7 @@ class ActivitiesRepository(BaseRepository):
         return (
             [
                 IOTestResponseDTO(
-                    id=io_test.id,
-                    name=io_test.name,
-                    test_in=io_test.test_in,
-                    test_out=io_test.test_out,
+                    id=io_test.id, name=io_test.name, test_in=io_test.test_in, test_out=io_test.test_out
                 )
                 for io_test in io_tests
             ]
@@ -153,10 +139,7 @@ class ActivitiesRepository(BaseRepository):
         return new_activity
 
     def update_activity(
-        self,
-        course_id: int,
-        activity: Activity,
-        new_activity_data: ActivityUpdateRequestDTO,
+        self, course_id: int, activity: Activity, new_activity_data: ActivityUpdateRequestDTO
     ) -> Activity:
         if new_activity_data.starting_files:
             compressed_rplfile_bytes = tar_utils.compress_uploadfiles_to_tar_gz(

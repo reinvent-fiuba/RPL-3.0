@@ -27,6 +27,7 @@ class UnitTestSuiteCreationRequestDTO(BaseModel):
 
 
 class ActivityWithMetadataOnlyResponseDTO(BaseModel):
+    id: int
     course_id: int
     category_id: int
     category_name: str
@@ -70,6 +71,7 @@ class ActivityUpdateRequestDTO(BaseModel):
 
 
 class ActivityResponseDTO(BaseModel):
+    id: int
     course_id: int
     category_id: int
     category_name: str

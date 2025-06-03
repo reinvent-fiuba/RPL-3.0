@@ -10,8 +10,4 @@ class UniversityResponseDTO(BaseModel):
 
     @classmethod
     def from_university(cls, university: "University") -> "UniversityResponseDTO":
-        return cls(
-            id=university.id,
-            name=university.name,
-            degrees=university.get_degrees(),
-        )
+        return cls(id=university.id, name=university.name, degrees=university.get_degrees())

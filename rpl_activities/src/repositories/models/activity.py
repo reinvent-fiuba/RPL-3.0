@@ -2,13 +2,9 @@ from typing import List, Optional
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from rpl_activities.src.repositories.models.activity_category import (
-        ActivityCategory,
-    )
+    from rpl_activities.src.repositories.models.activity_category import ActivityCategory
     from rpl_activities.src.repositories.models.rpl_file import RPLFile
-    from rpl_activities.src.repositories.models.activity_submission import (
-        ActivitySubmission,
-    )
+    from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
     from rpl_activities.src.repositories.models.io_test import IOTest
     from rpl_activities.src.repositories.models.unit_test_suite import UnitTestSuite
 

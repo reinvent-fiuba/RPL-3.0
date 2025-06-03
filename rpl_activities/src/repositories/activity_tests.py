@@ -1,10 +1,7 @@
 from datetime import datetime, timezone
 from typing import Optional
 
-from rpl_activities.src.dtos.activity_dtos import (
-    UnitTestSuiteCreationRequestDTO,
-    IOTestRequestDTO,
-)
+from rpl_activities.src.dtos.activity_dtos import UnitTestSuiteCreationRequestDTO, IOTestRequestDTO
 from rpl_activities.src.dtos.submission_dtos import TestsExecutionLogDTO
 from rpl_activities.src.repositories.base import BaseRepository
 import sqlalchemy as sa
@@ -23,11 +20,7 @@ from .models.activity_submission import ActivitySubmission
 
 STUDENT_OUTPUT_START_DELIMITER = "start_RUN"
 STUDENT_OUTPUT_END_DELIMITER = "end_RUN"
-IO_TEST_OUTPUT_DELIMITERS_TO_SKIP = [
-    "assignment_main.py",
-    "./main",
-    "custom_IO_main.pyc",
-]
+IO_TEST_OUTPUT_DELIMITERS_TO_SKIP = ["assignment_main.py", "./main", "custom_IO_main.pyc"]
 UNIT_TEST_RUN_PASS = "PASSED"
 
 
@@ -105,10 +98,7 @@ class TestsRepository(BaseRepository):
         return activity
 
     def create_unit_test_suite_for_activity(
-        self,
-        new_unit_test_suite_data: UnitTestSuiteCreationRequestDTO,
-        activity: Activity,
-        course_id: int,
+        self, new_unit_test_suite_data: UnitTestSuiteCreationRequestDTO, activity: Activity, course_id: int
     ) -> UnitTestSuite:
         rplfile = self.rplfiles_repo.create_rplfile(
             file_name=f"{datetime.today().strftime('%Y-%m-%d')}__{course_id}__{activity.id}__unittests",
@@ -162,9 +152,7 @@ class TestsRepository(BaseRepository):
     # ==============================================================================
 
     def save_tests_execution_log_for_submission(
-        self,
-        new_execution_log_data: TestsExecutionLogDTO,
-        submission: ActivitySubmission,
+        self, new_execution_log_data: TestsExecutionLogDTO, submission: ActivitySubmission
     ) -> tuple[TestsExecutionLog, ActivitySubmission]:
         test_execution_log = TestsExecutionLog(
             activity_submission_id=submission.id,
@@ -214,10 +202,7 @@ class TestsRepository(BaseRepository):
         return True
 
     def save_io_test_runs_from_exec_log_and_check_if_all_passed(
-        self,
-        io_tests: list[IOTest],
-        test_execution_log_id: int,
-        new_execution_log_data: TestsExecutionLogDTO,
+        self, io_tests: list[IOTest], test_execution_log_id: int, new_execution_log_data: TestsExecutionLogDTO
     ) -> bool:
         student_outputs_per_run = self.__parse_student_outputs_per_io_test_run(
             new_execution_log_data.tests_execution_stdout

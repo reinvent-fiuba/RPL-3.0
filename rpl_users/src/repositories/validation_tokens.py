@@ -8,9 +8,7 @@ from datetime import datetime, timedelta, timezone
 class ValidationTokensRepository(BaseRepository):
     def save_new_validation_token(self, user_id: int, token: str) -> ValidationToken:
         validation_token = ValidationToken(
-            user_id=user_id,
-            token=token,
-            expiration_date=datetime.now(timezone.utc) + timedelta(days=1),
+            user_id=user_id, token=token, expiration_date=datetime.now(timezone.utc) + timedelta(days=1)
         )
         self.db_session.add(validation_token)
         self.db_session.commit()

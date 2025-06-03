@@ -39,11 +39,7 @@ def test_create_user_success(users_api_client: TestClient):
 
 @pytest.mark.parametrize(
     "test_name,missing_field",
-    [
-        ("missing_username", "username"),
-        ("missing_email", "email"),
-        ("missing_password", "password"),
-    ],
+    [("missing_username", "username"), ("missing_email", "email"), ("missing_password", "password")],
 )
 def test_create_user_missing_fields(users_api_client: TestClient, test_name, missing_field):
     new_user_data = {
@@ -140,10 +136,7 @@ def test_get_profile(users_api_client: TestClient, example_users: dict[str, User
     ],
 )
 def test_update_profile(
-    users_api_client: TestClient,
-    example_users: dict[str, User],
-    regular_auth_headers,
-    fields_to_update,
+    users_api_client: TestClient, example_users: dict[str, User], regular_auth_headers, fields_to_update
 ):
     response = users_api_client.patch(
         "/api/v3/auth/profile", json=fields_to_update, headers=regular_auth_headers
@@ -160,9 +153,7 @@ def test_update_profile(
 
 
 def test_update_immutable_fields(
-    users_api_client: TestClient,
-    example_users: dict[str, User],
-    regular_auth_headers,
+    users_api_client: TestClient, example_users: dict[str, User], regular_auth_headers
 ):
     immutable_fields = {"username": "regularUsername"}
     response = users_api_client.patch(

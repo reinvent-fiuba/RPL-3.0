@@ -41,11 +41,7 @@ class MetadataForDateGroupingDTO(BaseModel):
 class SubmissionsStatsOfCourseDTO(BaseModel):
     stats_per_student: List[SubmissionsStatsOfStudentDTO]
     grouping_metadata: List[
-        Union[
-            MetadataForActivitiesGroupingDTO,
-            MetadataFoUsersGroupingDTO,
-            MetadataForDateGroupingDTO,
-        ]
+        Union[MetadataForActivitiesGroupingDTO, MetadataFoUsersGroupingDTO, MetadataForDateGroupingDTO]
     ]
     total_submitters: int
     total_submitters_with_at_least_one_successful_submission: int

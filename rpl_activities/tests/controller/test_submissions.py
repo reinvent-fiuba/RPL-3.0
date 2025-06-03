@@ -6,9 +6,7 @@ import logging
 
 from rpl_activities.src.repositories.models import aux_models
 from rpl_activities.src.repositories.models.activity import Activity
-from rpl_activities.src.repositories.models.activity_submission import (
-    ActivitySubmission,
-)
+from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
 from rpl_activities.src.repositories.models.activity_category import ActivityCategory
 
 from rpl_activities.src.repositories.models.io_test import IOTest
@@ -25,8 +23,7 @@ def test_get_submission(
     admin_auth_headers: dict[str, str],
 ):
     response = activities_api_client.get(
-        f"/api/v3/submissions/{example_submission.id}",
-        headers=admin_auth_headers,
+        f"/api/v3/submissions/{example_submission.id}", headers=admin_auth_headers
     )
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
@@ -61,10 +58,7 @@ def test_get_non_existent_submission_not_found(
     example_submission: ActivitySubmission,
     admin_auth_headers: dict[str, str],
 ):
-    response = activities_api_client.get(
-        "/api/v3/submissions/99999",
-        headers=admin_auth_headers,
-    )
+    response = activities_api_client.get("/api/v3/submissions/99999", headers=admin_auth_headers)
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -98,12 +92,10 @@ def test_create_submission(
 
     # the submission's stored rplfile should contain both the ones from the student's solution (tiempo.c, tiempo.h) and the activities' starting files. Thus, it should also have overwritten any submission files that were marked as either "read" or "hidden" within the starting files that the teacher created.
     submission_rplfile = activities_api_client.get(
-        f"/api/v3/extractedRPLFile/{response_data['submission_rplfile_id']}",
-        headers=admin_auth_headers,
+        f"/api/v3/extractedRPLFile/{response_data['submission_rplfile_id']}", headers=admin_auth_headers
     )
     activity_rplfile = activities_api_client.get(
-        f"/api/v3/extractedRPLFile/{example_activity.starting_rplfile_id}",
-        headers=admin_auth_headers,
+        f"/api/v3/extractedRPLFile/{example_activity.starting_rplfile_id}", headers=admin_auth_headers
     )
     assert submission_rplfile.status_code == status.HTTP_200_OK
     subm_rplfile_data = submission_rplfile.json()

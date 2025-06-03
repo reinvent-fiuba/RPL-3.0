@@ -5,9 +5,7 @@ from rpl_activities.src.deps.auth import CurrentCourseUser, StudentCourseUser
 from rpl_activities.src.repositories.activities import ActivitiesRepository
 from rpl_activities.src.repositories.models import aux_models
 from rpl_activities.src.repositories.models.activity import Activity
-from rpl_activities.src.repositories.models.activity_submission import (
-    ActivitySubmission,
-)
+from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
 from rpl_activities.src.repositories.submissions import SubmissionsRepository
 from rpl_activities.src.services.activities import ActivitiesService
 from rpl_activities.src.dtos.stats_dtos import (
@@ -116,8 +114,7 @@ class StatsService:
             amount_of_failed_attempts_for_activity_with_the_most_failed_attempts,
             average_failed_attempts_per_activity,
         ) = self.__get_detailed_stats_related_to_failed_attempts(
-            activities,
-            curr_user_submissions_grouped_by_activity,
+            activities, curr_user_submissions_grouped_by_activity
         )
         return ActivitiesStatsOfStudentDTO(
             amount_of_activities_started,
@@ -131,9 +128,7 @@ class StatsService:
         )
 
     def __sum_submissions_with_specific_status(
-        self,
-        curr_user_submissions: list[ActivitySubmission],
-        status: aux_models.SubmissionStatus,
+        self, curr_user_submissions: list[ActivitySubmission], status: aux_models.SubmissionStatus
     ) -> int:
         return sum(1 for submission in curr_user_submissions if submission.status == status)
 
@@ -161,8 +156,7 @@ class StatsService:
             amount_of_failed_attempts_for_activity_with_the_most_failed_attempts,
             average_failed_attempts_per_activity,
         ) = self.__get_detailed_stats_related_to_failed_attempts(
-            activities,
-            curr_user_submissions_grouped_by_activity,
+            activities, curr_user_submissions_grouped_by_activity
         )
         return SubmissionsStatsOfStudentDTO(
             total_submissions,
@@ -235,10 +229,7 @@ class StatsService:
     # ==============================================================================
 
     def __get_activities_with_filters_applied(
-        self,
-        course_id: int,
-        category_id: Optional[int],
-        activity_id: Optional[int],
+        self, course_id: int, category_id: Optional[int], activity_id: Optional[int]
     ) -> list[Activity]:
         activities = self.activities_repo.get_all_active_activities_by_course_id(course_id)
         if category_id is not None:
@@ -248,19 +239,14 @@ class StatsService:
         return activities
 
     def __get_students_with_filter_applied(
-        self,
-        all_students_course_users: list[StudentCourseUser],
-        user_id: Optional[int],
+        self, all_students_course_users: list[StudentCourseUser], user_id: Optional[int]
     ) -> list[StudentCourseUser]:
         if user_id is not None:
             return [student for student in all_students_course_users if student.user_id == user_id]
         return all_students_course_users
 
     def __get_submission_stats_grouped_by_activity(
-        self,
-        students: list[StudentCourseUser],
-        activities: list[Activity],
-        date_filter: Optional[date],
+        self, students: list[StudentCourseUser], activities: list[Activity], date_filter: Optional[date]
     ) -> SubmissionsStatsOfCourseDTO:
         stats_sorted_by_activity_grouped = []
         grouping_metadata = []
@@ -272,11 +258,7 @@ class StatsService:
 
         for activity in activities:
             filtered_submissions_for_activity = self.__get_filtered_submissions_for_activity(
-                activity,
-                students,
-                date_filter,
-                submitters,
-                submitters_with_one_success,
+                activity, students, date_filter, submitters, submitters_with_one_success
             )
             stats = self.__calculate_submissions_stats_of_current_user(
                 [activity],
@@ -311,10 +293,7 @@ class StatsService:
         )
 
     def __get_submission_stats_grouped_by_user(
-        self,
-        students: list[StudentCourseUser],
-        activities: list[Activity],
-        date_filter: Optional[date],
+        self, students: list[StudentCourseUser], activities: list[Activity], date_filter: Optional[date]
     ) -> SubmissionsStatsOfCourseDTO:
         stats_sorted_by_user_grouped = []
         grouping_metadata = []
@@ -370,10 +349,7 @@ class StatsService:
         )
 
     def __get_submission_stats_grouped_by_date(
-        self,
-        students: list[StudentCourseUser],
-        activities: list[Activity],
-        date_filter: Optional[date],
+        self, students: list[StudentCourseUser], activities: list[Activity], date_filter: Optional[date]
     ) -> SubmissionsStatsOfCourseDTO:
         submissions_by_date = self.__gather_submissions_grouped_by_date(students, activities, date_filter)
 
@@ -447,10 +423,7 @@ class StatsService:
         return filtered_submissions
 
     def __get_filtered_submissions_for_student(
-        self,
-        student: StudentCourseUser,
-        activities: list[Activity],
-        date_filter: Optional[date],
+        self, student: StudentCourseUser, activities: list[Activity], date_filter: Optional[date]
     ) -> list[ActivitySubmission]:
         filtered_submissions = []
         for activity in activities:
@@ -467,10 +440,7 @@ class StatsService:
         return filtered_submissions
 
     def __gather_submissions_grouped_by_date(
-        self,
-        students: list[StudentCourseUser],
-        activities: list[Activity],
-        date_filter: Optional[date],
+        self, students: list[StudentCourseUser], activities: list[Activity], date_filter: Optional[date]
     ) -> dict[date, list[ActivitySubmission]]:
         submissions_by_date = defaultdict(list)
         for student in students:

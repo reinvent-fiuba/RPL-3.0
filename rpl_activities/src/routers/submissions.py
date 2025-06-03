@@ -42,10 +42,7 @@ def create_submission(
     )
 
 
-@router.put(
-    "/submissions/{submission_id}/status",
-    response_model=SubmissionWithMetadataOnlyResponseDTO,
-)
+@router.put("/submissions/{submission_id}/status", response_model=SubmissionWithMetadataOnlyResponseDTO)
 def update_submission_status(
     submission_id: int, new_status_data: UpdateSubmissionStatusRequestDTO, db: DBSessionDependency
 ):
@@ -98,10 +95,7 @@ def get_all_final_submissions_from_activity(
     )
 
 
-@router.post(
-    "/submissions/{submission_id}/execLog",
-    status_code=status.HTTP_201_CREATED,
-)
+@router.post("/submissions/{submission_id}/execLog", status_code=status.HTTP_201_CREATED)
 def save_tests_execution_log_for_submission(
     submission_id: int, new_execution_log_data: TestsExecutionLogDTO, db: DBSessionDependency
 ):

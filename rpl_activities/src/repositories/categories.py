@@ -1,8 +1,5 @@
 from datetime import datetime, timezone
-from rpl_activities.src.dtos.category_dtos import (
-    CategoryResponseDTO,
-    CategoryUpdateRequestDTO,
-)
+from rpl_activities.src.dtos.category_dtos import CategoryResponseDTO, CategoryUpdateRequestDTO
 from rpl_activities.src.repositories.base import BaseRepository
 import sqlalchemy as sa
 from .models.activity_category import ActivityCategory
@@ -23,8 +20,7 @@ class CategoriesRepository(BaseRepository):
         return (
             self.db_session.execute(
                 sa.select(ActivityCategory).where(
-                    ActivityCategory.course_id == course_id,
-                    ActivityCategory.active == True,
+                    ActivityCategory.course_id == course_id, ActivityCategory.active == True
                 )
             )
             .scalars()
@@ -63,8 +59,7 @@ class CategoriesRepository(BaseRepository):
         category = (
             self.db_session.execute(
                 sa.select(ActivityCategory).where(
-                    ActivityCategory.id == category_id,
-                    ActivityCategory.course_id == course_id,
+                    ActivityCategory.id == category_id, ActivityCategory.course_id == course_id
                 )
             )
             .scalars()
@@ -73,9 +68,7 @@ class CategoriesRepository(BaseRepository):
         return category
 
     def update_category(
-        self,
-        new_category_data: CategoryUpdateRequestDTO,
-        category: ActivityCategory,
+        self, new_category_data: CategoryUpdateRequestDTO, category: ActivityCategory
     ) -> ActivityCategory:
         if new_category_data.name is not None:
             category.name = new_category_data.name

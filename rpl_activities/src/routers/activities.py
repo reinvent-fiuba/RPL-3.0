@@ -19,9 +19,7 @@ router = APIRouter(prefix="/api/v3", tags=["Activities"])
 
 @router.get("/courses/{course_id}/activities", response_model=List[ActivityWithMetadataOnlyResponseDTO])
 def get_all_activities(
-    course_id: int,
-    current_course_user: CurrentCourseUserDependency,
-    db: DBSessionDependency,
+    course_id: int, current_course_user: CurrentCourseUserDependency, db: DBSessionDependency
 ):
     return ActivitiesService(db).get_all_activities_for_current_user(current_course_user, course_id)
 

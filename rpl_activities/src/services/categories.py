@@ -15,9 +15,7 @@ class CategoriesService:
     # ====================== PRIVATE - ACCESSING - CATEGORIES ====================== #
 
     def _get_categories(
-        self,
-        current_course_user: CurrentCourseUser,
-        course_id: int,
+        self, current_course_user: CurrentCourseUser, course_id: int
     ) -> list[CategoryResponseDTO]:
         has_activity_view = current_course_user.has_authority("activity_view")
         has_activity_manage = current_course_user.has_authority("activity_manage")
@@ -37,9 +35,7 @@ class CategoriesService:
     # ====================== ACCESSING - CATEGORIES ====================== #
 
     def get_categories(
-        self,
-        current_course_user: CurrentCourseUser,
-        course_id: int,
+        self, current_course_user: CurrentCourseUser, course_id: int
     ) -> list[CategoryResponseDTO]:
         return [
             CategoryResponseDTO(
@@ -57,10 +53,7 @@ class CategoriesService:
     # ====================== PRIVATE - UTILS ====================== #
 
     def _clone_all_categories(
-        self,
-        current_course_user: CurrentCourseUser,
-        from_course_id: int,
-        to_course_id: int,
+        self, current_course_user: CurrentCourseUser, from_course_id: int, to_course_id: int
     ) -> dict[int, ActivityCategory]:
         categories = self._get_categories(current_course_user, from_course_id)
         for category in categories:
@@ -70,10 +63,7 @@ class CategoriesService:
     # ====================== MANAGING - CATEGORIES ====================== #
 
     def create_category(
-        self,
-        current_course_user: CurrentCourseUser,
-        course_id: int,
-        category_data: CategoryResponseDTO,
+        self, current_course_user: CurrentCourseUser, course_id: int, category_data: CategoryResponseDTO
     ) -> CategoryResponseDTO:
         if not current_course_user.has_authority("activity_manage"):
             raise HTTPException(
@@ -106,10 +96,7 @@ class CategoriesService:
 
         category = self.categories_repo.get_category_by_id_and_course_id(category_id, course_id)
         if not category:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Category not found",
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
 
         self.categories_repo.update_category(new_category_data, category)
 
@@ -124,10 +111,7 @@ class CategoriesService:
         )
 
     def clone_all_info(
-        self,
-        current_course_user: CurrentCourseUser,
-        from_course_id: int,
-        to_course_id: int,
+        self, current_course_user: CurrentCourseUser, from_course_id: int, to_course_id: int
     ) -> None:
         if not current_course_user.has_authority("activity_manage"):
             raise HTTPException(

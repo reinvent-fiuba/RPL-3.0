@@ -88,10 +88,7 @@ class CourseWithUserInformationResponseDTO(BaseModel):
 
     @classmethod
     def from_course_and_user_info(
-        cls,
-        course: "Course",
-        enrolled: "bool",
-        accepted: "bool",
+        cls, course: "Course", enrolled: "bool", accepted: "bool"
     ) -> "CourseWithUserInformationResponseDTO":
         return cls(
             id=course.id,
@@ -128,10 +125,7 @@ class CourseUserResponseDTO(BaseModel):
     last_updated: datetime.datetime
 
     @classmethod
-    def from_course_user(
-        cls,
-        course_user: "CourseUser",
-    ) -> "CourseUserResponseDTO":
+    def from_course_user(cls, course_user: "CourseUser") -> "CourseUserResponseDTO":
         return cls(
             user_id=course_user.user.id,
             course_id=course_user.course.id,

@@ -5,9 +5,7 @@ import logging
 
 from rpl_activities.src.repositories.models import aux_models
 from rpl_activities.src.repositories.models.activity import Activity
-from rpl_activities.src.repositories.models.activity_submission import (
-    ActivitySubmission,
-)
+from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
 from rpl_activities.src.repositories.models.activity_category import ActivityCategory
 
 from rpl_activities.src.repositories.models.io_test import IOTest
@@ -24,8 +22,7 @@ def test_get_activities_as_student_returns_only_active_activities(
     regular_auth_headers,
 ):
     response = activities_api_client.get(
-        f"/api/v3/courses/{example_activity.course_id}/activities",
-        headers=regular_auth_headers,
+        f"/api/v3/courses/{example_activity.course_id}/activities", headers=regular_auth_headers
     )
     assert response.status_code == status.HTTP_200_OK
     response_activity = response.json()[0]
@@ -48,21 +45,14 @@ def test_get_activities_as_teacher_returns_all_activities(
     admin_auth_headers,
 ):
     response = activities_api_client.get(
-        f"/api/v3/courses/{example_activity.course_id}/activities",
-        headers=admin_auth_headers,
+        f"/api/v3/courses/{example_activity.course_id}/activities", headers=admin_auth_headers
     )
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 2
 
 
-def test_get_activities_empty(
-    activities_api_client: TestClient,
-    admin_auth_headers,
-):
-    response = activities_api_client.get(
-        "/api/v3/courses/1/activities",
-        headers=admin_auth_headers,
-    )
+def test_get_activities_empty(activities_api_client: TestClient, admin_auth_headers):
+    response = activities_api_client.get("/api/v3/courses/1/activities", headers=admin_auth_headers)
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 0
 
@@ -74,8 +64,7 @@ def test_get_activities_with_submission(
     regular_auth_headers,
 ):
     response = activities_api_client.get(
-        f"/api/v3/courses/{example_activity.course_id}/activities",
-        headers=regular_auth_headers,
+        f"/api/v3/courses/{example_activity.course_id}/activities", headers=regular_auth_headers
     )
     assert response.status_code == status.HTTP_200_OK
     response_activity = response.json()[0]
@@ -91,8 +80,7 @@ def test_get_activities_with_multiple_submissions_returns_them_with_their_best_s
     regular_auth_headers,
 ):
     response = activities_api_client.get(
-        f"/api/v3/courses/{example_activity.course_id}/activities",
-        headers=regular_auth_headers,
+        f"/api/v3/courses/{example_activity.course_id}/activities", headers=regular_auth_headers
     )
     assert response.status_code == status.HTTP_200_OK
     response_activity = response.json()[0]
@@ -135,13 +123,10 @@ def test_get_activity(
 
 
 def test_get_nonexistent_activity_not_found(
-    activities_api_client: TestClient,
-    example_activity: Activity,
-    regular_auth_headers,
+    activities_api_client: TestClient, example_activity: Activity, regular_auth_headers
 ):
     response = activities_api_client.get(
-        f"/api/v3/courses/{example_activity.course_id}/activities/99999",
-        headers=regular_auth_headers,
+        f"/api/v3/courses/{example_activity.course_id}/activities/99999", headers=regular_auth_headers
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -171,9 +156,7 @@ def test_get_activity_with_io_tests(
 
 
 def test_delete_activity_as_teacher_success(
-    activities_api_client: TestClient,
-    example_activity: Activity,
-    admin_auth_headers,
+    activities_api_client: TestClient, example_activity: Activity, admin_auth_headers
 ):
     old_activity_id = example_activity.id
     response = activities_api_client.delete(
@@ -190,9 +173,7 @@ def test_delete_activity_as_teacher_success(
 
 
 def test_delete_activity_as_student_forbidden(
-    activities_api_client: TestClient,
-    example_activity: Activity,
-    regular_auth_headers,
+    activities_api_client: TestClient, example_activity: Activity, regular_auth_headers
 ):
     response = activities_api_client.delete(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}",
@@ -202,13 +183,10 @@ def test_delete_activity_as_student_forbidden(
 
 
 def test_delete_nonexistent_activity_not_found(
-    activities_api_client: TestClient,
-    example_activity: Activity,
-    admin_auth_headers,
+    activities_api_client: TestClient, example_activity: Activity, admin_auth_headers
 ):
     response = activities_api_client.delete(
-        f"/api/v3/courses/{example_activity.course_id}/activities/99999",
-        headers=admin_auth_headers,
+        f"/api/v3/courses/{example_activity.course_id}/activities/99999", headers=admin_auth_headers
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -366,12 +344,7 @@ def test_create_activity_with_missing_required_fields(
     assert response.json()["detail"][0]["msg"] == "Field required"
 
     # Missing language
-    form_data = {
-        "name": "test",
-        "points": 2,
-        "category_id": example_category.id,
-        "description": "enunciado",
-    }
+    form_data = {"name": "test", "points": 2, "category_id": example_category.id, "description": "enunciado"}
     response = activities_api_client.post(
         f"/api/v3/courses/{example_category.course_id}/activities",
         headers=admin_auth_headers,
@@ -382,12 +355,7 @@ def test_create_activity_with_missing_required_fields(
     assert response.json()["detail"][0]["msg"] == "Field required"
 
     # Missing category_id
-    form_data = {
-        "name": "test",
-        "points": 2,
-        "language": "python",
-        "description": "enunciado",
-    }
+    form_data = {"name": "test", "points": 2, "language": "python", "description": "enunciado"}
     response = activities_api_client.post(
         f"/api/v3/courses/{example_category.course_id}/activities",
         headers=admin_auth_headers,
@@ -462,8 +430,7 @@ def test_update_activity_as_teacher_success(
     assert response_data["points"] == int(form_data_1["points"])
     assert response_data["starting_rplfile_id"] is not None
     aux_response = activities_api_client.get(
-        f"/api/v3/extractedRPLFile/{response_data['starting_rplfile_id']}",
-        headers=admin_auth_headers,
+        f"/api/v3/extractedRPLFile/{response_data['starting_rplfile_id']}", headers=admin_auth_headers
     )
     assert aux_response.status_code == status.HTTP_200_OK
     aux_response_data: ExtractedFilesDict = aux_response.json()
@@ -474,10 +441,7 @@ def test_update_activity_as_teacher_success(
     assert aux_response_data.get("assignment_main.py") is not None
 
     # Change only some fields
-    form_data_2 = {
-        "category_id": example_inactive_activity.category_id,
-        "active": "true",
-    }
+    form_data_2 = {"category_id": example_inactive_activity.category_id, "active": "true"}
     response = activities_api_client.patch(
         f"/api/v3/courses/{example_inactive_activity.course_id}/activities/{example_inactive_activity.id}",
         headers=admin_auth_headers,
@@ -533,11 +497,7 @@ def test_create_io_test_for_activity_as_student_forbidden(
     example_activity_with_io_tests: Activity,
     regular_auth_headers,
 ):
-    data = {
-        "name": "test",
-        "test_in": "test_in",
-        "test_out": "test_out",
-    }
+    data = {"name": "test", "test_in": "test_in", "test_out": "test_out"}
     response = activities_api_client.post(
         f"/api/v3/courses/{example_activity_with_io_tests.course_id}/activities/{example_activity_with_io_tests.id}/iotests",
         headers=regular_auth_headers,
@@ -552,11 +512,7 @@ def test_update_io_test_for_activity_as_student_forbidden(
     example_activity_with_io_tests: Activity,
     regular_auth_headers,
 ):
-    data = {
-        "name": "test",
-        "test_in": "changed in",
-        "test_out": "changed out",
-    }
+    data = {"name": "test", "test_in": "changed in", "test_out": "changed out"}
     response = activities_api_client.put(
         f"/api/v3/courses/{example_activity_with_io_tests.course_id}/activities/{example_activity_with_io_tests.id}/iotests/{example_io_tests[0].id}",
         headers=regular_auth_headers,
@@ -584,11 +540,7 @@ def test_create_io_test_for_activity_that_had_iotests_previously(
     example_activity_with_io_tests: Activity,
     admin_auth_headers,
 ):
-    data = {
-        "name": "test",
-        "test_in": "test_in",
-        "test_out": "test_out",
-    }
+    data = {"name": "test", "test_in": "test_in", "test_out": "test_out"}
     response = activities_api_client.post(
         f"/api/v3/courses/{example_activity_with_io_tests.course_id}/activities/{example_activity_with_io_tests.id}/iotests",
         headers=admin_auth_headers,
@@ -614,11 +566,7 @@ def test_create_io_test_for_activity_that_had_unittests_previously(
     example_unit_test_suite: UnitTestSuite,
     admin_auth_headers,
 ):
-    data = {
-        "name": "test",
-        "test_in": "test_in",
-        "test_out": "test_out",
-    }
+    data = {"name": "test", "test_in": "test_in", "test_out": "test_out"}
     response = activities_api_client.post(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/iotests",
         headers=admin_auth_headers,
@@ -647,11 +595,7 @@ def test_update_io_test_for_activity(
     example_activity_with_io_tests: Activity,
     admin_auth_headers,
 ):
-    data = {
-        "name": "test",
-        "test_in": "changed in",
-        "test_out": "changed out",
-    }
+    data = {"name": "test", "test_in": "changed in", "test_out": "changed out"}
     response = activities_api_client.put(
         f"/api/v3/courses/{example_activity_with_io_tests.course_id}/activities/{example_activity_with_io_tests.id}/iotests/{example_io_tests[0].id}",
         headers=admin_auth_headers,
@@ -690,13 +634,9 @@ def test_delete_io_test_for_activity(
 
 
 def test_create_unit_tests_for_activity_as_student_forbidden(
-    activities_api_client: TestClient,
-    example_activity: Activity,
-    regular_auth_headers,
+    activities_api_client: TestClient, example_activity: Activity, regular_auth_headers
 ):
-    data = {
-        "unit_tests_code": "print('Unit tests nuevos')",
-    }
+    data = {"unit_tests_code": "print('Unit tests nuevos')"}
     response = activities_api_client.post(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",
         headers=regular_auth_headers,
@@ -711,9 +651,7 @@ def test_update_unit_tests_for_activity_as_student_forbidden(
     example_unit_test_suite: UnitTestSuite,
     regular_auth_headers,
 ):
-    data = {
-        "unit_tests_code": "print('Unit tests que reemplazan a los anteriores')",
-    }
+    data = {"unit_tests_code": "print('Unit tests que reemplazan a los anteriores')"}
     response = activities_api_client.put(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",
         headers=regular_auth_headers,
@@ -723,13 +661,9 @@ def test_update_unit_tests_for_activity_as_student_forbidden(
 
 
 def test_create_unit_tests_for_activity(
-    activities_api_client: TestClient,
-    example_activity: Activity,
-    admin_auth_headers,
+    activities_api_client: TestClient, example_activity: Activity, admin_auth_headers
 ):
-    data = {
-        "unit_tests_code": "print('Unit tests nuevos')",
-    }
+    data = {"unit_tests_code": "print('Unit tests nuevos')"}
     response = activities_api_client.post(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",
         headers=admin_auth_headers,
@@ -746,9 +680,7 @@ def test_create_unit_tests_for_activity_that_already_had_them_returns_conflict(
     example_unit_test_suite: UnitTestSuite,
     admin_auth_headers,
 ):
-    data = {
-        "unit_tests_code": "print('Unit tests nuevos')",
-    }
+    data = {"unit_tests_code": "print('Unit tests nuevos')"}
     response = activities_api_client.post(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",
         headers=admin_auth_headers,
@@ -763,9 +695,7 @@ def test_create_unit_tests_for_activity_that_had_iotests_previously(
     example_activity_with_io_tests: Activity,
     admin_auth_headers,
 ):
-    data = {
-        "unit_tests_code": "print('Unit tests nuevos')",
-    }
+    data = {"unit_tests_code": "print('Unit tests nuevos')"}
     response = activities_api_client.post(
         f"/api/v3/courses/{example_activity_with_io_tests.course_id}/activities/{example_activity_with_io_tests.id}/unittests",
         headers=admin_auth_headers,
@@ -785,9 +715,7 @@ def test_update_unit_tests_for_activity(
     example_unit_test_suite: UnitTestSuite,
     admin_auth_headers,
 ):
-    data = {
-        "unit_tests_code": "print('Unit tests que reemplazan a los anteriores')",
-    }
+    data = {"unit_tests_code": "print('Unit tests que reemplazan a los anteriores')"}
     response = activities_api_client.put(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",
         headers=admin_auth_headers,
@@ -799,13 +727,9 @@ def test_update_unit_tests_for_activity(
 
 
 def test_update_unit_tests_for_activity_that_didnt_have_any_returns_not_found(
-    activities_api_client: TestClient,
-    example_activity: Activity,
-    admin_auth_headers,
+    activities_api_client: TestClient, example_activity: Activity, admin_auth_headers
 ):
-    data = {
-        "unit_tests_code": "print('Unit tests que reemplazan a los anteriores (que no existen)')",
-    }
+    data = {"unit_tests_code": "print('Unit tests que reemplazan a los anteriores (que no existen)')"}
     response = activities_api_client.put(
         f"/api/v3/courses/{example_activity.course_id}/activities/{example_activity.id}/unittests",
         headers=admin_auth_headers,

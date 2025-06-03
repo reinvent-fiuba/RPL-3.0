@@ -15,18 +15,9 @@ class CourseUsersRepository(BaseRepository):
     # ====================== MANAGING ====================== #
 
     def save_new_course_user(
-        self,
-        course_id: int,
-        user_id: int,
-        role_id: int,
-        accepted: bool = False,
+        self, course_id: int, user_id: int, role_id: int, accepted: bool = False
     ) -> CourseUser:
-        new_course_user = CourseUser(
-            course_id=course_id,
-            user_id=user_id,
-            role_id=role_id,
-            accepted=accepted,
-        )
+        new_course_user = CourseUser(course_id=course_id, user_id=user_id, role_id=role_id, accepted=accepted)
         try:
             self.db_session.add(new_course_user)
             self.db_session.commit()
@@ -35,8 +26,7 @@ class CourseUsersRepository(BaseRepository):
         except IntegrityError:
             self.db_session.rollback()
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="User is already enrolled in the course",
+                status_code=status.HTTP_403_FORBIDDEN, detail="User is already enrolled in the course"
             )
 
     def update_course_user(self, course_id: int, user_id: int, role_id: int, accepted: bool):
@@ -58,10 +48,7 @@ class CourseUsersRepository(BaseRepository):
     def get_course_user(self, course_id: int, user_id: int) -> CourseUser:
         return (
             self.db_session.execute(
-                sa.select(CourseUser).where(
-                    CourseUser.course_id == course_id,
-                    CourseUser.user_id == user_id,
-                )
+                sa.select(CourseUser).where(CourseUser.course_id == course_id, CourseUser.user_id == user_id)
             )
             .scalars()
             .one_or_none()

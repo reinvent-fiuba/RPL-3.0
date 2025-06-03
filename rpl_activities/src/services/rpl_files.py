@@ -17,10 +17,7 @@ class RPLFilesService:
     def get_raw_rplfile(self, rplfile_id: int) -> Response:
         file = self.rpl_files_repo.get_by_id(rplfile_id)
         if not file:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="File not found",
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
         return Response(
             content=file.data,
             media_type=file.file_type,
@@ -33,15 +30,9 @@ class RPLFilesService:
     def get_extracted_rplfile(self, rplfile_id: int) -> ExtractedFilesDict:
         rplfile = self.rpl_files_repo.get_by_id(rplfile_id)
         if not rplfile:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="File not found",
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
         if rplfile.file_type != aux_models.RPLFileType.GZIP:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="File is not a gzip file",
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File is not a gzip file")
         return tar_utils.extract_tar_gz_to_dict_of_files(rplfile.data)
 
     def get_multiple_extracted_rplfiles(self, raw_rplfiles_ids: str) -> list[ExtractedFilesDict]:
@@ -55,10 +46,7 @@ class RPLFilesService:
     def get_extracted_rplfile_for_student(self, rplfile_id: int) -> ExtractedFilesDict:
         extracted_rplfile: ExtractedFilesDict = self.get_extracted_rplfile(rplfile_id)
         if not extracted_rplfile:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No files extracted",
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No files extracted")
 
         if tar_utils.METADATA_FILENAME not in extracted_rplfile:
             return extracted_rplfile

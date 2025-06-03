@@ -26,10 +26,7 @@ class CoursesRepository(BaseRepository):
 
     def save_new_course(self, course_data: CourseCreationDTO) -> Course:
         old_course = self.get_course_with_name_university_semester_and_subject_id(
-            course_data.name,
-            course_data.university,
-            course_data.semester,
-            course_data.subject_id,
+            course_data.name, course_data.university, course_data.semester, course_data.subject_id
         )
         if old_course:
             if old_course.deleted:
@@ -97,11 +94,7 @@ class CoursesRepository(BaseRepository):
         )
 
     def get_course_with_name_university_semester_and_subject_id(
-        self,
-        name: str,
-        university: str,
-        semester: str,
-        subject_id: str,
+        self, name: str, university: str, semester: str, subject_id: str
     ) -> Course:
         return (
             self.db_session.execute(
