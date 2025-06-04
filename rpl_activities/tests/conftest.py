@@ -23,7 +23,6 @@ from rpl_activities.src.repositories.models.activity import Activity
 from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
 from rpl_activities.src.repositories.models.base_model import Base
 from rpl_activities.src.repositories.models import aux_models, models_metadata
-from rpl_activities.src.config import env
 from rpl_activities.src.repositories.models.activity_category import ActivityCategory
 
 from rpl_activities.src.repositories.models.io_test import IOTest
@@ -43,11 +42,14 @@ from rpl_users.tests.conftest import (
     base_roles_fixture,
 )
 
+DB_URL = "mysql+pymysql://test_user:test_password@testing_db:3306/test_rpl_activities"
+# DB_URL="sqlite:///:memory:"
+
 
 @pytest.fixture(name="activities_api_dbsession", scope="function")
 def activities_api_dbsession_fixture():
     engine = create_engine(
-        env.DB_URL,
+        DB_URL,
         # connect_args={"check_same_thread": False}, # Use if sqlite is active
         poolclass=StaticPool,
     )
