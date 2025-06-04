@@ -1,12 +1,13 @@
 from typing import List, Optional
 from fastapi import APIRouter, status
-from rpl_activities.src.deps.auth import AuthDependency
+from rpl_users.src.deps.auth import AuthDependency
 from rpl_users.src.deps.auth import CurrentUserDependency
 from rpl_users.src.deps.database import DBSessionDependency
 from rpl_users.src.deps.email import EmailHandlerDependency
 from rpl_users.src.dtos.course_dtos import (
     CourseCreationDTO,
     CourseUptateDTO,
+    CourseUserScoreResponseDTO,
     CourseUserUptateDTO,
     CourseResponseDTO,
     CourseWithUserInformationResponseDTO,
@@ -88,6 +89,13 @@ def delete_course_user(
 
 
 # ====================== QUERYING - COURSE USERS ====================== #
+
+
+@router.get("/courses/{course_id}/scoreboard", response_model=List[CourseUserScoreResponseDTO])
+def get_course_scoreboard(
+    course_id: str, current_user: CurrentUserDependency, db: DBSessionDependency, auth_header: AuthDependency
+):
+    return CoursesService(db).get_course_scoreboard(course_id, current_user, auth_header)
 
 
 @router.get("/courses/{course_id}/permissions", response_model=List[str])

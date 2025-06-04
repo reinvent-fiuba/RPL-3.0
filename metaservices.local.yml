@@ -29,6 +29,21 @@ services:
       - "33069:3306"
     networks:
       - localdb_net
+  
+  local_queue:
+    build:
+      context: ./rabbitmq
+      dockerfile: Dockerfile
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - localdb_net
+
+    
 
 networks:
   localdb_net:

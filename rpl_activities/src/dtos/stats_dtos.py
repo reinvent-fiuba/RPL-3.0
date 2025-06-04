@@ -61,3 +61,9 @@ class ActivitiesStatsOfStudentDTO(BaseModel):
     name_of_activity_with_the_most_failed_attempts: Optional[str] = None
     amount_of_failed_attempts_for_activity_with_the_most_failed_attempts: Optional[int] = None
     average_failed_attempts_per_activity: Optional[float] = None
+
+
+class BasicActivitiesStatsOfStudentDTO(BaseModel):
+    user_id: int
+    total_score: int
+    successful_activities_count: int

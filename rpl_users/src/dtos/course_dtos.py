@@ -43,6 +43,14 @@ class CourseUserUptateDTO(BaseModel):
 # ====================== RESPONSES ====================== #
 
 
+class CourseUserScoreResponseDTO(BaseModel):
+    name: str
+    surname: str
+    img_uri: str
+    total_score: int
+    successful_activities_count: int
+
+
 class CourseResponseDTO(BaseModel):
     id: int
     name: str

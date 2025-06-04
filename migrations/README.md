@@ -1,7 +1,7 @@
 ## Plan de migración
 
 > [!WARNING]\
-> Aca solo se documenta la parte local del proceso de migración. El resto se encuentra documentado en los archivos del proyecto en drive.
+> Aca solo se documenta la parte local del segundo proceso de migración. El resto se encuentra documentado en los archivos del proyecto en drive.
 
 - Cargar el dump en una imagen limpia de mysql 8.0.37 (CONFIGURADA CON `character_set_server=latin1` y `collation_server=latin1_swedish_ci`)
 

@@ -5,7 +5,7 @@ from typing import Annotated
 from fastapi import Depends
 
 
-engine = create_engine(DB_URL, echo=True, pool_recycle=3600)
+engine = create_engine(DB_URL, echo=False, pool_recycle=3600)
 SessionLocal = sessionmaker(autoflush=False, bind=engine)
 
 # Dependency =============================

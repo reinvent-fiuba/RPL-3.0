@@ -63,6 +63,22 @@ class SubmissionsRepository(BaseRepository):
             .all()
         )
 
+    def get_all_submissions_by_users_at_activities(
+        self, user_ids: list[int], activities: list[Activity]
+    ) -> list[ActivitySubmission]:
+        if len(activities) == 0 or len(user_ids) == 0:
+            return []
+        return (
+            self.db_session.execute(
+                sa.select(ActivitySubmission).where(
+                    ActivitySubmission.user_id.in_(user_ids),
+                    ActivitySubmission.activity_id.in_([activity.id for activity in activities]),
+                )
+            )
+            .scalars()
+            .all()
+        )
+
     # =================================================================
 
     def get_unit_tests_data_from_submission(self, submission: ActivitySubmission) -> str:

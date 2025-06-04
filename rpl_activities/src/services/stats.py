@@ -9,6 +9,7 @@ from rpl_activities.src.repositories.models.activity_submission import ActivityS
 from rpl_activities.src.repositories.submissions import SubmissionsRepository
 from rpl_activities.src.services.activities import ActivitiesService
 from rpl_activities.src.dtos.stats_dtos import (
+    BasicActivitiesStatsOfStudentDTO,
     MetadataFoUsersGroupingDTO,
     MetadataForActivitiesGroupingDTO,
     MetadataForDateGroupingDTO,
@@ -170,6 +171,38 @@ class StatsService:
         )
 
     # ==============================================================================
+
+    def get_basic_activities_stats_for_users(
+        self, course_id: int, current_course_user: CurrentCourseUser, user_ids: Optional[list[int]] = None
+    ) -> list[BasicActivitiesStatsOfStudentDTO]:
+        self.activities_service.verify_permission_to_view(current_course_user)
+        if not user_ids:
+            return []
+        activities = self.activities_repo.get_all_active_activities_by_course_id(course_id)
+        all_submissions = self.submissions_repo.get_all_submissions_by_users_at_activities(
+            user_ids, activities
+        )
+        basic_stats = []
+        for user_id in user_ids:
+            user_submissions = [submission for submission in all_submissions if submission.user_id == user_id]
+            basic_stats.append(
+                BasicActivitiesStatsOfStudentDTO(
+                    user_id=user_id,
+                    total_score=sum(
+                        submission.activity.points
+                        for submission in user_submissions
+                        if submission.status == aux_models.SubmissionStatus.SUCCESS
+                    ),
+                    successful_activities_count=len(
+                        set(
+                            submission.activity_id
+                            for submission in user_submissions
+                            if submission.status == aux_models.SubmissionStatus.SUCCESS
+                        )
+                    ),
+                )
+            )
+        return basic_stats
 
     def get_activities_stats_for_current_user(
         self, course_id: int, current_course_user: CurrentCourseUser
