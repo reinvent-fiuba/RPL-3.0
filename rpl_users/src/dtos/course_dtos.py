@@ -9,21 +9,20 @@ import datetime
 # ====================== REQUESTS ====================== #
 
 
-class CourseCreationDTO(BaseModel):
+class CourseCreationRequestDTO(BaseModel):
     id: Optional[int] = None
     name: str
     university: str
     subject_id: str
     description: Optional[str] = None
-    active: bool
     semester: str
     semester_start_date: datetime.date
     semester_end_date: datetime.date
     img_uri: Optional[str] = None
-    course_user_admin_user_id: int
+    course_admin_user_id: int
 
 
-class CourseUptateDTO(BaseModel):
+class CourseUptateRequestDTO(BaseModel):
     name: str
     university: str
     subject_id: str
@@ -35,9 +34,9 @@ class CourseUptateDTO(BaseModel):
     img_uri: Optional[str] = None
 
 
-class CourseUserUptateDTO(BaseModel):
-    accepted: bool
-    role: str
+class CourseUserUptateRequestDTO(BaseModel):
+    accepted: Optional[bool] = None
+    role: Optional[str] = None
 
 
 # ====================== RESPONSES ====================== #
@@ -115,7 +114,7 @@ class CourseWithUserInformationResponseDTO(BaseModel):
 
 
 class CourseUserResponseDTO(BaseModel):
-    user_id: int
+    id: int
     course_id: int
     course_user_id: int
     name: str
@@ -135,7 +134,7 @@ class CourseUserResponseDTO(BaseModel):
     @classmethod
     def from_course_user(cls, course_user: "CourseUser") -> "CourseUserResponseDTO":
         return cls(
-            user_id=course_user.user.id,
+            id=course_user.user.id,
             course_id=course_user.course.id,
             course_user_id=course_user.id,
             name=course_user.user.name,

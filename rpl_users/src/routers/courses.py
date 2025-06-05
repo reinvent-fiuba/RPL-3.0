@@ -5,10 +5,10 @@ from rpl_users.src.deps.auth import CurrentUserDependency
 from rpl_users.src.deps.database import DBSessionDependency
 from rpl_users.src.deps.email import EmailHandlerDependency
 from rpl_users.src.dtos.course_dtos import (
-    CourseCreationDTO,
-    CourseUptateDTO,
+    CourseCreationRequestDTO,
+    CourseUptateRequestDTO,
     CourseUserScoreResponseDTO,
-    CourseUserUptateDTO,
+    CourseUserUptateRequestDTO,
     CourseResponseDTO,
     CourseWithUserInformationResponseDTO,
     CourseUserResponseDTO,
@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/v3", tags=["Courses"])
 
 @router.post("/courses", response_model=CourseResponseDTO, status_code=status.HTTP_201_CREATED)
 def create_course(
-    course_data: CourseCreationDTO,
+    course_data: CourseCreationRequestDTO,
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
     auth_header: AuthDependency,
@@ -36,7 +36,10 @@ def create_course(
 
 @router.put("/courses/{course_id}", response_model=CourseResponseDTO)
 def update_course(
-    course_id: str, course_data: CourseUptateDTO, current_user: CurrentUserDependency, db: DBSessionDependency
+    course_id: str,
+    course_data: CourseUptateRequestDTO,
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
 ):
     return CoursesService(db).update_course(course_id, course_data, current_user)
 
@@ -68,12 +71,14 @@ def enroll_student_in_course(course_id: str, current_user: CurrentUserDependency
 def update_course_user(
     course_id: str,
     user_id: str,
-    course_data: CourseUserUptateDTO,
+    new_course_user_data: CourseUserUptateRequestDTO,
     current_user: CurrentUserDependency,
     email_handler: EmailHandlerDependency,
     db: DBSessionDependency,
 ):
-    return CoursesService(db).update_course_user(course_id, user_id, course_data, current_user, email_handler)
+    return CoursesService(db).update_course_user(
+        course_id, user_id, new_course_user_data, current_user, email_handler
+    )
 
 
 @router.post("/courses/{course_id}/unenroll", status_code=status.HTTP_204_NO_CONTENT)

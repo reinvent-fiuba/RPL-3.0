@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 from .base import BaseRepository
 
 from .models.course_user import CourseUser
@@ -29,10 +30,14 @@ class CourseUsersRepository(BaseRepository):
                 status_code=status.HTTP_403_FORBIDDEN, detail="User is already enrolled in the course"
             )
 
-    def update_course_user(self, course_id: int, user_id: int, role_id: int, accepted: bool):
+    def update_course_user(
+        self, course_id: int, user_id: int, role_id: Optional[int], accepted: Optional[bool]
+    ):
         course_user = self.get_course_user(course_id=course_id, user_id=user_id)
-        course_user.role_id = role_id
-        course_user.accepted = accepted
+        if role_id:
+            course_user.role_id = role_id
+        if accepted:
+            course_user.accepted = accepted
         course_user.last_updated = datetime.now(timezone.utc)
         self.db_session.commit()
         self.db_session.refresh(course_user)

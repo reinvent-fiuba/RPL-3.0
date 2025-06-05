@@ -181,6 +181,7 @@ class UsersService:
         users = self.users_repo.get_all_users_with_username_or_fullname(username_or_fullname)
         return [
             FindUsersResponseDTO(
+                id=user.id,
                 username=user.username,
                 email=user.email,
                 name=user.name,

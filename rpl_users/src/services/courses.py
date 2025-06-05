@@ -1,14 +1,16 @@
+import logging
 from typing import List, Optional
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBearer
 import httpx
+import uvicorn
 from rpl_users.src.config import env
 from rpl_users.src.deps.email import EmailHandler
 from rpl_users.src.dtos.course_dtos import (
-    CourseCreationDTO,
-    CourseUptateDTO,
+    CourseCreationRequestDTO,
+    CourseUptateRequestDTO,
     CourseUserScoreResponseDTO,
-    CourseUserUptateDTO,
+    CourseUserUptateRequestDTO,
     CourseWithUserInformationResponseDTO,
     CourseUserResponseDTO,
 )
@@ -88,8 +90,8 @@ class CoursesService:
 
     # ====================== PRIVATE - MANAGING - COURSES ====================== #
 
-    def __create_course_as_admin(self, course_data: CourseCreationDTO) -> Course:
-        user_admin = self.users_repo.get_user_with_id(course_data.course_user_admin_user_id)
+    def __create_course_as_admin(self, course_data: CourseCreationRequestDTO) -> Course:
+        user_admin = self.users_repo.get_user_with_id(course_data.course_admin_user_id)
         if user_admin is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
 
@@ -110,7 +112,7 @@ class CoursesService:
 
         self.courses_repo.delete_course(course.id)
 
-    def __clone_course(self, course_data: CourseCreationDTO, auth_header: HTTPBearer) -> Course:
+    def __clone_course(self, course_data: CourseCreationRequestDTO, auth_header: HTTPBearer) -> Course:
         course = self.__assert_course_exists(course_data.id)
 
         course_data.img_uri = course_data.img_uri or course.img_uri
@@ -132,9 +134,10 @@ class CoursesService:
     def __fetch_sorted_basic_score_summary_per_user(
         self, course_id: str, course_users: List[CourseUser], auth_header: HTTPBearer
     ) -> list[dict[str, int]]:
+        user_ids = [course_user.user_id for course_user in course_users]
         response = self.activities_api_client.get(
             url=f"/stats/courses/{course_id}/basicSummary",
-            params={"user_ids": ",".join(str(course_user.user_id) for course_user in course_users)},
+            params={"user_ids": user_ids},
             headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
         )
         if response.status_code != status.HTTP_200_OK:
@@ -151,7 +154,7 @@ class CoursesService:
     # ====================== MANAGING - COURSES ====================== #
 
     def create_course(
-        self, course_data: CourseCreationDTO, current_user: User, auth_header: HTTPBearer
+        self, course_data: CourseCreationRequestDTO, current_user: User, auth_header: HTTPBearer
     ) -> CourseResponseDTO:
         if not current_user.is_admin:
             raise HTTPException(
@@ -166,7 +169,7 @@ class CoursesService:
         return CourseResponseDTO.from_course(new_course)
 
     def update_course(
-        self, course_id: str, course_data: CourseUptateDTO, current_user: User
+        self, course_id: str, course_data: CourseUptateRequestDTO, current_user: User
     ) -> CourseResponseDTO:
         self.__assert_course_exists(course_id)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["course_edit"])
@@ -219,19 +222,22 @@ class CoursesService:
         self,
         course_id: str,
         user_id: str,
-        course_data: CourseUserUptateDTO,
+        new_course_user_data: CourseUserUptateRequestDTO,
         current_user: User,
         email_handler: EmailHandler,
     ) -> CourseUserResponseDTO:
         self.__assert_user_exists(user_id)
         self.__assert_course_exists(course_id)
-        role = self.__assert_role_exists(course_data.role)
+        if new_course_user_data.role:
+            role = self.__assert_role_exists(new_course_user_data.role)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["user_manage"])
         course_user = self.__assert_course_user_exists_and_has_permissions(course_id, user_id)
 
-        self.course_users_repo.update_course_user(course_id, user_id, role.id, course_data.accepted)
+        self.course_users_repo.update_course_user(
+            course_id, user_id, role.id if new_course_user_data.role else None, new_course_user_data.accepted
+        )
 
-        if course_data.accepted:
+        if new_course_user_data.accepted:
             email_handler.send_course_acceptance_email(
                 course_user.user.email, course_user.user, course_user.course
             )
@@ -275,11 +281,12 @@ class CoursesService:
                     CourseUserScoreResponseDTO(
                         name=course_user.user.name,
                         surname=course_user.user.surname,
-                        img_uri=course_user.user.img_uri,
+                        img_uri=course_user.user.img_uri if course_user.user.img_uri else "",
                         total_score=user_data["total_score"],
                         successful_activities_count=user_data["successful_activities_count"],
                     )
                 )
+        return course_user_scores
 
     def get_user_permissions(self, course_id: str, current_user: User) -> List[str]:
         self.__assert_course_exists(course_id)

@@ -4,7 +4,7 @@ from pydantic import BaseModel, EmailStr
 
 
 class CourseUserResponseDTO(BaseModel):
-    user_id: int
+    id: int
     course_id: int
     course_user_id: int
     name: str

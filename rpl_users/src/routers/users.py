@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from fastapi import APIRouter, status
 from rpl_users.src.deps.auth import CurrentUserDependency
 from rpl_users.src.deps.email import EmailHandlerDependency
@@ -75,9 +75,9 @@ def update_user_profile(
     return UsersService(db).update_user_profile(current_user, new_profile_info)
 
 
-@router.get("/users", response_model=FindUsersResponseDTO)
-def find_users(current_user: CurrentUserDependency, db: DBSessionDependency, username: Optional[str] = ""):
-    return UsersService(db).find_users(username, current_user)
+@router.get("/users", response_model=List[FindUsersResponseDTO])
+def find_users(current_user: CurrentUserDependency, db: DBSessionDependency, query: Optional[str] = ""):
+    return UsersService(db).find_users(query, current_user)
 
 
 # ==============================================================================

@@ -9,7 +9,7 @@ from fastapi import HTTPException, status
 import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 
-from ..dtos.course_dtos import CourseCreationDTO, CourseUptateDTO
+from ..dtos.course_dtos import CourseCreationRequestDTO, CourseUptateRequestDTO
 
 
 class CoursesRepository(BaseRepository):
@@ -24,7 +24,7 @@ class CoursesRepository(BaseRepository):
 
     # ====================== MANAGING ====================== #
 
-    def save_new_course(self, course_data: CourseCreationDTO) -> Course:
+    def save_new_course(self, course_data: CourseCreationRequestDTO) -> Course:
         old_course = self.get_course_with_name_university_semester_and_subject_id(
             course_data.name, course_data.university, course_data.semester, course_data.subject_id
         )
@@ -42,7 +42,7 @@ class CoursesRepository(BaseRepository):
             university=course_data.university,
             subject_id=course_data.subject_id,
             description=course_data.description,
-            active=course_data.active,
+            active=True,
             semester=course_data.semester,
             semester_start_date=course_data.semester_start_date,
             semester_end_date=course_data.semester_end_date,
@@ -58,7 +58,7 @@ class CoursesRepository(BaseRepository):
             self.db_session.rollback()
             self._raise_http_conflict_exception()
 
-    def update_course(self, course_id: str, course_data: CourseUptateDTO) -> Course:
+    def update_course(self, course_id: str, course_data: CourseUptateRequestDTO) -> Course:
         try:
             updated_course = self.get_course_with_id(course_id)
             updated_course.name = course_data.name

@@ -28,11 +28,13 @@ class EmailHandler:
         msg.set_content(body)
 
         context = ssl.create_default_context()
-
-        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
-            server.login(RPL_HELP_EMAIL_USER, RPL_HELP_EMAIL_PASSWORD)
-            server.send_message(msg)
-            logging.info(f"Email sent to {to_address} with subject: {subject}")
+        try:
+            with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
+                server.login(RPL_HELP_EMAIL_USER, RPL_HELP_EMAIL_PASSWORD)
+                server.send_message(msg)
+                logging.info(f"Email sent to {to_address} with subject: {subject}")
+        except smtplib.SMTPException as e:
+            logging.getLogger("uvicorn.error").error(f"Failed to send email to {to_address}. Error: {e}")
 
     # ==============================================================================
 

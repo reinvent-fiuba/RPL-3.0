@@ -17,7 +17,7 @@ AuthDependency = Annotated[HTTPAuthorizationCredentials, Depends(auth_handler)]
 class CurrentCourseUser:
     def __init__(self, user_data: CourseUserResponseDTO):
         self.id = user_data.course_user_id
-        self.user_id = user_data.user_id
+        self.user_id = user_data.id
         self.course_id = user_data.course_id
         self.username = user_data.username
         self.email = user_data.email
@@ -72,7 +72,7 @@ CurrentCourseUserDependency = Annotated[CurrentCourseUser, Depends(get_current_c
 class StudentCourseUser:
     def __init__(self, user_data: CourseUserResponseDTO):
         self.id = user_data.course_user_id
-        self.user_id = user_data.user_id
+        self.user_id = user_data.id
         self.course_id = user_data.course_id
         self.name = user_data.name
         self.surname = user_data.surname

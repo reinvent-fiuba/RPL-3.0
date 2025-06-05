@@ -75,6 +75,7 @@ class UserPasswordResetDTO(BaseModel):
 
 
 class FindUsersResponseDTO(BaseModel):
+    id: int
     username: str
     email: EmailStr
     name: str

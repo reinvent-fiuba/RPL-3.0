@@ -37,13 +37,31 @@ class UsersRepository(BaseRepository):
     # ====================== PRIVATE - QUERYING ====================== #
 
     def __select_matching_username_or_fullname(self, username_or_fullname: str) -> sa.sql.expression.Select:
-        return sa.select(User).where(
-            sa.or_(
-                User.username.ilike(f"%{username_or_fullname}%"),
-                User.name.ilike(f"%{username_or_fullname}%"),
-                User.surname.ilike(f"%{username_or_fullname}%"),
+        split_fullname = username_or_fullname.split()
+        if len(split_fullname) == 1:
+            return sa.select(User).where(
+                sa.or_(
+                    User.username.ilike(f"%{username_or_fullname}%"),
+                    User.name.ilike(f"%{username_or_fullname}%"),
+                    User.surname.ilike(f"%{username_or_fullname}%"),
+                )
             )
-        )
+        else:
+            fullname_direct_matching = "%".join(split_fullname)
+            first_part = split_fullname[0]
+            last_part = split_fullname[-1]
+            return sa.select(User).where(
+                sa.or_(
+                    User.username.ilike(f"%{username_or_fullname}%"),
+                    User.name.ilike(f"%{username_or_fullname}%"),
+                    User.surname.ilike(f"%{username_or_fullname}%"),
+                    sa.func.concat(User.name, " ", User.surname).ilike(f"%{fullname_direct_matching}%"),
+                    User.name.ilike(f"%{first_part}%"),
+                    User.surname.ilike(f"%{last_part}%"),
+                    User.name.ilike(f"%{last_part}%"),
+                    User.surname.ilike(f"%{first_part}%"),
+                )
+            )
 
     # ====================== QUERYING ====================== #
 
@@ -58,13 +76,13 @@ class UsersRepository(BaseRepository):
 
     def get_all_users_with_username_or_fullname(self, username_or_fullname: str) -> list[User]:
         if not username_or_fullname:
-            return []
+            return self.db_session.execute(sa.select(User).limit(30).order_by(User.id)).scalars().all()
         else:
             return (
                 self.db_session.execute(
                     self.__select_matching_username_or_fullname(username_or_fullname)
                     .limit(30)
-                    .order_by(User.id.desc())
+                    .order_by(User.id)
                 )
                 .scalars()
                 .all()
