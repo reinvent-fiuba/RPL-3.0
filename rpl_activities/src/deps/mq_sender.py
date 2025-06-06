@@ -20,7 +20,7 @@ class MQSender:
             body=message,
             properties=pika.BasicProperties(delivery_mode=pika.DeliveryMode.Persistent),
         )
-        logging.info(f"Sent submission to MQ: {message}")
+        logging.getLogger("uvicorn.error").info(f"Sent submission to MQ: {message}")
 
     def close(self):
         if self.connection.is_open:

@@ -20,7 +20,7 @@ from rpl_users.src.repositories.models.user import User
 
 class EmailHandler:
 
-    def __send_email(to_address, subject, body):
+    def __send_email(self, to_address, subject, body):
         msg = EmailMessage()
         msg["Subject"] = subject
         msg["From"] = RPL_HELP_EMAIL_USER
@@ -32,7 +32,7 @@ class EmailHandler:
             with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
                 server.login(RPL_HELP_EMAIL_USER, RPL_HELP_EMAIL_PASSWORD)
                 server.send_message(msg)
-                logging.info(f"Email sent to {to_address} with subject: {subject}")
+                logging.getLogger("uvicorn.error").info(f"Email sent to {to_address} with subject: {subject}")
         except smtplib.SMTPException as e:
             logging.getLogger("uvicorn.error").error(f"Failed to send email to {to_address}. Error: {e}")
 
@@ -59,7 +59,7 @@ class EmailHandler:
 
     def send_password_reset_email(self, to_address) -> str:
         token = secrets.token_urlsafe(32)
-        reset_link = f"{FRONTEND_URL}/user/resetPassword?token={token}"
+        reset_link = f"{FRONTEND_URL}/user/changePassword?token={token}"
         subject = "RPL: Reseteo de contraseña"
         body = f"""
                 <!DOCTYPE html>

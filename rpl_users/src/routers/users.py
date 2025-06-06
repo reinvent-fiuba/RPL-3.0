@@ -37,10 +37,8 @@ def resend_validation_email(
 
 
 @router.post("/auth/validateEmail")
-def validate_email(
-    validation_data: UserEmailValidationDTO, email_handler: EmailHandlerDependency, db: DBSessionDependency
-):
-    return UsersService(db).validate_email(validation_data, email_handler)
+def validate_email(validation_data: UserEmailValidationDTO, db: DBSessionDependency):
+    return UsersService(db).validate_email(validation_data)
 
 
 @router.post("/auth/forgotPassword", response_model=UserForgotPasswordDTO)

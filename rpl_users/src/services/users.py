@@ -57,7 +57,9 @@ class UsersService:
         valid = security.verify_password(user_data.password, user.password)
         if not valid:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-        logging.info(f"[users:services] User {user.username} logged in successfully")
+        logging.getLogger("uvicorn.error").info(
+            f"[users:services] User {user.username} logged in successfully"
+        )
         return user
 
     def __send_validation_email(self, user_id, email: str, email_handler: EmailHandler):
@@ -68,7 +70,12 @@ class UsersService:
         token_data = self.validation_tokens_repo.get_by_token(token)
         if not token_data:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
-        if token_data.expiration_date < datetime.now(timezone.utc):
+
+        expiration_date = token_data.expiration_date
+        # this always comes in UTC, but we replace to ensure the comparison
+        if expiration_date.tzinfo is None:
+            expiration_date = expiration_date.replace(tzinfo=timezone.utc)
+        if expiration_date < datetime.now(timezone.utc):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token expired")
         return token_data
 
@@ -104,7 +111,9 @@ class UsersService:
         user.email_validated = True
         user = self.users_repo.update_user(user)
         self.validation_tokens_repo.delete_by_token(validation_data.token)
-        logging.info(f"[users:services] User {user.username} validated email successfully")
+        logging.getLogger("uvicorn.error").info(
+            f"[users:services] User {user.username} validated email successfully"
+        )
 
     def login_user(self, user_data: UserLoginDTO) -> UserLoginResponseDTO:
         user = self.__verify_user_login(user_data)
@@ -117,7 +126,9 @@ class UsersService:
         user = self.__get_user_by_username_or_email(user_data.email)
         token = email_handler.send_password_reset_email(user.email)
         self.validation_tokens_repo.save_new_validation_token(user.id, token)
-        logging.info(f"[users:services] Password reset email sent to {user.username}")
+        logging.getLogger("uvicorn.error").info(
+            f"[users:services] Password reset email sent to {user.username}"
+        )
         return user_data
 
     def reset_password(self, user_data: UserPasswordResetDTO) -> UserProfileResponseDTO:
@@ -127,7 +138,9 @@ class UsersService:
         user.password = hashed_new_password
         user = self.users_repo.update_user(user)
         self.validation_tokens_repo.delete_by_token(user_data.token)
-        logging.info(f"[users:services] Password reset successful for {user.username}")
+        logging.getLogger("uvicorn.error").info(
+            f"[users:services] Password reset successful for {user.username}"
+        )
         return UserProfileResponseDTO(
             username=user.username,
             name=user.name,
