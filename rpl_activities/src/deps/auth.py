@@ -1,15 +1,49 @@
+import logging
 from typing import Annotated
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import httpx
 
-from rpl_activities.src.dtos.auth_dtos import CourseUserResponseDTO
+from rpl_activities.src.dtos.auth_dtos import CourseUserResponseDTO, CurrentMainUserResponseDTO
 
 
 # Dependencies =============================
 
 auth_handler = HTTPBearer()
 AuthDependency = Annotated[HTTPAuthorizationCredentials, Depends(auth_handler)]
+
+# ==========================================
+
+
+class CurrentMainUser:
+    def __init__(self, user_data: CurrentMainUserResponseDTO):
+        self.id = user_data.id
+        self.username = user_data.username
+        self.email = user_data.email
+        self.name = user_data.name
+        self.surname = user_data.surname
+        self.student_id = user_data.student_id
+        self.degree = user_data.degree
+        self.university = user_data.university
+        self.is_admin = user_data.is_admin
+
+
+async def get_current_main_user(auth_header: AuthDependency, request: Request) -> CurrentMainUser:
+    users_api_client: httpx.AsyncClient = request.state.users_api_client
+    res = await users_api_client.get(
+        "/api/v3/auth/externalUserMainAuth",
+        headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
+    )
+    if res.status_code != status.HTTP_200_OK:
+        raise HTTPException(
+            status_code=res.status_code, detail=f"Failed to authenticate current user: {res.text}"
+        )
+    user_data = CurrentMainUserResponseDTO(**res.json())
+    return CurrentMainUser(user_data)
+
+
+CurrentMainUserDependency = Annotated[CurrentMainUser, Depends(get_current_main_user)]
+
 
 # ==========================================
 

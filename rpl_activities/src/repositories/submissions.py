@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 import json
+import logging
 from fastapi import UploadFile
 
 from rpl_activities.src.deps.auth import CurrentCourseUser
@@ -106,6 +107,7 @@ class SubmissionsRepository(BaseRepository):
             return []
         return [
             IOTestRunResultDTO(
+                id=run.id,
                 name=run.test_name,
                 test_in=run.test_in,
                 expected_output=run.expected_output,
@@ -125,9 +127,18 @@ class SubmissionsRepository(BaseRepository):
         ):
             return []
         return [
-            UnitTestRunResultDTO(name=run.test_name, passed=run.passed, error_messages=run.error_messages)
+            UnitTestRunResultDTO(
+                id=run.id, name=run.test_name, passed=run.passed, error_messages=run.error_messages
+            )
             for run in submission.tests_execution_log.unit_test_runs
         ]
+
+    def get_tests_execution_log_stdout_and_stderr_from_submission(
+        self, submission: ActivitySubmission
+    ) -> tuple[str, str]:
+        if not submission.tests_execution_log:
+            return "", ""
+        return (submission.tests_execution_log.stdout, submission.tests_execution_log.stderr)
 
     def get_by_id(self, submission_id: int) -> ActivitySubmission | None:
         return (

@@ -33,10 +33,10 @@ def get_mq_sender():
     try:
         mq_sender = MQSender()
         yield mq_sender
+        if mq_sender and mq_sender.connection.is_open:
+            mq_sender.close()
     except pika.exceptions.AMQPConnectionError as e:
         logging.error(f"Failed to connect to MQ: {e}")
-    finally:
-        mq_sender.close()
 
 
 MQSenderDependency = Annotated[MQSender, Depends(get_mq_sender)]

@@ -20,3 +20,15 @@ class CourseUserResponseDTO(BaseModel):
     accepted: bool
     date_created: datetime.datetime
     last_updated: datetime.datetime
+
+
+class CurrentMainUserResponseDTO(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    name: str
+    surname: str
+    student_id: str
+    degree: str
+    university: str
+    is_admin: bool

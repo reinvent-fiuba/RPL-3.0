@@ -118,14 +118,14 @@ class StatsService:
             activities, curr_user_submissions_grouped_by_activity
         )
         return ActivitiesStatsOfStudentDTO(
-            amount_of_activities_started,
-            amount_of_activities_not_started,
-            amount_of_activities_solved,
-            points_obtained,
-            total_possible_points,
-            name_of_activity_with_the_most_failed_attempts,
-            amount_of_failed_attempts_for_activity_with_the_most_failed_attempts,
-            average_failed_attempts_per_activity,
+            amount_of_activities_started=amount_of_activities_started,
+            amount_of_activities_not_started=amount_of_activities_not_started,
+            amount_of_activities_solved=amount_of_activities_solved,
+            points_obtained=points_obtained,
+            total_possible_points=total_possible_points,
+            name_of_activity_with_the_most_failed_attempts=name_of_activity_with_the_most_failed_attempts,
+            amount_of_failed_attempts_for_activity_with_the_most_failed_attempts=amount_of_failed_attempts_for_activity_with_the_most_failed_attempts,
+            average_failed_attempts_per_activity=average_failed_attempts_per_activity,
         )
 
     def __sum_submissions_with_specific_status(
@@ -160,14 +160,14 @@ class StatsService:
             activities, curr_user_submissions_grouped_by_activity
         )
         return SubmissionsStatsOfStudentDTO(
-            total_submissions,
-            successful_submissions,
-            submissions_with_runtime_errors,
-            submissions_with_build_errors,
-            submissions_with_failures,
-            name_of_activity_with_the_most_failed_attempts,
-            amount_of_failed_attempts_for_activity_with_the_most_failed_attempts,
-            average_failed_attempts_per_activity,
+            total_submissions=total_submissions,
+            successful_submissions=successful_submissions,
+            submissions_with_runtime_errors=submissions_with_runtime_errors,
+            submissions_with_build_errors=submissions_with_build_errors,
+            submissions_with_failures=submissions_with_failures,
+            name_of_activity_with_the_most_failed_attempts=name_of_activity_with_the_most_failed_attempts,
+            amount_of_failed_attempts_for_activity_with_the_most_failed_attempts=amount_of_failed_attempts_for_activity_with_the_most_failed_attempts,
+            average_failed_attempts_per_activity=average_failed_attempts_per_activity,
         )
 
     # ==============================================================================
@@ -185,21 +185,19 @@ class StatsService:
         basic_stats = []
         for user_id in user_ids:
             user_submissions = [submission for submission in all_submissions if submission.user_id == user_id]
+            successful_submissions = [
+                submission
+                for submission in user_submissions
+                if submission.status == aux_models.SubmissionStatus.SUCCESS
+            ]
+            activities_with_at_least_one_success = set(
+                submission.activity for submission in successful_submissions
+            )
             basic_stats.append(
                 BasicActivitiesStatsOfStudentDTO(
                     user_id=user_id,
-                    total_score=sum(
-                        submission.activity.points
-                        for submission in user_submissions
-                        if submission.status == aux_models.SubmissionStatus.SUCCESS
-                    ),
-                    successful_activities_count=len(
-                        set(
-                            submission.activity_id
-                            for submission in user_submissions
-                            if submission.status == aux_models.SubmissionStatus.SUCCESS
-                        )
-                    ),
+                    total_score=sum(activity.points for activity in activities_with_at_least_one_success),
+                    successful_activities_count=len(activities_with_at_least_one_success),
                 )
             )
         return basic_stats

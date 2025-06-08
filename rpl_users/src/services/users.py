@@ -8,6 +8,7 @@ from rpl_users.src.dtos.role_dtos import RoleResponseDTO
 from rpl_users.src.dtos.university_dtos import UniversityResponseDTO
 from rpl_users.src.repositories.models.user import User
 from rpl_users.src.dtos.user_dtos import (
+    CurrentMainUserResponseDTO,
     FindUsersResponseDTO,
     ResendEmailValidationDTO,
     UserCreationDTO,
@@ -207,3 +208,16 @@ class UsersService:
         ]
 
     # =============================================================================
+
+    def get_user_for_ext_service(self, current_user: User) -> CurrentMainUserResponseDTO:
+        return CurrentMainUserResponseDTO(
+            id=current_user.id,
+            username=current_user.username,
+            email=current_user.email,
+            name=current_user.name,
+            surname=current_user.surname,
+            student_id=current_user.student_id,
+            degree=current_user.degree,
+            university=current_user.university,
+            is_admin=current_user.is_admin,
+        )

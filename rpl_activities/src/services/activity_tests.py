@@ -1,6 +1,6 @@
 import logging
 from fastapi import HTTPException, status
-from rpl_activities.src.deps.auth import CurrentCourseUser
+from rpl_activities.src.deps.auth import CurrentCourseUser, CurrentMainUser
 from rpl_activities.src.dtos.activity_dtos import (
     IOTestRequestDTO,
     UnitTestSuiteCreationRequestDTO,
@@ -55,8 +55,8 @@ class TestsService:
             deleted=activity.deleted,
             points=activity.points,
             starting_rplfile_id=activity.starting_rplfile.id,
-            activity_unittests=unit_tests_data,
-            activity_iotests=io_tests_data,
+            activity_unit_tests_content=unit_tests_data,
+            activity_io_tests=io_tests_data,
             compilation_flags=activity.compilation_flags,
             date_created=activity.date_created,
             last_updated=activity.last_updated,
@@ -148,9 +148,8 @@ class TestsService:
     # ====================== MANAGING - ALL TESTS ====================== #
 
     def clone_all_activity_tests(
-        self, current_course_user: CurrentCourseUser, from_activity: Activity, to_activity: Activity
+        self, current_main_user: CurrentMainUser, from_activity: Activity, to_activity: Activity
     ):
-        self._verify_permission_to_manage(current_course_user)
         if from_activity.is_io_tested:
             io_tests = self.tests_repo.get_all_io_tests_by_activity_id(from_activity.id)
             for io_test in io_tests:

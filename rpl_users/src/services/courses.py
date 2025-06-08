@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 from fastapi import HTTPException, status
-from fastapi.security import HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials
 import httpx
 import uvicorn
 from rpl_users.src.config import env
@@ -112,7 +112,9 @@ class CoursesService:
 
         self.courses_repo.delete_course(course.id)
 
-    def __clone_course(self, course_data: CourseCreationRequestDTO, auth_header: HTTPBearer) -> Course:
+    def __clone_course(
+        self, course_data: CourseCreationRequestDTO, auth_header: HTTPAuthorizationCredentials
+    ) -> Course:
         course = self.__assert_course_exists(course_data.id)
 
         course_data.img_uri = course_data.img_uri or course.img_uri
@@ -127,14 +129,19 @@ class CoursesService:
         )
         if response.status_code != status.HTTP_201_CREATED:
             self.__delete_course(new_course)
-            raise HTTPException(status_code=response.status_code, detail="Failed to clone course categories")
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Failed to clone course categories. Response from activities api was: {response.text}",
+            )
 
         return new_course
 
     def __fetch_sorted_basic_score_summary_per_user(
-        self, course_id: str, course_users: List[CourseUser], auth_header: HTTPBearer
+        self, course_id: str, course_users: List[CourseUser], auth_header: HTTPAuthorizationCredentials
     ) -> list[dict[str, int]]:
-        user_ids = [course_user.user_id for course_user in course_users]
+        user_ids = [
+            course_user.user_id for course_user in course_users if (course_user.role.name == "student")
+        ]
         response = self.activities_api_client.get(
             url=f"/stats/courses/{course_id}/basicSummary",
             params={"user_ids": user_ids},
@@ -154,7 +161,10 @@ class CoursesService:
     # ====================== MANAGING - COURSES ====================== #
 
     def create_course(
-        self, course_data: CourseCreationRequestDTO, current_user: User, auth_header: HTTPBearer
+        self,
+        course_data: CourseCreationRequestDTO,
+        current_user: User,
+        auth_header: HTTPAuthorizationCredentials,
     ) -> CourseResponseDTO:
         if not current_user.is_admin:
             raise HTTPException(
@@ -261,7 +271,7 @@ class CoursesService:
     # ====================== QUERYING - COURSE USERS ====================== #
 
     def get_course_scoreboard(
-        self, course_id: str, current_user: User, auth_header: HTTPBearer
+        self, course_id: str, current_user: User, auth_header: HTTPAuthorizationCredentials
     ) -> List[CourseUserScoreResponseDTO]:
         self.__assert_course_exists(course_id)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["course_view"])

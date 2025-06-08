@@ -34,7 +34,7 @@ class SubmissionsService:
             submission_rplfile_name=submission.solution_rplfile.file_name,
             submission_rplfile_type=submission.solution_rplfile.file_type,
             submission_rplfile_id=submission.solution_rplfile_id,
-            acitivity_starting_rplfile_name=submission.activity.starting_rplfile.file_name,
+            activity_starting_rplfile_name=submission.activity.starting_rplfile.file_name,
             activity_starting_rplfile_type=submission.activity.starting_rplfile.file_type,
             activity_starting_rplfile_id=submission.activity.starting_rplfile_id,
             activity_language=submission.activity.language,
@@ -67,13 +67,16 @@ class SubmissionsService:
         submission_tests_exit_msg = self.submissions_repo.get_tests_exit_msg_from_submission(submission)
         io_tests_run_results = self.submissions_repo.get_io_tests_run_results_from_submission(submission)
         unit_tests_run_results = self.submissions_repo.get_unit_tests_run_results_from_submission(submission)
+        tests_log_stdout, tests_log_stderr = (
+            self.submissions_repo.get_tests_execution_log_stdout_and_stderr_from_submission(submission)
+        )
         return SubmissionResultResponseDTO(
             id=submission.id,
             activity_id=submission.activity_id,
             submission_rplfile_name=submission.solution_rplfile.file_name,
             submission_rplfile_type=submission.solution_rplfile.file_type,
             submission_rplfile_id=submission.solution_rplfile_id,
-            acitivity_starting_rplfile_name=submission.activity.starting_rplfile.file_name,
+            activity_starting_rplfile_name=submission.activity.starting_rplfile.file_name,
             activity_starting_rplfile_type=submission.activity.starting_rplfile.file_type,
             activity_starting_rplfile_id=submission.activity.starting_rplfile_id,
             activity_language=submission.activity.language,
@@ -84,8 +87,10 @@ class SubmissionsService:
             is_final_solution=submission.is_final_solution,
             submission_date=submission.date_created,
             exit_message=submission_tests_exit_msg,
-            iotests_run_results=io_tests_run_results,
-            unittests_run_results=unit_tests_run_results,
+            stderr=tests_log_stderr,
+            stdout=tests_log_stdout,
+            io_tests_run_results=io_tests_run_results,
+            unit_tests_run_results=unit_tests_run_results,
         )
 
     def __verify_and_get_submission(self, submission_id: int) -> ActivitySubmission:

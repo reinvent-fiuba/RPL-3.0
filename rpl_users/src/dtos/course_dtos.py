@@ -27,7 +27,7 @@ class CourseUptateRequestDTO(BaseModel):
     university: str
     subject_id: str
     description: Optional[str] = None
-    active: bool
+    active: Optional[bool] = True
     semester: str
     semester_start_date: datetime.date
     semester_end_date: datetime.date

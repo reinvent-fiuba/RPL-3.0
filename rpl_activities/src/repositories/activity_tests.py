@@ -172,7 +172,7 @@ class TestsRepository(BaseRepository):
         self.db_session.refresh(submission)
         return test_execution_log, submission
 
-    def __parse_student_outputs_per_io_test_run(stdout: str) -> list[str]:
+    def __parse_student_outputs_per_io_test_run(self, stdout: str) -> list[str]:
         student_outputs_per_run = []
         current_output_lines = []
         for line in stdout.splitlines():
@@ -235,7 +235,7 @@ class TestsRepository(BaseRepository):
         for single_test_report in suite_summary.single_test_reports:
             unit_test_run = UnitTestRun(
                 tests_execution_log_id=test_execution_log_id,
-                name=single_test_report.name,
+                test_name=single_test_report.name,
                 passed=(single_test_report.status == UNIT_TEST_RUN_PASS),
                 error_messages=single_test_report.messages or "",
                 date_created=datetime.now(timezone.utc),

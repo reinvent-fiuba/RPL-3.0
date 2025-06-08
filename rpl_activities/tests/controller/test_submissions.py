@@ -32,7 +32,7 @@ def test_get_submission(
     assert response_data["submission_rplfile_type"] == example_submission.solution_rplfile.file_type
     assert response_data["submission_rplfile_id"] == example_submission.solution_rplfile_id
     assert (
-        response_data["acitivity_starting_rplfile_name"]
+        response_data["activity_starting_rplfile_name"]
         == example_submission.activity.starting_rplfile.file_name
     )
     assert (

@@ -26,6 +26,7 @@ class EmailHandler:
         msg["From"] = RPL_HELP_EMAIL_USER
         msg["To"] = to_address
         msg.set_content(body)
+        msg.add_alternative(body, subtype="html")
 
         context = ssl.create_default_context()
         try:
@@ -80,6 +81,9 @@ class EmailHandler:
     def send_course_acceptance_email(self, to_address: str, user_data: User, course_data: Course):
         link = f"{FRONTEND_URL}/course/{course_data.id}"
         subject = "RPL: Aceptación de curso"
+        user_fullname = f"{user_data.name} {user_data.surname}"
+        course_name = f"{course_data.subject_id} - {course_data.name}"
+        course_description = f"{course_data.description or ''}"
         body = f"""
                 <!DOCTYPE html>
                 <html lang="es">
@@ -87,11 +91,11 @@ class EmailHandler:
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <body>
-                    <p>Bienvenido <span text="{user_data.name}"></span> <span text="{user_data.surname}"></span>, fuiste aceptado en el curso
-                    <span text="{course_data.subject_id}"></span> - <span text="{course_data.name}"></span>
+                    <p>Bienvenido {user_fullname}, fuiste aceptado en el curso
+                    {course_name}
                     </p>
                     </p>
-                    <p text="{course_data.description}"></p>
+                    <p>{course_description}</p>
                     </p>
                     <p>Para acceder al curso podes hacer click <a href="{link}">acá</a></p>
                 </body>

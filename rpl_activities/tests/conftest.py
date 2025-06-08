@@ -11,13 +11,16 @@ from sqlalchemy.pool import StaticPool
 from rpl_activities.src.deps.auth import (
     AuthDependency,
     CurrentCourseUser,
+    CurrentMainUser,
     StudentCourseUser,
     __basic_request_param_checks,
     get_current_course_user,
+    get_current_main_user,
     get_student_course_user_for_current_user,
 )
 from rpl_activities.src.deps.database import get_db_session
 from rpl_activities.src.deps.mq_sender import get_mq_sender
+from rpl_activities.src.dtos.auth_dtos import CurrentMainUserResponseDTO
 from rpl_activities.src.main import app
 from rpl_activities.src.repositories.models.activity import Activity
 from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
@@ -80,6 +83,18 @@ def activities_api_http_client_fixture(
 ):
     app.dependency_overrides[get_db_session] = lambda: activities_api_dbsession
 
+    def override_get_current_main_user(auth_header: AuthDependency, request: Request):
+        res = users_api_client.get(
+            "/api/v3/auth/externalUserMainAuth",
+            headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
+        )
+        if res.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=res.status_code, detail=f"Failed to authenticate current user: {res.text}"
+            )
+        user_data = CurrentMainUserResponseDTO(**res.json())
+        return CurrentMainUser(user_data)
+
     def override_get_current_course_user(auth_header: AuthDependency, request: Request):
         course_id = __basic_request_param_checks(request.path_params.get("course_id"))
         res = users_api_client.get(
@@ -108,6 +123,7 @@ def activities_api_http_client_fixture(
         course_user_data = CourseUserResponseDTO(**student_course_user)
         return StudentCourseUser(course_user_data)
 
+    app.dependency_overrides[get_current_main_user] = override_get_current_main_user
     app.dependency_overrides[get_current_course_user] = override_get_current_course_user
     app.dependency_overrides[get_student_course_user_for_current_user] = (
         override_get_student_course_user_for_current_user

@@ -66,7 +66,7 @@ def mark_submission_as_final_solution(
 
 
 @router.get(
-    "/courses/{course_id}/activities/{activity_id}/submissions/finalSubmission",
+    "/courses/{course_id}/activities/{activity_id}/finalSubmission",
     response_model=SubmissionWithMetadataOnlyResponseDTO,
 )
 def get_final_submission_for_current_student(
@@ -81,7 +81,7 @@ def get_final_submission_for_current_student(
 
 
 @router.get(
-    "/courses/{course_id}/activities/{activity_id}/submissions/allFinalSubmissions",
+    "/courses/{course_id}/activities/{activity_id}/allFinalSubmissions",
     response_model=AllFinalSubmissionsResponseDTO,
 )
 def get_all_final_submissions_from_activity(
