@@ -63,7 +63,7 @@ class UsersService:
         )
         return user
 
-    def __send_validation_email(self, user_id, email: str, email_handler: EmailHandler):
+    def __send_validation_email(self, user_id: int, email: str, email_handler: EmailHandler):
         token = email_handler.send_validation_email(email)
         self.validation_tokens_repo.save_new_validation_token(user_id, token)
 
@@ -143,6 +143,7 @@ class UsersService:
             f"[users:services] Password reset successful for {user.username}"
         )
         return UserProfileResponseDTO(
+            id=user.id,
             username=user.username,
             name=user.name,
             surname=user.surname,
@@ -158,6 +159,7 @@ class UsersService:
 
     def get_user_profile(self, user: User) -> UserProfileResponseDTO:
         return UserProfileResponseDTO(
+            id=user.id,
             username=user.username,
             name=user.name,
             surname=user.surname,
@@ -178,6 +180,7 @@ class UsersService:
 
         user = self.users_repo.update_user(user)
         return UserProfileResponseDTO(
+            id=user.id,
             username=user.username,
             name=user.name,
             surname=user.surname,

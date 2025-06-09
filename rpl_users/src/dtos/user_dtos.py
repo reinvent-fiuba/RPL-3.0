@@ -37,6 +37,7 @@ class UserLoginResponseDTO(BaseModel):
 
 
 class UserProfileResponseDTO(BaseModel):
+    id: int
     username: str
     name: str
     surname: str

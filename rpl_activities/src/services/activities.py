@@ -1,3 +1,4 @@
+from datetime import timedelta
 import logging
 from fastapi import HTTPException, status
 from rpl_activities.src.deps.auth import CurrentCourseUser, CurrentMainUser
@@ -112,8 +113,8 @@ class ActivitiesService:
             last_submission_date=self.submissions_repo.get_last_submission_date_by_user_at_activity(
                 current_course_user.user_id, activity, current_user_submissions_at_activity
             ),
-            date_created=activity.date_created,
-            last_updated=activity.last_updated,
+            date_created=(activity.date_created - timedelta(hours=3)),
+            last_updated=(activity.last_updated - timedelta(hours=3)),
         )
 
     def build_activity_response_dto(self, activity: Activity) -> ActivityResponseDTO:
@@ -136,8 +137,8 @@ class ActivitiesService:
             activity_unit_tests_content=unit_tests_data,
             activity_io_tests=io_tests_data,
             compilation_flags=activity.compilation_flags,
-            date_created=activity.date_created,
-            last_updated=activity.last_updated,
+            date_created=(activity.date_created - timedelta(hours=3)),
+            last_updated=(activity.last_updated - timedelta(hours=3)),
         )
 
     # ====================== QUERYING ====================== #

@@ -1,3 +1,4 @@
+from datetime import timedelta
 from fastapi.testclient import TestClient
 from fastapi import status
 from sqlalchemy.orm import Session
@@ -87,9 +88,9 @@ def test_get_activities_with_multiple_submissions_returns_them_with_their_best_s
 
     assert response_activity["submission_status"] == example_failed_submission.status
     assert response_activity["submission_status"] == aux_models.SubmissionStatus.FAILURE
-    assert response_activity["last_submission_date"] == example_submission.date_created.strftime(
-        "%Y-%m-%dT%H:%M:%S"
-    )
+    assert response_activity["last_submission_date"] == (
+        example_submission.date_created - timedelta(hours=3)
+    ).strftime("%Y-%m-%dT%H:%M:%S")
 
 
 # ==============================================================================
@@ -118,8 +119,12 @@ def test_get_activity(
     assert response_activity["active"] == example_activity.active
     assert response_activity["activity_io_tests"] == []
     assert response_activity["starting_rplfile_id"] == example_activity.starting_rplfile_id
-    assert response_activity["date_created"] == example_activity.date_created.strftime("%Y-%m-%dT%H:%M:%S")
-    assert response_activity["last_updated"] == example_activity.last_updated.strftime("%Y-%m-%dT%H:%M:%S")
+    assert response_activity["date_created"] == (example_activity.date_created - timedelta(hours=3)).strftime(
+        "%Y-%m-%dT%H:%M:%S"
+    )
+    assert response_activity["last_updated"] == (example_activity.last_updated - timedelta(hours=3)).strftime(
+        "%Y-%m-%dT%H:%M:%S"
+    )
 
 
 def test_get_nonexistent_activity_not_found(

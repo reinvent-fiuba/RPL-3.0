@@ -148,6 +148,6 @@ class CourseUserResponseDTO(BaseModel):
             role=course_user.role.name,
             permissions=course_user.get_permissions(),
             accepted=course_user.accepted,
-            date_created=course_user.date_created,
-            last_updated=course_user.last_updated,
+            date_created=(course_user.date_created - datetime.timedelta(hours=3)),
+            last_updated=(course_user.last_updated - datetime.timedelta(hours=3)),
         )

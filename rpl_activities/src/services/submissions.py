@@ -249,15 +249,15 @@ class SubmissionsService:
         return [self.__build_submission_result_response(submission) for submission in submissions]
 
     def get_all_submissions_results_from_activity_for_student(
-        self, activity_id: int, current_course_user: CurrentCourseUser, student_course_user: StudentCourseUser
+        self, activity_id: int, student_user_id: int, current_course_user: CurrentCourseUser
     ) -> list[SubmissionResultResponseDTO]:
         self.activities_service.verify_permission_to_manage(current_course_user)
         submissions = self.submissions_repo.get_all_submissions_from_activity_id_and_user_id(
-            activity_id, student_course_user.user_id
+            activity_id, student_user_id
         )
         return [self.__build_submission_result_response(submission) for submission in submissions]
 
-    def reprocess_all_pending_submissions(self) -> SubmissionWithMetadataOnlyResponseDTO:
+    def reprocess_all_pending_submissions(self) -> list[SubmissionWithMetadataOnlyResponseDTO]:
         pending_submissions = self.submissions_repo.get_all_pending_and_stuck_submissions()
         enqueued_submissions = []
         for submission in pending_submissions:

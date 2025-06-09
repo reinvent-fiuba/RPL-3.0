@@ -100,7 +100,6 @@ class TestsExecutionLogDTO(BaseModel):
     tests_execution_exit_message: str
     tests_execution_stderr: str
     tests_execution_stdout: str
-    # tests_execution_stdout_when_stdout_only: str
     unit_test_suite_result_summary: Optional[UnitTestSuiteRunsSummaryDTO] = None
 
 

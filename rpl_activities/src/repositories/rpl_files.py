@@ -1,3 +1,4 @@
+from typing import Optional
 from rpl_activities.src.repositories.base import BaseRepository
 import sqlalchemy as sa
 from .models.rpl_file import RPLFile
@@ -5,7 +6,7 @@ from .models.rpl_file import RPLFile
 
 class RPLFilesRepository(BaseRepository):
 
-    def get_by_id(self, file_id: int) -> RPLFile:
+    def get_by_id(self, file_id: int) -> Optional[RPLFile]:
         return (
             self.db_session.execute(sa.select(RPLFile).where(RPLFile.id == file_id)).scalars().one_or_none()
         )

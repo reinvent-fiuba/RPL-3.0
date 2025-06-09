@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 from rpl_users.src.dtos.user_dtos import UserCreationDTO
 from .base import BaseRepository
 
@@ -65,13 +66,13 @@ class UsersRepository(BaseRepository):
 
     # ====================== QUERYING ====================== #
 
-    def get_user_with_username(self, username: str) -> User:
+    def get_user_with_username(self, username: str) -> Optional[User]:
         return self.db_session.execute(sa.select(User).where(User.username == username)).scalar_one_or_none()
 
-    def get_user_with_email(self, email: str) -> User:
+    def get_user_with_email(self, email: str) -> Optional[User]:
         return self.db_session.execute(sa.select(User).where(User.email == email)).scalar_one_or_none()
 
-    def get_user_with_id(self, user_id: str) -> User:
+    def get_user_with_id(self, user_id: int) -> Optional[User]:
         return self.db_session.execute(sa.select(User).where(User.id == user_id)).scalar_one_or_none()
 
     def get_all_users_with_username_or_fullname(self, username_or_fullname: str) -> list[User]:

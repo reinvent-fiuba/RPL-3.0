@@ -15,15 +15,15 @@ class RPLFilesService:
         self.rpl_files_repo = RPLFilesRepository(db)
 
     def get_raw_rplfile(self, rplfile_id: int) -> Response:
-        file = self.rpl_files_repo.get_by_id(rplfile_id)
-        if not file:
+        rplfile = self.rpl_files_repo.get_by_id(rplfile_id)
+        if not rplfile:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
         return Response(
-            content=file.data,
-            media_type=file.file_type,
+            content=rplfile.data,
+            media_type=rplfile.file_type,
             headers={
-                "Content-Disposition": f"attachment; filename={file.file_name}",
-                "Content-Type": file.file_type,
+                "Content-Disposition": f"attachment; filename={rplfile.file_name}",
+                "Content-Type": rplfile.file_type,
             },
         )
 

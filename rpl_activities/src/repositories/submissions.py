@@ -1,6 +1,7 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 import logging
+from typing import Optional
 from fastapi import UploadFile
 
 from rpl_activities.src.deps.auth import CurrentCourseUser
@@ -40,13 +41,13 @@ class SubmissionsRepository(BaseRepository):
 
     def get_last_submission_date_by_user_at_activity(
         self, user_id: int, activity: Activity, current_user_submissions_at_activity: list[ActivitySubmission]
-    ) -> datetime:
+    ) -> Optional[datetime]:
         if len(current_user_submissions_at_activity) == 0:
             return None
         last_submission = max(
             current_user_submissions_at_activity, key=lambda submission: submission.date_created
         )
-        return last_submission.date_created
+        return last_submission.date_created - timedelta(hours=3)
 
     def get_all_submissions_by_user_at_activities(
         self, user_id: int, activities: list[Activity]
@@ -138,7 +139,7 @@ class SubmissionsRepository(BaseRepository):
     ) -> tuple[str, str]:
         if not submission.tests_execution_log:
             return "", ""
-        return (submission.tests_execution_log.stdout, submission.tests_execution_log.stderr)
+        return (submission.tests_execution_log.stdout or "", submission.tests_execution_log.stderr or "")
 
     def get_by_id(self, submission_id: int) -> ActivitySubmission | None:
         return (

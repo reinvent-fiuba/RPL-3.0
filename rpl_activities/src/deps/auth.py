@@ -1,5 +1,5 @@
 import logging
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import httpx
@@ -64,7 +64,7 @@ class CurrentCourseUser:
         return authority in self.permissions
 
 
-def __basic_request_param_checks(course_id: str) -> int:
+def __basic_request_param_checks(course_id: Optional[str]) -> int:
     # Note: done due to direct usage of raw request. The proper handling is also done at router level, this is just an extra precaution.
     if not course_id:
         raise HTTPException(
@@ -114,35 +114,15 @@ class StudentCourseUser:
         self.student_id = user_data.student_id
 
 
-async def get_student_course_user_for_current_user(
-    auth_header: AuthDependency, request: Request
-) -> StudentCourseUser:
-    users_api_client: httpx.AsyncClient = request.state.users_api_client
-    student_id = request.path_params.get("student_id")
-    course_id = __basic_request_param_checks(request.path_params.get("course_id"))
-
-    res = await users_api_client.get(
-        f"/api/v3/courses/{course_id}/users?student_id={student_id}", headers=auth_header
-    )
-    if res.status_code != status.HTTP_200_OK or len(res.json()) == 0:
-        raise HTTPException(status_code=res.status_code, detail=f"Failed to get student: {res.text}")
-    student_course_user = res.json()[0]
-    course_user_data = CourseUserResponseDTO(**student_course_user)
-    return StudentCourseUser(course_user_data)
-
-
-StudentCourseUserDependency = Annotated[StudentCourseUser, Depends(get_student_course_user_for_current_user)]
-
-# ==========================================
-
-
 async def get_all_students_course_users_for_current_user(
     auth_header: AuthDependency, request: Request
 ) -> list[StudentCourseUser]:
     users_api_client: httpx.AsyncClient = request.state.users_api_client
     course_id = __basic_request_param_checks(request.path_params.get("course_id"))
     res = await users_api_client.get(
-        f"/api/v3/courses/{course_id}/users?role_name=student", headers=auth_header
+        f"/api/v3/courses/{course_id}/users",
+        params={"role_name": "student"},
+        headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
     )
     if res.status_code != status.HTTP_200_OK:
         raise HTTPException(status_code=res.status_code, detail=f"Failed to get students: {res.text}")

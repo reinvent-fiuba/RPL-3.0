@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 from fastapi import APIRouter, Form, status
-from rpl_activities.src.deps.auth import CurrentCourseUserDependency, StudentCourseUserDependency
+from rpl_activities.src.deps.auth import CurrentCourseUserDependency
 
 from rpl_activities.src.deps.database import DBSessionDependency
 from rpl_activities.src.deps.mq_sender import MQSenderDependency
@@ -125,19 +125,18 @@ def get_all_current_user_submissions_results_from_activity(
 
 
 @router.get(
-    "/courses/{course_id}/activities/{activity_id}/students/{student_id}/submissions",
+    "/courses/{course_id}/activities/{activity_id}/students/{student_user_id}/submissions",
     response_model=List[SubmissionResultResponseDTO],
 )
 def get_all_submissions_results_from_activity_for_student(
     course_id: int,
     activity_id: int,
-    student_id: int,
+    student_user_id: int,
     current_course_user: CurrentCourseUserDependency,
-    student_course_user: StudentCourseUserDependency,
     db: DBSessionDependency,
 ):
     return SubmissionsService(db).get_all_submissions_results_from_activity_for_student(
-        activity_id, current_course_user, student_course_user
+        activity_id, student_user_id, current_course_user
     )
 
 

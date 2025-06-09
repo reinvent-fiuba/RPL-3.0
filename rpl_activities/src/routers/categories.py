@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/v3", tags=["ActivityCategories"])
 
 @router.get("/courses/{course_id}/activityCategories", response_model=List[CategoryResponseDTO])
 def get_categories(course_id: int, current_course_user: CurrentCourseUserDependency, db: DBSessionDependency):
-    return CategoriesService(db).get_categories(current_course_user, course_id)
+    return CategoriesService(db).get_categories_dtos(current_course_user, course_id)
 
 
 @router.post(

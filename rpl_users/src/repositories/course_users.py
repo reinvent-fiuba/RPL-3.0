@@ -32,7 +32,7 @@ class CourseUsersRepository(BaseRepository):
 
     def update_course_user(
         self, course_id: int, user_id: int, role_id: Optional[int], accepted: Optional[bool]
-    ):
+    ) -> CourseUser:
         course_user = self.get_course_user(course_id=course_id, user_id=user_id)
         if role_id:
             course_user.role_id = role_id
@@ -50,7 +50,7 @@ class CourseUsersRepository(BaseRepository):
 
     # ====================== QUERYING ====================== #
 
-    def get_course_user(self, course_id: int, user_id: int) -> CourseUser:
+    def get_course_user(self, course_id: int, user_id: int) -> Optional[CourseUser]:
         return (
             self.db_session.execute(
                 sa.select(CourseUser).where(CourseUser.course_id == course_id, CourseUser.user_id == user_id)

@@ -56,14 +56,14 @@ class CoursesService:
         if assertion is False:
             raise HTTPException(status_code, detail)
 
-    def __assert_course_exists(self, course_id: str) -> Course:
+    def __assert_course_exists(self, course_id: int) -> Course:
         course = self.courses_repo.get_course_with_id(course_id)
         self.__assert_or_else_raise_http_exception(
             course is not None, status.HTTP_400_BAD_REQUEST, "Course not found"
         )
         return course
 
-    def __assert_user_exists(self, user_id: str) -> User:
+    def __assert_user_exists(self, user_id: int) -> User:
         user = self.users_repo.get_user_with_id(user_id)
         self.__assert_or_else_raise_http_exception(
             user is not None, status.HTTP_400_BAD_REQUEST, "User not found"
@@ -78,7 +78,7 @@ class CoursesService:
         return role
 
     def __assert_course_user_exists_and_has_permissions(
-        self, course_id: str, user_id: str, permissions: List[str] = []
+        self, course_id: int, user_id: int, permissions: List[str] = []
     ) -> CourseUser:
         course_user = self.course_users_repo.get_course_user(course_id, user_id)
         self.__assert_or_else_raise_http_exception(
@@ -137,7 +137,7 @@ class CoursesService:
         return new_course
 
     def __fetch_sorted_basic_score_summary_per_user(
-        self, course_id: str, course_users: List[CourseUser], auth_header: HTTPAuthorizationCredentials
+        self, course_id: int, course_users: List[CourseUser], auth_header: HTTPAuthorizationCredentials
     ) -> list[dict[str, int]]:
         user_ids = [
             course_user.user_id for course_user in course_users if (course_user.role.name == "student")
@@ -179,7 +179,7 @@ class CoursesService:
         return CourseResponseDTO.from_course(new_course)
 
     def update_course(
-        self, course_id: str, course_data: CourseUptateRequestDTO, current_user: User
+        self, course_id: int, course_data: CourseUptateRequestDTO, current_user: User
     ) -> CourseResponseDTO:
         self.__assert_course_exists(course_id)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["course_edit"])
@@ -208,7 +208,7 @@ class CoursesService:
                 )
         return courses_with_user_info
 
-    def get_course_details(self, course_id: str, current_user: User) -> CourseResponseDTO:
+    def get_course_details(self, course_id: int, current_user: User) -> CourseResponseDTO:
         course = self.__assert_course_exists(course_id)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["course_view"])
 
@@ -216,7 +216,7 @@ class CoursesService:
 
     # ====================== MANAGING - COURSE USERS ====================== #
 
-    def enroll_student_in_course(self, course_id: str, current_user: User) -> RoleResponseDTO:
+    def enroll_student_in_course(self, course_id: int, current_user: User) -> RoleResponseDTO:
         self.__assert_course_exists(course_id)
 
         new_course_user = self.course_users_repo.save_new_course_user(
@@ -230,8 +230,8 @@ class CoursesService:
 
     def update_course_user(
         self,
-        course_id: str,
-        user_id: str,
+        course_id: int,
+        user_id: int,
         new_course_user_data: CourseUserUptateRequestDTO,
         current_user: User,
         email_handler: EmailHandler,
@@ -254,13 +254,13 @@ class CoursesService:
 
         return CourseUserResponseDTO.from_course_user(course_user)
 
-    def unenroll_course_user(self, course_id: str, current_user: User):
+    def unenroll_course_user(self, course_id: int, current_user: User):
         self.__assert_course_exists(course_id)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id)
 
         self.course_users_repo.delete_course_user(course_id=course_id, user_id=current_user.id)
 
-    def delete_course_user(self, course_id: str, user_id: str, current_user: User):
+    def delete_course_user(self, course_id: int, user_id: int, current_user: User):
         self.__assert_user_exists(user_id)
         self.__assert_course_exists(course_id)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["user_manage"])
@@ -271,7 +271,7 @@ class CoursesService:
     # ====================== QUERYING - COURSE USERS ====================== #
 
     def get_course_scoreboard(
-        self, course_id: str, current_user: User, auth_header: HTTPAuthorizationCredentials
+        self, course_id: int, current_user: User, auth_header: HTTPAuthorizationCredentials
     ) -> List[CourseUserScoreResponseDTO]:
         self.__assert_course_exists(course_id)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["course_view"])
@@ -298,14 +298,14 @@ class CoursesService:
                 )
         return course_user_scores
 
-    def get_user_permissions(self, course_id: str, current_user: User) -> List[str]:
+    def get_user_permissions(self, course_id: int, current_user: User) -> List[str]:
         self.__assert_course_exists(course_id)
         course_user = self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, [])
 
         return course_user.get_permissions()
 
     def get_all_course_users_from_course(
-        self, course_id: str, current_user: User, role_name: Optional[str], student_id: Optional[str]
+        self, course_id: int, current_user: User, role_name: Optional[str], student_id: Optional[str]
     ) -> List[CourseUserResponseDTO]:
         self.__assert_course_exists(course_id)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["user_view"])
@@ -321,10 +321,10 @@ class CoursesService:
 
         return [CourseUserResponseDTO.from_course_user(course_user) for course_user in course_users]
 
-    def get_all_courses_from_user(self, user_id: str, current_user: User) -> List[CourseResponseDTO]:
+    def get_all_courses_from_user(self, user_id: int, current_user: User) -> List[CourseResponseDTO]:
         self.__assert_user_exists(user_id)
         self.__assert_or_else_raise_http_exception(
-            user_id == str(current_user.id), status.HTTP_403_FORBIDDEN, "User can only view its own courses"
+            user_id == current_user.id, status.HTTP_403_FORBIDDEN, "User can only view its own courses"
         )
 
         return [
