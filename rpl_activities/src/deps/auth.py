@@ -31,10 +31,19 @@ class CurrentMainUser:
 
 async def get_current_main_user(auth_header: AuthDependency, request: Request) -> CurrentMainUser:
     users_api_client: httpx.AsyncClient = request.state.users_api_client
-    res = await users_api_client.get(
-        "/api/v3/auth/externalUserMainAuth",
-        headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
-    )
+    try:
+        res = await users_api_client.get(
+            "/api/v3/auth/externalUserMainAuth",
+            headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
+        )
+    except httpx.ConnectError or httpx.TimeoutException:
+        logging.getLogger("uvicorn.error").error(
+            f"Failed to connect to users API. Request: {request.method} {request.url}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Users API is currently unavailable, try again later.",
+        )
     if res.status_code != status.HTTP_200_OK:
         raise HTTPException(
             status_code=res.status_code, detail=f"Failed to authenticate current user: {res.text}"
@@ -85,12 +94,20 @@ def __basic_request_param_checks(course_id: Optional[str]) -> int:
 async def get_current_course_user(auth_header: AuthDependency, request: Request) -> CurrentCourseUser:
     users_api_client: httpx.AsyncClient = request.state.users_api_client
     course_id = __basic_request_param_checks(request.path_params.get("course_id"))
-
-    res = await users_api_client.get(
-        "/api/v3/auth/externalCourseUserAuth",
-        headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
-        params={"course_id": course_id},
-    )
+    try:
+        res = await users_api_client.get(
+            "/api/v3/auth/externalCourseUserAuth",
+            headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
+            params={"course_id": course_id},
+        )
+    except httpx.ConnectError or httpx.TimeoutException:
+        logging.getLogger("uvicorn.error").error(
+            f"Failed to connect to users API. Request: {request.method} {request.url}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Users API is currently unavailable, try again later.",
+        )
     if res.status_code != status.HTTP_200_OK:
         raise HTTPException(
             status_code=res.status_code, detail=f"Failed to authenticate current course user: {res.text}"
@@ -120,11 +137,20 @@ async def get_all_students_course_users_for_current_user(
 ) -> list[StudentCourseUser]:
     users_api_client: httpx.AsyncClient = request.state.users_api_client
     course_id = __basic_request_param_checks(request.path_params.get("course_id"))
-    res = await users_api_client.get(
-        f"/api/v3/courses/{course_id}/users",
-        params={"role_name": "student"},
-        headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
-    )
+    try:
+        res = await users_api_client.get(
+            f"/api/v3/courses/{course_id}/users",
+            params={"role_name": "student"},
+            headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
+        )
+    except httpx.ConnectError or httpx.TimeoutException:
+        logging.getLogger("uvicorn.error").error(
+            f"Failed to connect to users API. Request: {request.method} {request.url}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Users API is currently unavailable, try again later.",
+        )
     if res.status_code != status.HTTP_200_OK:
         raise HTTPException(status_code=res.status_code, detail=f"Failed to get students: {res.text}")
     students_course_users = res.json()

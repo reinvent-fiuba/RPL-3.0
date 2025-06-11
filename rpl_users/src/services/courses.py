@@ -122,11 +122,18 @@ class CoursesService:
 
         new_course = self.__create_course_as_admin(course_data)
 
-        response = self.activities_api_client.post(
-            url=f"/courses/{course.id}/activityCategories/clone",
-            params={"to_course_id": new_course.id},
-            headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
-        )
+        try:
+            response = self.activities_api_client.post(
+                url=f"/courses/{course.id}/activityCategories/clone",
+                params={"to_course_id": new_course.id},
+                headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
+            )
+        except httpx.ConnectError or httpx.TimeoutException as e:
+            self.__delete_course(new_course)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Activities API is not available, try again later",
+            )
         if response.status_code != status.HTTP_201_CREATED:
             self.__delete_course(new_course)
             raise HTTPException(
@@ -142,11 +149,17 @@ class CoursesService:
         user_ids = [
             course_user.user_id for course_user in course_users if (course_user.role.name == "student")
         ]
-        response = self.activities_api_client.get(
-            url=f"/stats/courses/{course_id}/basicSummary",
-            params={"user_ids": user_ids},
-            headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
-        )
+        try:
+            response = self.activities_api_client.get(
+                url=f"/stats/courses/{course_id}/basicSummary",
+                params={"user_ids": user_ids},
+                headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
+            )
+        except httpx.ConnectError or httpx.TimeoutException as e:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Activities API is not available, try again later",
+            )
         if response.status_code != status.HTTP_200_OK:
             raise HTTPException(
                 status_code=response.status_code,

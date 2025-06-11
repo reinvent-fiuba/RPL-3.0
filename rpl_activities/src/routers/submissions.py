@@ -87,9 +87,12 @@ def get_all_final_submissions_from_activity(
     )
 
 
-@router.get("/submissions/{submission_id}/result", response_model=SubmissionResultResponseDTO)
+@router.get("/courses/{course_id}/submissions/{submission_id}/result", response_model=SubmissionResultResponseDTO)
 def get_submission_execution_result(
-    submission_id: int, current_course_user: CurrentCourseUserDependency, db: DBSessionDependency
+    course_id: int, 
+    submission_id: int, 
+    current_course_user: CurrentCourseUserDependency, 
+    db: DBSessionDependency
 ):
     return SubmissionsService(db).get_submission_execution_result(submission_id, current_course_user)
 
