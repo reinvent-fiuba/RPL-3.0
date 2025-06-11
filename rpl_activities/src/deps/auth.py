@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import httpx
 
+from rpl_activities.src.config import env
 from rpl_activities.src.dtos.auth_dtos import CourseUserResponseDTO, CurrentMainUserResponseDTO
 
 
@@ -133,3 +134,26 @@ async def get_all_students_course_users_for_current_user(
 AllStudentsCourseUsersDependency = Annotated[
     list[StudentCourseUser], Depends(get_all_students_course_users_for_current_user)
 ]
+
+
+# ==========================================
+
+
+def validate_request_from_runner(auth_header: AuthDependency, request: Request) -> bool:
+    if not auth_header or not auth_header.credentials:
+        logging.getLogger("uvicorn.error").error(
+            f"Unauthorized request to runner-exclusive endpoint. Request: {request.method} {request.url}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization header is missing."
+        )
+    credential = auth_header.credentials
+    if credential != env.RUNNER_API_KEY:
+        logging.getLogger("uvicorn.error").error(
+            f"Invalid API key for runner-exclusive endpoint. Request: {request.method} {request.url}"
+        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid API key.")
+    return True
+
+
+RunnerAuthDependency = Annotated[bool, Depends(validate_request_from_runner)]

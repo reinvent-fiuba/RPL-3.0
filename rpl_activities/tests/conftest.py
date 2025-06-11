@@ -16,6 +16,7 @@ from rpl_activities.src.deps.auth import (
     __basic_request_param_checks,
     get_current_course_user,
     get_current_main_user,
+    validate_request_from_runner,
 )
 from rpl_activities.src.deps.database import get_db_session
 from rpl_activities.src.deps.mq_sender import get_mq_sender
@@ -122,9 +123,13 @@ def activities_api_http_client_fixture(
         course_user_data = CourseUserResponseDTO(**student_course_user)
         return StudentCourseUser(course_user_data)
 
+    def override_validate_request_from_runner(auth_header: AuthDependency, request: Request):
+        return True
+
     app.dependency_overrides[get_current_main_user] = override_get_current_main_user
     app.dependency_overrides[get_current_course_user] = override_get_current_course_user
     app.dependency_overrides[get_mq_sender] = lambda: test_mq_sender
+    app.dependency_overrides[validate_request_from_runner] = override_validate_request_from_runner
 
     client = TestClient(app)
     yield client

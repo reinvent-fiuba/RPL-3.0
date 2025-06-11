@@ -435,7 +435,8 @@ def test_update_activity_as_teacher_success(
     assert response_data["points"] == int(form_data_1["points"])
     assert response_data["starting_rplfile_id"] is not None
     aux_response = activities_api_client.get(
-        f"/api/v3/extractedRPLFile/{response_data['starting_rplfile_id']}", headers=admin_auth_headers
+        f"/api/v3/courses/{example_activity.course_id}/extractedRPLFile/{response_data['starting_rplfile_id']}",
+        headers=admin_auth_headers,
     )
     assert aux_response.status_code == status.HTTP_200_OK
     aux_response_data: ExtractedFilesDict = aux_response.json()

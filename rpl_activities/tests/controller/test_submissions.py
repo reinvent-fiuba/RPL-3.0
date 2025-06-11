@@ -92,10 +92,12 @@ def test_create_submission(
 
     # the submission's stored rplfile should contain both the ones from the student's solution (tiempo.c, tiempo.h) and the activities' starting files. Thus, it should also have overwritten any submission files that were marked as either "read" or "hidden" within the starting files that the teacher created.
     submission_rplfile = activities_api_client.get(
-        f"/api/v3/extractedRPLFile/{response_data['submission_rplfile_id']}", headers=admin_auth_headers
+        f"/api/v3/courses/{example_activity.course_id}/extractedRPLFile/{response_data['submission_rplfile_id']}",
+        headers=admin_auth_headers,
     )
     activity_rplfile = activities_api_client.get(
-        f"/api/v3/extractedRPLFile/{example_activity.starting_rplfile_id}", headers=admin_auth_headers
+        f"/api/v3/courses/{example_activity.course_id}/extractedRPLFile/{example_activity.starting_rplfile_id}",
+        headers=admin_auth_headers,
     )
     assert submission_rplfile.status_code == status.HTTP_200_OK
     subm_rplfile_data = submission_rplfile.json()

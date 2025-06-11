@@ -38,6 +38,11 @@ spec:
             secretKeyRef:
               name: activities-db-url-local
               key: activities-db-url-local
+        - name: RUNNER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: runner-api-key
+              key: runner-api-key
         ports:
           - name: http
             containerPort: 80
