@@ -5,6 +5,8 @@ mysql*/
 
 dumps/
 
+rabbitmq/
+
 
 
 # Byte-compiled / optimized / DLL files

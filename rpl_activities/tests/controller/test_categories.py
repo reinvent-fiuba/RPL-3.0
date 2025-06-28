@@ -158,7 +158,7 @@ def test_clone_all_info_when_io_tests_on_activity(
     )
     assert response.status_code == status.HTTP_200_OK
     response_activity = response.json()
-    assert len(response_activity["activity_iotests"]) == 3
+    assert len(response_activity["activity_io_tests"]) == 3
 
     from_course_id = example_activity_with_io_tests.course_id
     to_course_id = 2  # Assuming you want to clone to a different course
@@ -182,7 +182,7 @@ def test_clone_all_info_when_unit_tests_on_activity(
     )
     assert response.status_code == status.HTTP_201_CREATED
     response_activity = response.json()
-    assert response_activity["activity_unittests"] == data["unit_tests_code"]
+    assert response_activity["activity_unit_tests_content"] == data["unit_tests_code"]
 
     from_course_id = example_activity.course_id
     to_course_id = 2  # Assuming you want to clone to a different course

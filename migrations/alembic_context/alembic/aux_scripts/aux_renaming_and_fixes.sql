@@ -13,6 +13,8 @@ ALTER TABLE activities RENAME COLUMN activity_category_id TO category_id;
 ALTER TABLE activities ADD UNIQUE (starting_rplfile_id);
 RENAME TABLE unit_test_run TO unit_test_runs, io_test_run TO io_test_runs, test_run TO tests_execution_logs;
 ALTER TABLE unit_test_runs RENAME COLUMN name TO test_name;
+ALTER TABLE unit_test_runs RENAME COLUMN test_run_id TO tests_execution_log_id;
+ALTER TABLE io_test_runs RENAME COLUMN test_run_id TO tests_execution_log_id;
 RENAME TABLE unit_tests TO unit_test_suites;
 ALTER TABLE unit_test_suites ADD UNIQUE (activity_id);
 ALTER TABLE unit_test_suites RENAME COLUMN test_file_id TO test_rplfile_id;

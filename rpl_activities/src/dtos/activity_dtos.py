@@ -84,9 +84,9 @@ class ActivityResponseDTO(BaseModel):
     deleted: bool
     points: int
     starting_rplfile_id: int
-    activity_unittests: str = ""
+    activity_unit_tests_content: str = ""
     compilation_flags: str = ""
-    activity_iotests: List[IOTestResponseDTO] = []
+    activity_io_tests: List[IOTestResponseDTO] = []
     date_created: datetime
     last_updated: datetime
 

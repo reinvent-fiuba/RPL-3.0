@@ -19,8 +19,8 @@ class RoleResponseDTO(BaseModel):
             id=role.id,
             name=role.name,
             permissions=role.get_permissions(),
-            date_created=role.date_created,
-            last_updated=role.last_updated,
+            date_created=(role.date_created - datetime.timedelta(hours=3)),
+            last_updated=(role.last_updated - datetime.timedelta(hours=3)),
         )
 
     @classmethod

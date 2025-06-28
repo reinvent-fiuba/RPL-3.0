@@ -5,7 +5,7 @@ DEFAULT_GCC_FLAGS = "-g -O2 -std=c99 -Wall -Wformat=2 -Wshadow -Wpointer-arith -
 
 
 class Language(str, Enum):
-    C = "C"
+    C = "c"
     PYTHON = "python"
     GO = "go"
 

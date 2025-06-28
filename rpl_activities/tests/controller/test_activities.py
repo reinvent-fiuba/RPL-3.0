@@ -1,3 +1,4 @@
+from datetime import timedelta
 from fastapi.testclient import TestClient
 from fastapi import status
 from sqlalchemy.orm import Session
@@ -87,9 +88,9 @@ def test_get_activities_with_multiple_submissions_returns_them_with_their_best_s
 
     assert response_activity["submission_status"] == example_failed_submission.status
     assert response_activity["submission_status"] == aux_models.SubmissionStatus.FAILURE
-    assert response_activity["last_submission_date"] == example_submission.date_created.strftime(
-        "%Y-%m-%dT%H:%M:%S"
-    )
+    assert response_activity["last_submission_date"] == (
+        example_submission.date_created - timedelta(hours=3)
+    ).strftime("%Y-%m-%dT%H:%M:%S")
 
 
 # ==============================================================================
@@ -116,10 +117,14 @@ def test_get_activity(
         == aux_models.LanguageWithVersion(example_activity.language).without_version()
     )
     assert response_activity["active"] == example_activity.active
-    assert response_activity["activity_iotests"] == []
+    assert response_activity["activity_io_tests"] == []
     assert response_activity["starting_rplfile_id"] == example_activity.starting_rplfile_id
-    assert response_activity["date_created"] == example_activity.date_created.strftime("%Y-%m-%dT%H:%M:%S")
-    assert response_activity["last_updated"] == example_activity.last_updated.strftime("%Y-%m-%dT%H:%M:%S")
+    assert response_activity["date_created"] == (example_activity.date_created - timedelta(hours=3)).strftime(
+        "%Y-%m-%dT%H:%M:%S"
+    )
+    assert response_activity["last_updated"] == (example_activity.last_updated - timedelta(hours=3)).strftime(
+        "%Y-%m-%dT%H:%M:%S"
+    )
 
 
 def test_get_nonexistent_activity_not_found(
@@ -143,13 +148,13 @@ def test_get_activity_with_io_tests(
     )
     assert response.status_code == status.HTTP_200_OK
     response_activity = response.json()
-    assert len(response_activity["activity_iotests"]) == 2
-    assert response_activity["activity_iotests"][0]["name"] == example_io_tests[0].name
-    assert response_activity["activity_iotests"][0]["test_in"] == example_io_tests[0].test_in
-    assert response_activity["activity_iotests"][0]["test_out"] == example_io_tests[0].test_out
-    assert response_activity["activity_iotests"][1]["name"] == example_io_tests[1].name
-    assert response_activity["activity_iotests"][1]["test_in"] == example_io_tests[1].test_in
-    assert response_activity["activity_iotests"][1]["test_out"] == example_io_tests[1].test_out
+    assert len(response_activity["activity_io_tests"]) == 2
+    assert response_activity["activity_io_tests"][0]["name"] == example_io_tests[0].name
+    assert response_activity["activity_io_tests"][0]["test_in"] == example_io_tests[0].test_in
+    assert response_activity["activity_io_tests"][0]["test_out"] == example_io_tests[0].test_out
+    assert response_activity["activity_io_tests"][1]["name"] == example_io_tests[1].name
+    assert response_activity["activity_io_tests"][1]["test_in"] == example_io_tests[1].test_in
+    assert response_activity["activity_io_tests"][1]["test_out"] == example_io_tests[1].test_out
 
 
 # ==============================================================================
@@ -231,7 +236,7 @@ def test_create_activity_as_teacher_success(
     form_data = {
         "name": "test2",
         "points": 3,
-        "language": "C",
+        "language": "c",
         "category_id": example_category.id,
         "description": "enunciado2",
     }
@@ -382,7 +387,7 @@ def test_create_activity_in_wrong_existing_course_forbidden(
         "description": "enunciado",
     }
     response = activities_api_client.post(
-        f"/api/v3/courses/2/activities",
+        "/api/v3/courses/2/activities",
         headers=admin_auth_headers,
         data=form_data,
         files=examples_of_starting_files_raw_data["python"],
@@ -430,7 +435,8 @@ def test_update_activity_as_teacher_success(
     assert response_data["points"] == int(form_data_1["points"])
     assert response_data["starting_rplfile_id"] is not None
     aux_response = activities_api_client.get(
-        f"/api/v3/extractedRPLFile/{response_data['starting_rplfile_id']}", headers=admin_auth_headers
+        f"/api/v3/courses/{example_activity.course_id}/extractedRPLFile/{response_data['starting_rplfile_id']}",
+        headers=admin_auth_headers,
     )
     assert aux_response.status_code == status.HTTP_200_OK
     aux_response_data: ExtractedFilesDict = aux_response.json()
@@ -557,7 +563,7 @@ def test_create_io_test_for_activity_that_had_iotests_previously(
     )
     assert response.status_code == status.HTTP_200_OK
     response_activity = response.json()
-    assert len(response_activity["activity_iotests"]) == 3
+    assert len(response_activity["activity_io_tests"]) == 3
 
 
 def test_create_io_test_for_activity_that_had_unittests_previously(
@@ -584,9 +590,9 @@ def test_create_io_test_for_activity_that_had_unittests_previously(
     assert response.status_code == status.HTTP_200_OK
     response_activity = response.json()
     # It's mantained but the activity mode is changed and it has the new io test
-    assert len(response_activity["activity_unittests"]) > 0
+    assert len(response_activity["activity_unit_tests_content"]) > 0
     assert response_activity["is_io_tested"] is True
-    assert len(response_activity["activity_iotests"]) == 1
+    assert len(response_activity["activity_io_tests"]) == 1
 
 
 def test_update_io_test_for_activity(
@@ -612,7 +618,7 @@ def test_update_io_test_for_activity(
     )
     assert response.status_code == status.HTTP_200_OK
     response_activity = response.json()
-    assert len(response_activity["activity_iotests"]) == 2
+    assert len(response_activity["activity_io_tests"]) == 2
 
 
 def test_delete_io_test_for_activity(
@@ -627,7 +633,7 @@ def test_delete_io_test_for_activity(
     )
     assert response.status_code == status.HTTP_200_OK
     response_activity = response.json()
-    assert len(response_activity["activity_iotests"]) == 1
+    assert len(response_activity["activity_io_tests"]) == 1
 
 
 # ==============================================================================
@@ -671,7 +677,7 @@ def test_create_unit_tests_for_activity(
     )
     assert response.status_code == status.HTTP_201_CREATED
     response_activity = response.json()
-    assert response_activity["activity_unittests"] == data["unit_tests_code"]
+    assert response_activity["activity_unit_tests_content"] == data["unit_tests_code"]
 
 
 def test_create_unit_tests_for_activity_that_already_had_them_returns_conflict(
@@ -704,9 +710,9 @@ def test_create_unit_tests_for_activity_that_had_iotests_previously(
     assert response.status_code == status.HTTP_201_CREATED
     response_activity = response.json()
     # It's mantained but the activity mode is changed and it has the new unit tests
-    assert len(response_activity["activity_iotests"]) == 2
+    assert len(response_activity["activity_io_tests"]) == 2
     assert response_activity["is_io_tested"] is False
-    assert response_activity["activity_unittests"] == data["unit_tests_code"]
+    assert response_activity["activity_unit_tests_content"] == data["unit_tests_code"]
 
 
 def test_update_unit_tests_for_activity(
@@ -723,7 +729,7 @@ def test_update_unit_tests_for_activity(
     )
     assert response.status_code == status.HTTP_200_OK
     response_activity = response.json()
-    assert response_activity["activity_unittests"] == data["unit_tests_code"]
+    assert response_activity["activity_unit_tests_content"] == data["unit_tests_code"]
 
 
 def test_update_unit_tests_for_activity_that_didnt_have_any_returns_not_found(

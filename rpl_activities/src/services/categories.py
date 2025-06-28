@@ -1,6 +1,11 @@
+from datetime import timedelta
 from fastapi import HTTPException, status
-from rpl_activities.src.deps.auth import CurrentCourseUser
-from rpl_activities.src.dtos.category_dtos import CategoryResponseDTO
+from rpl_activities.src.deps.auth import CurrentCourseUser, CurrentMainUser
+from rpl_activities.src.dtos.category_dtos import (
+    CategoryCreationRequestDTO,
+    CategoryResponseDTO,
+    CategoryUpdateRequestDTO,
+)
 from rpl_activities.src.repositories.categories import CategoriesRepository
 from rpl_activities.src.repositories.models.activity_category import ActivityCategory
 from rpl_activities.src.services.activities import ActivitiesService
@@ -16,7 +21,7 @@ class CategoriesService:
 
     def _get_categories(
         self, current_course_user: CurrentCourseUser, course_id: int
-    ) -> list[CategoryResponseDTO]:
+    ) -> list[ActivityCategory]:
         has_activity_view = current_course_user.has_authority("activity_view")
         has_activity_manage = current_course_user.has_authority("activity_manage")
         if not has_activity_view:
@@ -34,7 +39,7 @@ class CategoriesService:
 
     # ====================== ACCESSING - CATEGORIES ====================== #
 
-    def get_categories(
+    def get_categories_dtos(
         self, current_course_user: CurrentCourseUser, course_id: int
     ) -> list[CategoryResponseDTO]:
         return [
@@ -43,8 +48,8 @@ class CategoriesService:
                 course_id=category.course_id,
                 name=category.name,
                 description=category.description,
-                date_created=category.date_created,
-                last_updated=category.last_updated,
+                date_created=(category.date_created - timedelta(hours=3)),
+                last_updated=(category.last_updated - timedelta(hours=3)),
                 active=category.active,
             )
             for category in self._get_categories(current_course_user, course_id)
@@ -53,17 +58,20 @@ class CategoriesService:
     # ====================== PRIVATE - UTILS ====================== #
 
     def _clone_all_categories(
-        self, current_course_user: CurrentCourseUser, from_course_id: int, to_course_id: int
+        self, current_main_user: CurrentMainUser, from_course_id: int, to_course_id: int
     ) -> dict[int, ActivityCategory]:
-        categories = self._get_categories(current_course_user, from_course_id)
+        categories = self.categories_repo.get_all_categories(from_course_id)
         for category in categories:
             new_category = self.categories_repo.clone_category(category, to_course_id)
-            self.activities_service.clone_all_activities(current_course_user, category, new_category)
+            self.activities_service.clone_all_activities(current_main_user, category, new_category)
 
     # ====================== MANAGING - CATEGORIES ====================== #
 
     def create_category(
-        self, current_course_user: CurrentCourseUser, course_id: int, category_data: CategoryResponseDTO
+        self,
+        current_course_user: CurrentCourseUser,
+        course_id: int,
+        category_data: CategoryCreationRequestDTO,
     ) -> CategoryResponseDTO:
         if not current_course_user.has_authority("activity_manage"):
             raise HTTPException(
@@ -76,8 +84,8 @@ class CategoriesService:
             course_id=created_category.course_id,
             name=created_category.name,
             description=created_category.description,
-            date_created=created_category.date_created,
-            last_updated=created_category.last_updated,
+            date_created=(created_category.date_created - timedelta(hours=3)),
+            last_updated=(created_category.last_updated - timedelta(hours=3)),
             active=created_category.active,
         )
 
@@ -86,7 +94,7 @@ class CategoriesService:
         current_course_user: CurrentCourseUser,
         course_id: int,
         category_id: int,
-        new_category_data: CategoryResponseDTO,
+        new_category_data: CategoryUpdateRequestDTO,
     ) -> CategoryResponseDTO:
         if not current_course_user.has_authority("activity_manage"):
             raise HTTPException(
@@ -105,17 +113,17 @@ class CategoriesService:
             course_id=category.course_id,
             name=category.name,
             description=category.description,
-            date_created=category.date_created,
-            last_updated=category.last_updated,
+            date_created=(category.date_created - timedelta(hours=3)),
+            last_updated=(category.last_updated - timedelta(hours=3)),
             active=category.active,
         )
 
     def clone_all_info(
-        self, current_course_user: CurrentCourseUser, from_course_id: int, to_course_id: int
+        self, current_main_user: CurrentMainUser, from_course_id: int, to_course_id: int
     ) -> None:
-        if not current_course_user.has_authority("activity_manage"):
+        if not current_main_user.is_admin:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="User does not have permission to create a category",
+                detail="User does not have permission to clone a category",
             )
-        self._clone_all_categories(current_course_user, from_course_id, to_course_id)
+        self._clone_all_categories(current_main_user, from_course_id, to_course_id)

@@ -77,8 +77,8 @@ def test_unenroll_course_user_from_course(
     result = response.json()
     assert len(result) == 1
 
-    admin_user = next((r for r in result if r["user_id"] == example_users["admin"].id))
-    assert admin_user["user_id"] == example_users["admin"].id
+    admin_user = next((r for r in result if r["id"] == example_users["admin"].id))
+    assert admin_user["id"] == example_users["admin"].id
     assert admin_user["course_id"] == course_id
     assert admin_user["course_user_id"] is not None
     assert admin_user["name"] == example_users["admin"].name
@@ -207,8 +207,8 @@ def test_get_all_course_users_from_course_when_only_admin_user(
     result = response.json()
     assert len(result) == 1
 
-    admin_user = next((r for r in result if r["user_id"] == example_users["admin"].id))
-    assert admin_user["user_id"] == example_users["admin"].id
+    admin_user = next((r for r in result if r["id"] == example_users["admin"].id))
+    assert admin_user["id"] == example_users["admin"].id
     assert admin_user["course_id"] == course_id
     assert admin_user["course_user_id"] is not None
     assert admin_user["name"] == example_users["admin"].name
@@ -244,8 +244,8 @@ def test_get_all_course_users_from_course_when_multiple_users(
     result = response.json()
     assert len(result) == 2
 
-    admin_user = next((r for r in result if r["user_id"] == example_users["admin"].id))
-    assert admin_user["user_id"] == example_users["admin"].id
+    admin_user = next((r for r in result if r["id"] == example_users["admin"].id))
+    assert admin_user["id"] == example_users["admin"].id
     assert admin_user["course_id"] == course_id
     assert admin_user["course_user_id"] is not None
     assert admin_user["name"] == example_users["admin"].name
@@ -261,8 +261,8 @@ def test_get_all_course_users_from_course_when_multiple_users(
     assert admin_user["date_created"] is not None
     assert admin_user["last_updated"] is not None
 
-    student_user = next((r for r in result if r["user_id"] == example_users["regular"].id))
-    assert student_user["user_id"] == example_users["regular"].id
+    student_user = next((r for r in result if r["id"] == example_users["regular"].id))
+    assert student_user["id"] == example_users["regular"].id
     assert student_user["course_id"] == course_id
     assert student_user["course_user_id"] is not None
     assert student_user["name"] == example_users["regular"].name
@@ -302,8 +302,8 @@ def test_get_all_student_course_users_from_course_when_multiple_users(
     result = response.json()
     assert len(result) == 1
 
-    student_user = next((r for r in result if r["user_id"] == example_users["regular"].id))
-    assert student_user["user_id"] == example_users["regular"].id
+    student_user = next((r for r in result if r["id"] == example_users["regular"].id))
+    assert student_user["id"] == example_users["regular"].id
     assert student_user["course_id"] == course_id
     assert student_user["course_user_id"] is not None
     assert student_user["name"] == example_users["regular"].name
@@ -343,8 +343,8 @@ def test_get_course_user_with_student_id_from_course_when_multiple_users(
     result = response.json()
     assert len(result) == 1
 
-    student_user = next((r for r in result if r["user_id"] == example_users["regular"].id))
-    assert student_user["user_id"] == example_users["regular"].id
+    student_user = next((r for r in result if r["id"] == example_users["regular"].id))
+    assert student_user["id"] == example_users["regular"].id
     assert student_user["course_id"] == course_id
     assert student_user["course_user_id"] is not None
     assert student_user["name"] == example_users["regular"].name
@@ -416,8 +416,8 @@ def test_get_all_course_users_from_course_when_multiple_users_after_updating(
     result = response.json()
     assert len(result) == 2
 
-    admin_user = next((r for r in result if r["user_id"] == example_users["admin"].id))
-    assert admin_user["user_id"] == example_users["admin"].id
+    admin_user = next((r for r in result if r["id"] == example_users["admin"].id))
+    assert admin_user["id"] == example_users["admin"].id
     assert admin_user["course_id"] == course_id
     assert admin_user["course_user_id"] is not None
     assert admin_user["name"] == example_users["admin"].name
@@ -433,8 +433,8 @@ def test_get_all_course_users_from_course_when_multiple_users_after_updating(
     assert admin_user["date_created"] is not None
     assert admin_user["last_updated"] is not None
 
-    student_user = next((r for r in result if r["user_id"] == example_users["regular"].id))
-    assert student_user["user_id"] == example_users["regular"].id
+    student_user = next((r for r in result if r["id"] == example_users["regular"].id))
+    assert student_user["id"] == example_users["regular"].id
     assert student_user["course_id"] == course_id
     assert student_user["course_user_id"] is not None
     assert student_user["name"] == example_users["regular"].name
@@ -476,7 +476,7 @@ def test_update_course_user_using_super_admin_user(
     assert response.status_code == status.HTTP_200_OK
 
     result = response.json()
-    assert result["user_id"] == example_users["admin"].id
+    assert result["id"] == example_users["admin"].id
     assert result["course_id"] == course_id
     assert result["course_user_id"] is not None
     assert result["name"] == example_users["admin"].name
@@ -516,7 +516,7 @@ def test_update_course_user_using_admin_user(
     assert response.status_code == status.HTTP_200_OK
 
     result = response.json()
-    assert result["user_id"] == example_users["admin"].id
+    assert result["id"] == example_users["admin"].id
     assert result["course_id"] == course_id
     assert result["course_user_id"] is not None
     assert result["name"] == example_users["admin"].name
@@ -592,7 +592,7 @@ def test_not_accept_user_should_not_send_course_acceptance_email(
     assert response.status_code == status.HTTP_200_OK
 
     result = response.json()
-    assert result["user_id"] == example_users["admin"].id
+    assert result["id"] == example_users["admin"].id
     assert result["course_id"] == course_id
     assert result["course_user_id"] is not None
     assert result["name"] == example_users["admin"].name
@@ -763,8 +763,8 @@ def test_delete_course_user_from_course_using_super_admin_user(
     result = response.json()
     assert len(result) == 1
 
-    admin_user = next((r for r in result if r["user_id"] == example_users["regular"].id))
-    assert admin_user["user_id"] == example_users["regular"].id
+    admin_user = next((r for r in result if r["id"] == example_users["regular"].id))
+    assert admin_user["id"] == example_users["regular"].id
     assert admin_user["course_id"] == course_id
     assert admin_user["course_user_id"] is not None
     assert admin_user["name"] == example_users["regular"].name
@@ -806,8 +806,8 @@ def test_delete_course_user_from_course_using_admin_user(
     result = response.json()
     assert len(result) == 1
 
-    admin_user = next((r for r in result if r["user_id"] == example_users["regular"].id))
-    assert admin_user["user_id"] == example_users["regular"].id
+    admin_user = next((r for r in result if r["id"] == example_users["regular"].id))
+    assert admin_user["id"] == example_users["regular"].id
     assert admin_user["course_id"] == course_id
     assert admin_user["course_user_id"] is not None
     assert admin_user["name"] == example_users["regular"].name
@@ -919,7 +919,6 @@ def test_get_courses_of_user_when_user_is_enrolled_on_one_course(
     assert result[0]["id"] == course.id
     assert result[0]["name"] == course.name
     assert result[0]["university"] == course.university
-    assert result[0]["active"] == course.active
     assert result[0]["semester"] == course.semester
     assert result[0]["semester_start_date"] == course.semester_start_date.date().isoformat()
     assert result[0]["semester_end_date"] == course.semester_end_date.date().isoformat()
@@ -935,11 +934,10 @@ def test_get_courses_of_user_when_user_is_enrolled_on_multiple_courses(
         "name": "Algo2Mendez",
         "university": "UCA",
         "subject_id": "3001",
-        "active": False,
         "semester": "2019-2c",
         "semester_start_date": "2019-07-01T00:00:00",
         "semester_end_date": "2019-12-01T00:00:00",
-        "course_user_admin_user_id": admin_user.id,
+        "course_admin_user_id": admin_user.id,
     }
     course_2_response = users_api_client.post(
         "/api/v3/courses", json=course_data, headers=admin_auth_headers
@@ -956,7 +954,6 @@ def test_get_courses_of_user_when_user_is_enrolled_on_multiple_courses(
     assert result_course_1["id"] == course_1.id
     assert result_course_1["name"] == course_1.name
     assert result_course_1["university"] == course_1.university
-    assert result_course_1["active"] == course_1.active
     assert result_course_1["semester"] == course_1.semester
     assert result_course_1["semester_start_date"] == course_1.semester_start_date.date().isoformat()
     assert result_course_1["semester_end_date"] == course_1.semester_end_date.date().isoformat()
@@ -965,7 +962,6 @@ def test_get_courses_of_user_when_user_is_enrolled_on_multiple_courses(
     assert result_course_2["id"] == course_2_response["id"]
     assert result_course_2["name"] == course_2_response["name"]
     assert result_course_2["university"] == course_2_response["university"]
-    assert result_course_2["active"] == course_2_response["active"]
     assert result_course_2["semester"] == course_2_response["semester"]
     assert result_course_2["semester_start_date"] == course_2_response["semester_start_date"]
     assert result_course_2["semester_end_date"] == course_2_response["semester_end_date"]

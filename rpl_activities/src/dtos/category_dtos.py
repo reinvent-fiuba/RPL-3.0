@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class CategoryResponseDTO(BaseModel):
     id: int
+    course_id: int
     name: str
     description: str
     date_created: datetime

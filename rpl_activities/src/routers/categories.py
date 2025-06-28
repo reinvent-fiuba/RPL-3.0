@@ -1,6 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, status
 from rpl_activities.src.deps.auth import CurrentCourseUserDependency
+from rpl_activities.src.deps.auth import CurrentMainUserDependency
 
 from rpl_activities.src.deps.database import DBSessionDependency
 from rpl_activities.src.dtos.category_dtos import (
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/api/v3", tags=["ActivityCategories"])
 
 @router.get("/courses/{course_id}/activityCategories", response_model=List[CategoryResponseDTO])
 def get_categories(course_id: int, current_course_user: CurrentCourseUserDependency, db: DBSessionDependency):
-    return CategoriesService(db).get_categories(current_course_user, course_id)
+    return CategoriesService(db).get_categories_dtos(current_course_user, course_id)
 
 
 @router.post(
@@ -53,10 +54,7 @@ def update_category(
 
 @router.post("/courses/{course_id}/activityCategories/clone", status_code=status.HTTP_201_CREATED)
 def clone_all_info(
-    course_id: int,
-    current_course_user: CurrentCourseUserDependency,
-    db: DBSessionDependency,
-    to_course_id=int,
+    course_id: int, current_main_user: CurrentMainUserDependency, db: DBSessionDependency, to_course_id=int
 ):
     from_course_id = course_id
-    return CategoriesService(db).clone_all_info(current_course_user, from_course_id, to_course_id)
+    return CategoriesService(db).clone_all_info(current_main_user, from_course_id, to_course_id)

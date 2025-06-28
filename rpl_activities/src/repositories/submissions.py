@@ -1,5 +1,7 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
+import logging
+from typing import Optional
 from fastapi import UploadFile
 
 from rpl_activities.src.deps.auth import CurrentCourseUser
@@ -39,13 +41,13 @@ class SubmissionsRepository(BaseRepository):
 
     def get_last_submission_date_by_user_at_activity(
         self, user_id: int, activity: Activity, current_user_submissions_at_activity: list[ActivitySubmission]
-    ) -> datetime:
+    ) -> Optional[datetime]:
         if len(current_user_submissions_at_activity) == 0:
             return None
         last_submission = max(
             current_user_submissions_at_activity, key=lambda submission: submission.date_created
         )
-        return last_submission.date_created
+        return last_submission.date_created - timedelta(hours=3)
 
     def get_all_submissions_by_user_at_activities(
         self, user_id: int, activities: list[Activity]
@@ -56,6 +58,22 @@ class SubmissionsRepository(BaseRepository):
             self.db_session.execute(
                 sa.select(ActivitySubmission).where(
                     ActivitySubmission.user_id == user_id,
+                    ActivitySubmission.activity_id.in_([activity.id for activity in activities]),
+                )
+            )
+            .scalars()
+            .all()
+        )
+
+    def get_all_submissions_by_users_at_activities(
+        self, user_ids: list[int], activities: list[Activity]
+    ) -> list[ActivitySubmission]:
+        if len(activities) == 0 or len(user_ids) == 0:
+            return []
+        return (
+            self.db_session.execute(
+                sa.select(ActivitySubmission).where(
+                    ActivitySubmission.user_id.in_(user_ids),
                     ActivitySubmission.activity_id.in_([activity.id for activity in activities]),
                 )
             )
@@ -90,6 +108,7 @@ class SubmissionsRepository(BaseRepository):
             return []
         return [
             IOTestRunResultDTO(
+                id=run.id,
                 name=run.test_name,
                 test_in=run.test_in,
                 expected_output=run.expected_output,
@@ -109,9 +128,18 @@ class SubmissionsRepository(BaseRepository):
         ):
             return []
         return [
-            UnitTestRunResultDTO(name=run.test_name, passed=run.passed, error_messages=run.error_messages)
+            UnitTestRunResultDTO(
+                id=run.id, name=run.test_name, passed=run.passed, error_messages=run.error_messages
+            )
             for run in submission.tests_execution_log.unit_test_runs
         ]
+
+    def get_tests_execution_log_stdout_and_stderr_from_submission(
+        self, submission: ActivitySubmission
+    ) -> tuple[str, str]:
+        if not submission.tests_execution_log:
+            return "", ""
+        return (submission.tests_execution_log.stdout or "", submission.tests_execution_log.stderr or "")
 
     def get_by_id(self, submission_id: int) -> ActivitySubmission | None:
         return (

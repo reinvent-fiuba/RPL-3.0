@@ -29,7 +29,7 @@ class TestsRepository(BaseRepository):
         super().__init__(db)
         self.rplfiles_repo = RPLFilesRepository(db)
 
-    def get_io_test_by_id_and_activity_id(self, io_test_id: int, activity_id: int) -> IOTest:
+    def get_io_test_by_id_and_activity_id(self, io_test_id: int, activity_id: int) -> Optional[IOTest]:
         return (
             self.db_session.execute(
                 sa.select(IOTest).where(IOTest.id == io_test_id, IOTest.activity_id == activity_id)
@@ -172,7 +172,7 @@ class TestsRepository(BaseRepository):
         self.db_session.refresh(submission)
         return test_execution_log, submission
 
-    def __parse_student_outputs_per_io_test_run(stdout: str) -> list[str]:
+    def __parse_student_outputs_per_io_test_run(self, stdout: str) -> list[str]:
         student_outputs_per_run = []
         current_output_lines = []
         for line in stdout.splitlines():
@@ -229,13 +229,13 @@ class TestsRepository(BaseRepository):
     ) -> bool:
         suite_summary = new_execution_log_data.unit_test_suite_result_summary
         if not suite_summary:
-            return [], False
+            return False
 
         unit_test_runs = []
         for single_test_report in suite_summary.single_test_reports:
             unit_test_run = UnitTestRun(
                 tests_execution_log_id=test_execution_log_id,
-                name=single_test_report.name,
+                test_name=single_test_report.name,
                 passed=(single_test_report.status == UNIT_TEST_RUN_PASS),
                 error_messages=single_test_report.messages or "",
                 date_created=datetime.now(timezone.utc),

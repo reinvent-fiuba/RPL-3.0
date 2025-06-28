@@ -9,38 +9,45 @@ import datetime
 # ====================== REQUESTS ====================== #
 
 
-class CourseCreationDTO(BaseModel):
+class CourseCreationRequestDTO(BaseModel):
     id: Optional[int] = None
     name: str
     university: str
     subject_id: str
     description: Optional[str] = None
-    active: bool
     semester: str
     semester_start_date: datetime.date
     semester_end_date: datetime.date
     img_uri: Optional[str] = None
-    course_user_admin_user_id: int
+    course_admin_user_id: int
 
 
-class CourseUptateDTO(BaseModel):
+class CourseUptateRequestDTO(BaseModel):
     name: str
     university: str
     subject_id: str
     description: Optional[str] = None
-    active: bool
+    active: Optional[bool] = True
     semester: str
     semester_start_date: datetime.date
     semester_end_date: datetime.date
     img_uri: Optional[str] = None
 
 
-class CourseUserUptateDTO(BaseModel):
-    accepted: bool
-    role: str
+class CourseUserUptateRequestDTO(BaseModel):
+    accepted: Optional[bool] = None
+    role: Optional[str] = None
 
 
 # ====================== RESPONSES ====================== #
+
+
+class CourseUserScoreResponseDTO(BaseModel):
+    name: str
+    surname: str
+    img_uri: str
+    total_score: int
+    successful_activities_count: int
 
 
 class CourseResponseDTO(BaseModel):
@@ -107,7 +114,7 @@ class CourseWithUserInformationResponseDTO(BaseModel):
 
 
 class CourseUserResponseDTO(BaseModel):
-    user_id: int
+    id: int
     course_id: int
     course_user_id: int
     name: str
@@ -127,7 +134,7 @@ class CourseUserResponseDTO(BaseModel):
     @classmethod
     def from_course_user(cls, course_user: "CourseUser") -> "CourseUserResponseDTO":
         return cls(
-            user_id=course_user.user.id,
+            id=course_user.user.id,
             course_id=course_user.course.id,
             course_user_id=course_user.id,
             name=course_user.user.name,
@@ -141,6 +148,6 @@ class CourseUserResponseDTO(BaseModel):
             role=course_user.role.name,
             permissions=course_user.get_permissions(),
             accepted=course_user.accepted,
-            date_created=course_user.date_created,
-            last_updated=course_user.last_updated,
+            date_created=(course_user.date_created - datetime.timedelta(hours=3)),
+            last_updated=(course_user.last_updated - datetime.timedelta(hours=3)),
         )

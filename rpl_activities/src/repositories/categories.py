@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from rpl_activities.src.dtos.category_dtos import CategoryResponseDTO, CategoryUpdateRequestDTO
+from rpl_activities.src.dtos.category_dtos import CategoryCreationRequestDTO, CategoryUpdateRequestDTO
 from rpl_activities.src.repositories.base import BaseRepository
 import sqlalchemy as sa
 from .models.activity_category import ActivityCategory
@@ -7,7 +7,7 @@ from .models.activity_category import ActivityCategory
 
 class CategoriesRepository(BaseRepository):
 
-    def get_all_categories(self, course_id: int):
+    def get_all_categories(self, course_id: int) -> list[ActivityCategory]:
         return (
             self.db_session.execute(
                 sa.select(ActivityCategory).where(ActivityCategory.course_id == course_id)
@@ -16,7 +16,7 @@ class CategoriesRepository(BaseRepository):
             .all()
         )
 
-    def get_active_categories(self, course_id: int):
+    def get_active_categories(self, course_id: int) -> list[ActivityCategory]:
         return (
             self.db_session.execute(
                 sa.select(ActivityCategory).where(
@@ -27,7 +27,7 @@ class CategoriesRepository(BaseRepository):
             .all()
         )
 
-    def create_category(self, course_id: int, category_data: CategoryResponseDTO) -> ActivityCategory:
+    def create_category(self, course_id: int, category_data: CategoryCreationRequestDTO) -> ActivityCategory:
         new_category = ActivityCategory(
             course_id=course_id,
             name=category_data.name,

@@ -1,3 +1,4 @@
+from typing import Optional
 from .base import BaseRepository
 
 from .models.validation_token import ValidationToken
@@ -15,7 +16,7 @@ class ValidationTokensRepository(BaseRepository):
         self.db_session.refresh(validation_token)
         return validation_token
 
-    def get_by_token(self, token: str) -> ValidationToken:
+    def get_by_token(self, token: str) -> Optional[ValidationToken]:
         return self.db_session.execute(
             sa.select(ValidationToken).where(ValidationToken.token == token)
         ).scalar_one_or_none()

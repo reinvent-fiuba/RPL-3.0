@@ -11,4 +11,8 @@ COPY ./rpl_users/src /rpl_users/src
 COPY ./rpl_users/__init__.py /rpl_users/__init__.py
 
 
-CMD ["fastapi", "run", "rpl_users/src/main.py", "--port", "80"]
+# For development
+# CMD ["uvicorn", "rpl_users.src.main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--reload-dir", " rpl_users/src" "--use-colors"]
+
+CMD ["uvicorn", "rpl_users.src.main:app", "--host", "0.0.0.0", "--port", "80", "--use-colors"]
+

@@ -5,16 +5,18 @@ from pydantic import BaseModel
 from rpl_activities.src.repositories.models import aux_models
 
 
-class SubmissionsStatsOfStudentDTO(BaseModel):
+class SubmissionsStatsDTO(BaseModel):
     total_submissions: int
     successful_submissions: int
     submissions_with_runtime_errors: int
     submissions_with_build_errors: int
     submissions_with_failures: int
-
-    name_of_activity_with_the_most_failed_attempts: Optional[str] = None
-    amount_of_failed_attempts_for_activity_with_the_most_failed_attempts: Optional[int] = None
-    average_failed_attempts_per_activity: Optional[float] = None
+    avg_submissions_by_student: Optional[float]
+    avg_error_submissions_by_student: Optional[float]
+    avg_success_submissions_by_student: Optional[float]
+    total_submitters: Optional[int]
+    total_submitters_with_at_least_one_successful_submission: Optional[int]
+    total_submitters_without_successful_submissions: Optional[int]
 
 
 class MetadataForActivitiesGroupingDTO(BaseModel):
@@ -38,17 +40,11 @@ class MetadataForDateGroupingDTO(BaseModel):
 
 
 # depending on the grouping, the metadata changes
-class SubmissionsStatsOfCourseDTO(BaseModel):
-    stats_per_student: List[SubmissionsStatsOfStudentDTO]
-    grouping_metadata: List[
+class GroupedSubmissionsStatsDTO(BaseModel):
+    submissions_stats: List[SubmissionsStatsDTO]
+    metadata: List[
         Union[MetadataForActivitiesGroupingDTO, MetadataFoUsersGroupingDTO, MetadataForDateGroupingDTO]
     ]
-    total_submitters: int
-    total_submitters_with_at_least_one_successful_submission: int
-
-    total_submissions_of_all_students: int
-    total_successful_submissions_of_all_students: int
-    total_errored_submissions_of_all_students: int
 
 
 class ActivitiesStatsOfStudentDTO(BaseModel):
@@ -58,6 +54,8 @@ class ActivitiesStatsOfStudentDTO(BaseModel):
     points_obtained: int
     total_possible_points: int
 
-    name_of_activity_with_the_most_failed_attempts: Optional[str] = None
-    amount_of_failed_attempts_for_activity_with_the_most_failed_attempts: Optional[int] = None
-    average_failed_attempts_per_activity: Optional[float] = None
+
+class BasicActivitiesStatsOfStudentDTO(BaseModel):
+    user_id: int
+    total_score: int
+    successful_activities_count: int

@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 from .base import BaseRepository
 
 from rpl_users.src.repositories.models.course import Course
@@ -9,7 +10,7 @@ from fastapi import HTTPException, status
 import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 
-from ..dtos.course_dtos import CourseCreationDTO, CourseUptateDTO
+from ..dtos.course_dtos import CourseCreationRequestDTO, CourseUptateRequestDTO
 
 
 class CoursesRepository(BaseRepository):
@@ -24,7 +25,7 @@ class CoursesRepository(BaseRepository):
 
     # ====================== MANAGING ====================== #
 
-    def save_new_course(self, course_data: CourseCreationDTO) -> Course:
+    def save_new_course(self, course_data: CourseCreationRequestDTO) -> Course:
         old_course = self.get_course_with_name_university_semester_and_subject_id(
             course_data.name, course_data.university, course_data.semester, course_data.subject_id
         )
@@ -42,7 +43,7 @@ class CoursesRepository(BaseRepository):
             university=course_data.university,
             subject_id=course_data.subject_id,
             description=course_data.description,
-            active=course_data.active,
+            active=True,
             semester=course_data.semester,
             semester_start_date=course_data.semester_start_date,
             semester_end_date=course_data.semester_end_date,
@@ -58,7 +59,7 @@ class CoursesRepository(BaseRepository):
             self.db_session.rollback()
             self._raise_http_conflict_exception()
 
-    def update_course(self, course_id: str, course_data: CourseUptateDTO) -> Course:
+    def update_course(self, course_id: int, course_data: CourseUptateRequestDTO) -> Course:
         try:
             updated_course = self.get_course_with_id(course_id)
             updated_course.name = course_data.name
@@ -78,24 +79,24 @@ class CoursesRepository(BaseRepository):
             self.db_session.rollback()
             self._raise_http_conflict_exception()
 
-    def delete_course(self, course_id: str) -> Course:
+    def delete_course(self, course_id: int):
         course = self.get_course_with_id(course_id)
         self.db_session.delete(course)
-        self.db_session.refresh(course)
+        self.db_session.commit()
 
     # ====================== QUERYING ====================== #
 
     def get_all_courses(self) -> list[Course]:
         return self.db_session.execute(sa.select(Course)).scalars().all()
 
-    def get_course_with_id(self, course_id: str) -> Course:
+    def get_course_with_id(self, course_id: int) -> Optional[Course]:
         return (
             self.db_session.execute(sa.select(Course).where(Course.id == course_id)).scalars().one_or_none()
         )
 
     def get_course_with_name_university_semester_and_subject_id(
         self, name: str, university: str, semester: str, subject_id: str
-    ) -> Course:
+    ) -> Optional[Course]:
         return (
             self.db_session.execute(
                 sa.select(Course).where(
@@ -109,7 +110,7 @@ class CoursesRepository(BaseRepository):
             .one_or_none()
         )
 
-    def get_all_courses_from_user(self, user_id: str) -> list[Course]:
+    def get_all_courses_from_user(self, user_id: int) -> list[Course]:
         return (
             self.db_session.execute(
                 sa.select(Course)

@@ -1,13 +1,14 @@
 from typing import List, Optional
 from fastapi import APIRouter, status
-from rpl_activities.src.deps.auth import AuthDependency
+from rpl_users.src.deps.auth import AuthDependency
 from rpl_users.src.deps.auth import CurrentUserDependency
 from rpl_users.src.deps.database import DBSessionDependency
 from rpl_users.src.deps.email import EmailHandlerDependency
 from rpl_users.src.dtos.course_dtos import (
-    CourseCreationDTO,
-    CourseUptateDTO,
-    CourseUserUptateDTO,
+    CourseCreationRequestDTO,
+    CourseUptateRequestDTO,
+    CourseUserScoreResponseDTO,
+    CourseUserUptateRequestDTO,
     CourseResponseDTO,
     CourseWithUserInformationResponseDTO,
     CourseUserResponseDTO,
@@ -25,7 +26,7 @@ router = APIRouter(prefix="/api/v3", tags=["Courses"])
 
 @router.post("/courses", response_model=CourseResponseDTO, status_code=status.HTTP_201_CREATED)
 def create_course(
-    course_data: CourseCreationDTO,
+    course_data: CourseCreationRequestDTO,
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
     auth_header: AuthDependency,
@@ -35,7 +36,10 @@ def create_course(
 
 @router.put("/courses/{course_id}", response_model=CourseResponseDTO)
 def update_course(
-    course_id: str, course_data: CourseUptateDTO, current_user: CurrentUserDependency, db: DBSessionDependency
+    course_id: int,
+    course_data: CourseUptateRequestDTO,
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
 ):
     return CoursesService(db).update_course(course_id, course_data, current_user)
 
@@ -51,7 +55,7 @@ def get_all_courses_including_their_relationship_with_user(
 
 
 @router.get("/courses/{course_id}", response_model=CourseResponseDTO)
-def get_course_details(course_id: str, current_user: CurrentUserDependency, db: DBSessionDependency):
+def get_course_details(course_id: int, current_user: CurrentUserDependency, db: DBSessionDependency):
     return CoursesService(db).get_course_details(course_id, current_user)
 
 
@@ -59,30 +63,32 @@ def get_course_details(course_id: str, current_user: CurrentUserDependency, db: 
 
 
 @router.post("/courses/{course_id}/enroll", response_model=RoleResponseDTO)
-def enroll_student_in_course(course_id: str, current_user: CurrentUserDependency, db: DBSessionDependency):
+def enroll_student_in_course(course_id: int, current_user: CurrentUserDependency, db: DBSessionDependency):
     return CoursesService(db).enroll_student_in_course(course_id, current_user)
 
 
 @router.patch("/courses/{course_id}/users/{user_id}", response_model=CourseUserResponseDTO)
 def update_course_user(
-    course_id: str,
-    user_id: str,
-    course_data: CourseUserUptateDTO,
+    course_id: int,
+    user_id: int,
+    new_course_user_data: CourseUserUptateRequestDTO,
     current_user: CurrentUserDependency,
     email_handler: EmailHandlerDependency,
     db: DBSessionDependency,
 ):
-    return CoursesService(db).update_course_user(course_id, user_id, course_data, current_user, email_handler)
+    return CoursesService(db).update_course_user(
+        course_id, user_id, new_course_user_data, current_user, email_handler
+    )
 
 
 @router.post("/courses/{course_id}/unenroll", status_code=status.HTTP_204_NO_CONTENT)
-def unenroll_course_user(course_id: str, current_user: CurrentUserDependency, db: DBSessionDependency):
+def unenroll_course_user(course_id: int, current_user: CurrentUserDependency, db: DBSessionDependency):
     CoursesService(db).unenroll_course_user(course_id, current_user)
 
 
 @router.delete("/courses/{course_id}/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_course_user(
-    course_id: str, user_id: str, current_user: CurrentUserDependency, db: DBSessionDependency
+    course_id: int, user_id: int, current_user: CurrentUserDependency, db: DBSessionDependency
 ):
     CoursesService(db).delete_course_user(course_id, user_id, current_user)
 
@@ -90,14 +96,21 @@ def delete_course_user(
 # ====================== QUERYING - COURSE USERS ====================== #
 
 
+@router.get("/courses/{course_id}/scoreboard", response_model=List[CourseUserScoreResponseDTO])
+def get_course_scoreboard(
+    course_id: int, current_user: CurrentUserDependency, db: DBSessionDependency, auth_header: AuthDependency
+):
+    return CoursesService(db).get_course_scoreboard(course_id, current_user, auth_header)
+
+
 @router.get("/courses/{course_id}/permissions", response_model=List[str])
-def get_user_permissions(course_id: str, current_user: CurrentUserDependency, db: DBSessionDependency):
+def get_user_permissions(course_id: int, current_user: CurrentUserDependency, db: DBSessionDependency):
     return CoursesService(db).get_user_permissions(course_id, current_user)
 
 
 @router.get("/courses/{course_id}/users", response_model=List[CourseUserResponseDTO])
 def get_all_course_users_from_course(
-    course_id: str,
+    course_id: int,
     current_user: CurrentUserDependency,
     db: DBSessionDependency,
     role_name: Optional[str] = None,
@@ -107,7 +120,7 @@ def get_all_course_users_from_course(
 
 
 @router.get("/users/{user_id}/courses", response_model=List[CourseResponseDTO])
-def get_all_courses_from_user(user_id: str, current_user: CurrentUserDependency, db: DBSessionDependency):
+def get_all_courses_from_user(user_id: int, current_user: CurrentUserDependency, db: DBSessionDependency):
     return CoursesService(db).get_all_courses_from_user(user_id, current_user)
 
 

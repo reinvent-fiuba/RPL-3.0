@@ -11,19 +11,21 @@ from sqlalchemy.pool import StaticPool
 from rpl_activities.src.deps.auth import (
     AuthDependency,
     CurrentCourseUser,
+    CurrentMainUser,
     StudentCourseUser,
     __basic_request_param_checks,
     get_current_course_user,
-    get_student_course_user_for_current_user,
+    get_current_main_user,
+    validate_request_from_runner,
 )
 from rpl_activities.src.deps.database import get_db_session
 from rpl_activities.src.deps.mq_sender import get_mq_sender
+from rpl_activities.src.dtos.auth_dtos import CurrentMainUserResponseDTO
 from rpl_activities.src.main import app
 from rpl_activities.src.repositories.models.activity import Activity
 from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
 from rpl_activities.src.repositories.models.base_model import Base
 from rpl_activities.src.repositories.models import aux_models, models_metadata
-from rpl_activities.src.config import env
 from rpl_activities.src.repositories.models.activity_category import ActivityCategory
 
 from rpl_activities.src.repositories.models.io_test import IOTest
@@ -43,11 +45,14 @@ from rpl_users.tests.conftest import (
     base_roles_fixture,
 )
 
+DB_URL = "mysql+pymysql://test_user:test_password@testing_db:3306/test_rpl_activities"
+# DB_URL="sqlite:///:memory:"
+
 
 @pytest.fixture(name="activities_api_dbsession", scope="function")
 def activities_api_dbsession_fixture():
     engine = create_engine(
-        env.DB_URL,
+        DB_URL,
         # connect_args={"check_same_thread": False}, # Use if sqlite is active
         poolclass=StaticPool,
     )
@@ -78,6 +83,18 @@ def activities_api_http_client_fixture(
 ):
     app.dependency_overrides[get_db_session] = lambda: activities_api_dbsession
 
+    def override_get_current_main_user(auth_header: AuthDependency, request: Request):
+        res = users_api_client.get(
+            "/api/v3/auth/externalUserMainAuth",
+            headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
+        )
+        if res.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=res.status_code, detail=f"Failed to authenticate current user: {res.text}"
+            )
+        user_data = CurrentMainUserResponseDTO(**res.json())
+        return CurrentMainUser(user_data)
+
     def override_get_current_course_user(auth_header: AuthDependency, request: Request):
         course_id = __basic_request_param_checks(request.path_params.get("course_id"))
         res = users_api_client.get(
@@ -106,11 +123,13 @@ def activities_api_http_client_fixture(
         course_user_data = CourseUserResponseDTO(**student_course_user)
         return StudentCourseUser(course_user_data)
 
+    def override_validate_request_from_runner(auth_header: AuthDependency, request: Request):
+        return True
+
+    app.dependency_overrides[get_current_main_user] = override_get_current_main_user
     app.dependency_overrides[get_current_course_user] = override_get_current_course_user
-    app.dependency_overrides[get_student_course_user_for_current_user] = (
-        override_get_student_course_user_for_current_user
-    )
     app.dependency_overrides[get_mq_sender] = lambda: test_mq_sender
+    app.dependency_overrides[validate_request_from_runner] = override_validate_request_from_runner
 
     client = TestClient(app)
     yield client

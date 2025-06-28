@@ -15,11 +15,10 @@ def test_create_course_with_admin_user_without_optional_fields(
         "name": "Algo1Mendez",
         "university": "FIUBA",
         "subject_id": "8001",
-        "active": True,
         "semester": "2019-1c",
         "semester_start_date": "2019-03-01",
         "semester_end_date": "2019-07-01",
-        "course_user_admin_user_id": example_users["admin"].id,
+        "course_admin_user_id": example_users["admin"].id,
     }
 
     response = users_api_client.post("/api/v3/courses", json=course_data, headers=admin_auth_headers)
@@ -30,7 +29,6 @@ def test_create_course_with_admin_user_without_optional_fields(
     assert result["id"] is not None
     assert result["name"] == course_data["name"]
     assert result["university"] == course_data["university"]
-    assert result["active"] == course_data["active"]
     assert result["semester"] == course_data["semester"]
     assert result["semester_start_date"] == course_data["semester_start_date"]
     assert result["semester_end_date"] == course_data["semester_end_date"]
@@ -44,12 +42,11 @@ def test_create_course_with_admin_user_with_all_fields(
         "university": "FIUBA",
         "subject_id": "8001",
         "description": "course description",
-        "active": True,
         "semester": "2019-1c",
         "semester_start_date": "2019-03-01",
         "semester_end_date": "2019-07-01",
         "img_uri": "https://example.com/image.png",
-        "course_user_admin_user_id": example_users["admin"].id,
+        "course_admin_user_id": example_users["admin"].id,
     }
 
     response = users_api_client.post("/api/v3/courses", json=course_data, headers=admin_auth_headers)
@@ -61,7 +58,6 @@ def test_create_course_with_admin_user_with_all_fields(
     assert result["name"] == course_data["name"]
     assert result["university"] == course_data["university"]
     assert result["description"] == course_data["description"]
-    assert result["active"] == course_data["active"]
     assert result["semester"] == course_data["semester"]
     assert result["semester_start_date"] == course_data["semester_start_date"]
     assert result["semester_end_date"] == course_data["semester_end_date"]
@@ -75,11 +71,10 @@ def test_cannot_create_course_with_regular_user(
         "name": "Algo1Mendez",
         "university": "FIUBA",
         "subject_id": "8001",
-        "active": True,
         "semester": "2019-1c",
         "semester_start_date": "2019-03-01",
         "semester_end_date": "2019-07-01",
-        "course_user_admin_user_id": example_users["admin"].id,
+        "course_admin_user_id": example_users["admin"].id,
     }
 
     response = users_api_client.post("/api/v3/courses", json=course_data, headers=regular_auth_headers)
@@ -98,11 +93,10 @@ def test_cannot_create_course_with_admin_user_using_non_existing_user_as_admin(
         "name": "Algo1Mendez",
         "university": "FIUBA",
         "subject_id": "8001",
-        "active": True,
         "semester": "2019-1c",
         "semester_start_date": "2019-03-01",
         "semester_end_date": "2019-07-01",
-        "course_user_admin_user_id": non_existing_user_id,
+        "course_admin_user_id": non_existing_user_id,
     }
 
     response = users_api_client.post("/api/v3/courses", json=course_data, headers=admin_auth_headers)
@@ -120,11 +114,10 @@ def test_create_course_with_admin_user_using_admin_user_as_admin(
         "name": "Algo1Mendez",
         "university": "FIUBA",
         "subject_id": "8001",
-        "active": True,
         "semester": "2019-1c",
         "semester_start_date": "2019-03-01",
         "semester_end_date": "2019-07-01",
-        "course_user_admin_user_id": example_users["admin"].id,
+        "course_admin_user_id": example_users["admin"].id,
     }
 
     response = users_api_client.post("/api/v3/courses", json=course_data, headers=admin_auth_headers)
@@ -135,7 +128,6 @@ def test_create_course_with_admin_user_using_admin_user_as_admin(
     assert result["id"] is not None
     assert result["name"] == course_data["name"]
     assert result["university"] == course_data["university"]
-    assert result["active"] == course_data["active"]
     assert result["semester"] == course_data["semester"]
     assert result["semester_start_date"] == course_data["semester_start_date"]
     assert result["semester_end_date"] == course_data["semester_end_date"]
@@ -148,11 +140,10 @@ def test_create_course_with_admin_user_using_regular_user_as_admin(
         "name": "Algo1Mendez",
         "university": "FIUBA",
         "subject_id": "8001",
-        "active": True,
         "semester": "2019-1c",
         "semester_start_date": "2019-03-01",
         "semester_end_date": "2019-07-01",
-        "course_user_admin_user_id": example_users["regular"].id,
+        "course_admin_user_id": example_users["regular"].id,
     }
 
     response = users_api_client.post("/api/v3/courses", json=course_data, headers=admin_auth_headers)
@@ -163,7 +154,6 @@ def test_create_course_with_admin_user_using_regular_user_as_admin(
     assert result["id"] is not None
     assert result["name"] == course_data["name"]
     assert result["university"] == course_data["university"]
-    assert result["active"] == course_data["active"]
     assert result["semester"] == course_data["semester"]
     assert result["semester_start_date"] == course_data["semester_start_date"]
     assert result["semester_end_date"] == course_data["semester_end_date"]
@@ -174,11 +164,10 @@ def test_cannot_create_the_same_course_twice(users_api_client: TestClient, examp
         "name": "Algo1Mendez",
         "university": "FIUBA",
         "subject_id": "8001",
-        "active": True,
         "semester": "2019-1c",
         "semester_start_date": "2019-03-01",
         "semester_end_date": "2019-07-01",
-        "course_user_admin_user_id": example_users["regular"].id,
+        "course_admin_user_id": example_users["regular"].id,
     }
 
     users_api_client.post("/api/v3/courses", json=course_data, headers=admin_auth_headers)
@@ -203,12 +192,11 @@ def test_clone_course_with_admin_user_with_all_fields(
         "university": "FIUBA",
         "subject_id": "8001",
         "description": "course description",
-        "active": True,
         "semester": "2019-1c",
         "semester_start_date": "2019-03-01",
         "semester_end_date": "2019-07-01",
         "img_uri": "https://example.com/image.png",
-        "course_user_admin_user_id": example_users["admin"].id,
+        "course_admin_user_id": example_users["admin"].id,
     }
 
     response = users_api_client.post("/api/v3/courses", json=course_data, headers=admin_auth_headers)
@@ -231,11 +219,10 @@ def test_clone_course_with_admin_user_with_all_fields(
         "name": "Algo1Mendez",
         "university": "FIUBA",
         "subject_id": "8001",
-        "active": True,
         "semester": "2019-2c",
         "semester_start_date": "2019-07-01",
         "semester_end_date": "2019-12-01",
-        "course_user_admin_user_id": example_users["admin"].id,
+        "course_admin_user_id": example_users["admin"].id,
     }
 
     response = users_api_client.post("/api/v3/courses", json=clone_course_data, headers=admin_auth_headers)
@@ -247,7 +234,6 @@ def test_clone_course_with_admin_user_with_all_fields(
     assert result["name"] == clone_course_data["name"]
     assert result["university"] == clone_course_data["university"]
     assert result["description"] == course_data["description"]
-    assert result["active"] == clone_course_data["active"]
     assert result["semester"] == clone_course_data["semester"]
     assert result["semester_start_date"] == clone_course_data["semester_start_date"]
     assert result["semester_end_date"] == clone_course_data["semester_end_date"]
@@ -262,11 +248,10 @@ def test_clone_non_existing_course(users_api_client: TestClient, example_users, 
         "name": "Algo1Mendez",
         "university": "FIUBA",
         "subject_id": "8001",
-        "active": True,
         "semester": "2019-2c",
         "semester_start_date": "2019-07-01",
         "semester_end_date": "2019-12-01",
-        "course_user_admin_user_id": example_users["admin"].id,
+        "course_admin_user_id": example_users["admin"].id,
     }
 
     response = users_api_client.post("/api/v3/courses", json=clone_course_data, headers=admin_auth_headers)
@@ -303,7 +288,6 @@ def test_get_all_courses_of_admin_course_user(
     assert result[0]["id"] == course.id
     assert result[0]["name"] == course.name
     assert result[0]["university"] == course.university
-    assert result[0]["active"] == course.active
     assert result[0]["semester"] == course.semester
     assert result[0]["semester_start_date"] == course.semester_start_date.date().isoformat()
     assert result[0]["semester_end_date"] == course.semester_end_date.date().isoformat()
@@ -325,7 +309,6 @@ def test_get_all_courses_of_user_that_has_not_been_enrolled_to_a_course_yet(
     assert result[0]["id"] == course.id
     assert result[0]["name"] == course.name
     assert result[0]["university"] == course.university
-    assert result[0]["active"] == course.active
     assert result[0]["semester"] == course.semester
     assert result[0]["semester_start_date"] == course.semester_start_date.date().isoformat()
     assert result[0]["semester_end_date"] == course.semester_end_date.date().isoformat()
@@ -350,7 +333,6 @@ def test_get_all_courses_of_user_that_has_been_enrolled_to_a_course(
     assert result[0]["id"] == course.id
     assert result[0]["name"] == course.name
     assert result[0]["university"] == course.university
-    assert result[0]["active"] == course.active
     assert result[0]["semester"] == course.semester
     assert result[0]["semester_start_date"] == course.semester_start_date.date().isoformat()
     assert result[0]["semester_end_date"] == course.semester_end_date.date().isoformat()
@@ -367,11 +349,10 @@ def test_get_all_courses_of_admin_course_user_when_multiple_courses(
         "name": "Algo2Mendez",
         "university": "UCA",
         "subject_id": "3001",
-        "active": False,
         "semester": "2019-2c",
         "semester_start_date": "2019-07-01",
         "semester_end_date": "2019-12-01",
-        "course_user_admin_user_id": example_users["regular"].id,
+        "course_admin_user_id": example_users["regular"].id,
     }
     regular_user_course_response = users_api_client.post(
         "/api/v3/courses", json=course_data, headers=admin_auth_headers
@@ -388,7 +369,6 @@ def test_get_all_courses_of_admin_course_user_when_multiple_courses(
     assert result_superadmin_course["id"] == superadmin_course.id
     assert result_superadmin_course["name"] == superadmin_course.name
     assert result_superadmin_course["university"] == superadmin_course.university
-    assert result_superadmin_course["active"] == superadmin_course.active
     assert result_superadmin_course["semester"] == superadmin_course.semester
     assert (
         result_superadmin_course["semester_start_date"]
@@ -405,7 +385,6 @@ def test_get_all_courses_of_admin_course_user_when_multiple_courses(
     assert result_regular_user_course["id"] == regular_user_course_response["id"]
     assert result_regular_user_course["name"] == regular_user_course_response["name"]
     assert result_regular_user_course["university"] == regular_user_course_response["university"]
-    assert result_regular_user_course["active"] == regular_user_course_response["active"]
     assert result_regular_user_course["semester"] == regular_user_course_response["semester"]
     assert (
         result_regular_user_course["semester_start_date"]
@@ -435,7 +414,6 @@ def test_get_course_details_using_super_admin_user(
     assert result["id"] == course.id
     assert result["name"] == course.name
     assert result["university"] == course.university
-    assert result["active"] == course.active
     assert result["semester"] == course.semester
     assert result["semester_start_date"] == course.semester_start_date.date().isoformat()
     assert result["semester_end_date"] == course.semester_end_date.date().isoformat()
@@ -455,7 +433,6 @@ def test_get_course_details_using_user_with_admin_role_permissions(
     assert result["id"] == course.id
     assert result["name"] == course.name
     assert result["university"] == course.university
-    assert result["active"] == course.active
     assert result["semester"] == course.semester
     assert result["semester_start_date"] == course.semester_start_date.date().isoformat()
     assert result["semester_end_date"] == course.semester_end_date.date().isoformat()
@@ -477,7 +454,6 @@ def test_get_course_details_using_user_with_student_role_permissions(
     assert result["id"] == course.id
     assert result["name"] == course.name
     assert result["university"] == course.university
-    assert result["active"] == course.active
     assert result["semester"] == course.semester
     assert result["semester_start_date"] == course.semester_start_date.date().isoformat()
     assert result["semester_end_date"] == course.semester_end_date.date().isoformat()
@@ -520,7 +496,6 @@ def test_update_course_with_super_admin_user_without_optional_fields(
         "name": "Algo2Mendez",
         "university": "UCA",
         "subject_id": "3001",
-        "active": False,
         "semester": "2019-2c",
         "semester_start_date": "2019-07-01",
         "semester_end_date": "2019-12-01",
@@ -535,7 +510,6 @@ def test_update_course_with_super_admin_user_without_optional_fields(
     assert result["id"] == course_id
     assert result["name"] == course_data["name"]
     assert result["university"] == course_data["university"]
-    assert result["active"] == course_data["active"]
     assert result["semester"] == course_data["semester"]
     assert result["semester_start_date"] == course_data["semester_start_date"]
     assert result["semester_end_date"] == course_data["semester_end_date"]
@@ -551,7 +525,6 @@ def test_update_course_with_super_admin_user_with_all_fields(
         "university": "FIUBA",
         "subject_id": "8001",
         "description": "course description",
-        "active": True,
         "semester": "2019-1c",
         "semester_start_date": "2019-03-01",
         "semester_end_date": "2019-07-01",
@@ -568,7 +541,6 @@ def test_update_course_with_super_admin_user_with_all_fields(
     assert result["name"] == course_data["name"]
     assert result["university"] == course_data["university"]
     assert result["description"] == course_data["description"]
-    assert result["active"] == course_data["active"]
     assert result["semester"] == course_data["semester"]
     assert result["semester_start_date"] == course_data["semester_start_date"]
     assert result["semester_end_date"] == course_data["semester_end_date"]
@@ -584,7 +556,6 @@ def test_cannot_update_course_with_user_that_has_not_been_enrolled(
         "name": "Algo2Mendez",
         "university": "UCA",
         "subject_id": "3001",
-        "active": False,
         "semester": "2019-2c",
         "semester_start_date": "2019-07-01",
         "semester_end_date": "2019-12-01",
@@ -610,7 +581,6 @@ def test_cannot_update_course_using_user_with_student_role_permissions(
         "name": "Algo2Mendez",
         "university": "UCA",
         "subject_id": "3001",
-        "active": False,
         "semester": "2019-2c",
         "semester_start_date": "2019-07-01",
         "semester_end_date": "2019-12-01",
@@ -634,7 +604,6 @@ def test_update_course_using_user_with_admin_role_permissions(
         "name": "Algo2Mendez",
         "university": "UCA",
         "subject_id": "3001",
-        "active": False,
         "semester": "2019-2c",
         "semester_start_date": "2019-07-01",
         "semester_end_date": "2019-12-01",
@@ -649,7 +618,6 @@ def test_update_course_using_user_with_admin_role_permissions(
     assert result["id"] == course_id
     assert result["name"] == course_data["name"]
     assert result["university"] == course_data["university"]
-    assert result["active"] == course_data["active"]
     assert result["semester"] == course_data["semester"]
     assert result["semester_start_date"] == course_data["semester_start_date"]
     assert result["semester_end_date"] == course_data["semester_end_date"]
@@ -664,7 +632,6 @@ def test_get_updated_course_of_user(
         "name": "Algo2Mendez",
         "university": "UCA",
         "subject_id": "3001",
-        "active": False,
         "semester": "2019-2c",
         "semester_start_date": "2019-07-01",
         "semester_end_date": "2019-12-01",
@@ -681,7 +648,6 @@ def test_get_updated_course_of_user(
     assert result[0]["id"] == course_id
     assert result[0]["name"] == course_data["name"]
     assert result[0]["university"] == course_data["university"]
-    assert result[0]["active"] == course_data["active"]
     assert result[0]["semester"] == course_data["semester"]
     assert result[0]["semester_start_date"] == course_data["semester_start_date"]
     assert result[0]["semester_end_date"] == course_data["semester_end_date"]
@@ -696,7 +662,6 @@ def test_cannot_update_non_existing_course(users_api_client: TestClient, admin_a
         "name": "Algo2Mendez",
         "university": "UCA",
         "subject_id": "3001",
-        "active": False,
         "semester": "2019-2c",
         "semester_start_date": "2019-07-01",
         "semester_end_date": "2019-12-01",

@@ -1,6 +1,7 @@
+from datetime import timedelta
 import logging
 from fastapi import HTTPException, status
-from rpl_activities.src.deps.auth import CurrentCourseUser
+from rpl_activities.src.deps.auth import CurrentCourseUser, CurrentMainUser
 from rpl_activities.src.dtos.activity_dtos import (
     ActivityWithMetadataOnlyResponseDTO,
     ActivityCreationRequestDTO,
@@ -112,8 +113,8 @@ class ActivitiesService:
             last_submission_date=self.submissions_repo.get_last_submission_date_by_user_at_activity(
                 current_course_user.user_id, activity, current_user_submissions_at_activity
             ),
-            date_created=activity.date_created,
-            last_updated=activity.last_updated,
+            date_created=(activity.date_created - timedelta(hours=3)),
+            last_updated=(activity.last_updated - timedelta(hours=3)),
         )
 
     def build_activity_response_dto(self, activity: Activity) -> ActivityResponseDTO:
@@ -133,11 +134,11 @@ class ActivitiesService:
             deleted=activity.deleted,
             points=activity.points,
             starting_rplfile_id=activity.starting_rplfile.id,
-            activity_unittests=unit_tests_data,
-            activity_iotests=io_tests_data,
+            activity_unit_tests_content=unit_tests_data,
+            activity_io_tests=io_tests_data,
             compilation_flags=activity.compilation_flags,
-            date_created=activity.date_created,
-            last_updated=activity.last_updated,
+            date_created=(activity.date_created - timedelta(hours=3)),
+            last_updated=(activity.last_updated - timedelta(hours=3)),
         )
 
     # ====================== QUERYING ====================== #
@@ -216,17 +217,13 @@ class ActivitiesService:
 
     def clone_all_activities(
         self,
-        current_course_user: CurrentCourseUser,
+        current_main_user: CurrentMainUser,
         from_category: ActivityCategory,
         to_category: ActivityCategory,
     ) -> dict[int, Activity]:
-        self.verify_permission_to_manage(current_course_user)
-
         activities = self.activities_repo.get_all_activities_by_category_id(from_category.id)
         for activity in activities:
-            if not activity.deleted:
+            if activity.deleted:
                 continue
-            new_activity = self.activities_repo.clone_activity(
-                activity, to_category.course_id, to_category.id
-            )
-            self.tests_service.clone_all_activity_tests(current_course_user, activity, new_activity)
+            new_activity = self.activities_repo.clone_activity(activity, to_category)
+            self.tests_service.clone_all_activity_tests(current_main_user, activity, new_activity)

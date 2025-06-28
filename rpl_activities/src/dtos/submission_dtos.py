@@ -21,6 +21,7 @@ class AllFinalSubmissionsResponseDTO(BaseModel):
 
 
 class IOTestRunResultDTO(BaseModel):
+    id: int
     name: str
     test_in: str
     expected_output: str
@@ -28,6 +29,7 @@ class IOTestRunResultDTO(BaseModel):
 
 
 class UnitTestRunResultDTO(BaseModel):
+    id: int
     name: str
     passed: bool
     error_messages: Optional[str] = None
@@ -39,7 +41,7 @@ class SubmissionResultResponseDTO(BaseModel):
     submission_rplfile_name: str
     submission_rplfile_type: aux_models.RPLFileType
     submission_rplfile_id: int
-    acitivity_starting_rplfile_name: str
+    activity_starting_rplfile_name: str
     activity_starting_rplfile_type: aux_models.RPLFileType
     activity_starting_rplfile_id: int
     activity_language: aux_models.LanguageWithVersion
@@ -50,8 +52,10 @@ class SubmissionResultResponseDTO(BaseModel):
     is_final_solution: bool
     submission_date: datetime
     exit_message: Optional[str] = None
-    iotests_run_results: Optional[List[IOTestRunResultDTO]] = None
-    unittests_run_results: Optional[List[UnitTestRunResultDTO]] = None
+    stderr: str = ""
+    stdout: str = ""
+    io_tests_run_results: Optional[List[IOTestRunResultDTO]] = None
+    unit_tests_run_results: Optional[List[UnitTestRunResultDTO]] = None
 
 
 # ==============================================================================
@@ -63,7 +67,7 @@ class SubmissionResponseDTO(BaseModel):
     submission_rplfile_name: str
     submission_rplfile_type: aux_models.RPLFileType
     submission_rplfile_id: int
-    acitivity_starting_rplfile_name: str
+    activity_starting_rplfile_name: str
     activity_starting_rplfile_type: aux_models.RPLFileType
     activity_starting_rplfile_id: int
     activity_language: aux_models.LanguageWithVersion
@@ -94,7 +98,7 @@ class TestsExecutionLogDTO(BaseModel):
     tests_execution_result_status: aux_models.TestsExecutionResultStatus
     tests_execution_stage: str
     tests_execution_exit_message: str
-    tests_execution_stderr: str = ""
+    tests_execution_stderr: str
     tests_execution_stdout: str
     unit_test_suite_result_summary: Optional[UnitTestSuiteRunsSummaryDTO] = None
 
