@@ -100,6 +100,7 @@ class TestsExecutionLogDTO(BaseModel):
     tests_execution_exit_message: str
     tests_execution_stderr: str
     tests_execution_stdout: str
+    all_student_only_outputs_from_iotests_runs: Optional[list[str]] = []
     unit_test_suite_result_summary: Optional[UnitTestSuiteRunsSummaryDTO] = None
 
 

@@ -8,6 +8,7 @@ class Language(str, Enum):
     C = "c"
     PYTHON = "python"
     GO = "go"
+    RUST = "rust"
 
     def with_version(self):
         if self == Language.C:
@@ -16,22 +17,28 @@ class Language(str, Enum):
             return LanguageWithVersion.PYTHON
         elif self == Language.GO:
             return LanguageWithVersion.GO
+        elif self == Language.RUST:
+            return LanguageWithVersion.RUST
         else:
             raise ValueError(f"Unsupported language: {self}")
 
 
 class LanguageWithVersion(str, Enum):
     C = "c_std11"
-    PYTHON = "python_3.7"
+    OLD_PYTHON = "python_3.7"  # The runner has been using 3.10 for quite some time but it was not updated. This is kept for compatibility.
+    PYTHON = "python_3.10"
     GO = "go_1.19"
+    RUST = "rust_1.88.0"
 
     def without_version(self):
         if self == LanguageWithVersion.C:
             return Language.C
-        elif self == LanguageWithVersion.PYTHON:
+        elif self == LanguageWithVersion.PYTHON or self == LanguageWithVersion.OLD_PYTHON:
             return Language.PYTHON
         elif self == LanguageWithVersion.GO:
             return Language.GO
+        elif self == LanguageWithVersion.RUST:
+            return Language.RUST
         else:
             raise ValueError(f"Unsupported language: {self}")
 

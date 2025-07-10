@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import logging
 from typing import Optional
 
 from rpl_activities.src.dtos.activity_dtos import UnitTestSuiteCreationRequestDTO, IOTestRequestDTO
@@ -18,9 +19,6 @@ from .models.io_test_run import IOTestRun
 from .models.test_execution_log import TestsExecutionLog
 from .models.activity_submission import ActivitySubmission
 
-STUDENT_OUTPUT_START_DELIMITER = "start_RUN"
-STUDENT_OUTPUT_END_DELIMITER = "end_RUN"
-IO_TEST_OUTPUT_DELIMITERS_TO_SKIP = ["assignment_main.py", "./main", "custom_IO_main.pyc"]
 UNIT_TEST_RUN_PASS = "PASSED"
 
 
@@ -172,25 +170,6 @@ class TestsRepository(BaseRepository):
         self.db_session.refresh(submission)
         return test_execution_log, submission
 
-    def __parse_student_outputs_per_io_test_run(self, stdout: str) -> list[str]:
-        student_outputs_per_run = []
-        current_output_lines = []
-        for line in stdout.splitlines():
-            if STUDENT_OUTPUT_END_DELIMITER in line and current_output_lines:
-                # we reconstruct output and remove trailing newline if present (since it's EOF)
-                final_output = "\n".join(current_output_lines)
-                if final_output.endswith("\n"):
-                    final_output = final_output[:-1]
-                student_outputs_per_run.append(final_output)
-                current_output_lines = []
-            elif STUDENT_OUTPUT_START_DELIMITER in line:
-                current_output_lines = []
-            elif any(delimiter in line for delimiter in IO_TEST_OUTPUT_DELIMITERS_TO_SKIP):
-                continue
-            else:
-                current_output_lines.append(line)
-        return student_outputs_per_run
-
     def __check_if_all_io_tests_passed(self, io_tests: list[IOTest], io_test_runs: list[IOTestRun]) -> bool:
         if len(io_tests) != len(io_test_runs):
             # Not all IO tests were run
@@ -204,10 +183,7 @@ class TestsRepository(BaseRepository):
     def save_io_test_runs_from_exec_log_and_check_if_all_passed(
         self, io_tests: list[IOTest], test_execution_log_id: int, new_execution_log_data: TestsExecutionLogDTO
     ) -> bool:
-        student_outputs_per_run = self.__parse_student_outputs_per_io_test_run(
-            new_execution_log_data.tests_execution_stdout
-        )
-
+        student_outputs_per_run = new_execution_log_data.all_student_only_outputs_from_iotests_runs
         io_test_runs = []
         for io_test, student_output in zip(io_tests, student_outputs_per_run):
             io_test_run = IOTestRun(
