@@ -43,6 +43,8 @@ class CourseUserUptateRequestDTO(BaseModel):
 
 
 class CourseUserScoreResponseDTO(BaseModel):
+    id: int
+    student_id: str
     name: str
     surname: str
     img_uri: str
@@ -128,11 +130,12 @@ class CourseUserResponseDTO(BaseModel):
     role: str
     permissions: list[str]
     accepted: bool
+    img_uri: Optional[str] = None
     date_created: datetime.datetime
     last_updated: datetime.datetime
 
     @classmethod
-    def from_course_user(cls, course_user: "CourseUser") -> "CourseUserResponseDTO":
+    def from_course_user(cls, course_user: "CourseUser", with_profile_picture: Optional[str] = None) -> "CourseUserResponseDTO":
         return cls(
             id=course_user.user.id,
             course_id=course_user.course.id,
@@ -148,6 +151,7 @@ class CourseUserResponseDTO(BaseModel):
             role=course_user.role.name,
             permissions=course_user.get_permissions(),
             accepted=course_user.accepted,
+            img_uri=with_profile_picture or None,
             date_created=(course_user.date_created - datetime.timedelta(hours=3)),
             last_updated=(course_user.last_updated - datetime.timedelta(hours=3)),
         )
