@@ -16,8 +16,8 @@ env:
   IMAGE_USERS_API: rpl-3.0-users
   IMAGE_ACTIVITIES_API: rpl-3.0-activities
   REGISTRY_HOSTNAME: gcr.io
-  DEPLOYMENT_NAME_USERS_API: users-api
-  DEPLOYMENT_NAME_ACTIVITIES_API: activities-api
+  DEPLOYMENT_NAME_USERS_API: rpl-users-api
+  DEPLOYMENT_NAME_ACTIVITIES_API: rpl-activities-api
   # NEW_RELIC_LICENSE_KEY: ${{ secrets.NEW_RELIC_LICENSE_KEY }}
 
 jobs:
