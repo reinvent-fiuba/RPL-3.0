@@ -71,14 +71,14 @@ jobs:
 
       - name: Build Users API Docker image
         run: |
-          docker build -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE_USERS_API":"$GITHUB_SHA" \
+          docker build -f rpl_users/Dockerfile -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE_USERS_API":"$GITHUB_SHA" \
             -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE_USERS_API":latest \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" .
 
       - name: Build Activities API Docker image
         run: |
-          docker build -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE_ACTIVITIES_API":"$GITHUB_SHA" \
+          docker build -f rpl_activities/Dockerfile -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE_ACTIVITIES_API":"$GITHUB_SHA" \
             -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE_ACTIVITIES_API":latest \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" .
