@@ -47,13 +47,13 @@ spec:
           - name: http
             containerPort: 80
         readinessProbe:
-          initialDelaySeconds: 300
+          initialDelaySeconds: 60
           periodSeconds: 60
           httpGet:
             path: /api/v3/health
             port: 80
         livenessProbe:
-          initialDelaySeconds: 300
+          initialDelaySeconds: 60
           periodSeconds: 60
           failureThreshold: 3
           httpGet:

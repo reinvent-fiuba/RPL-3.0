@@ -9,7 +9,6 @@ on:
 
 env:
   GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
-  # GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
   GITHUB_SHA: ${{ github.sha }}
   GKE_ZONE: us-central1-c
   GKE_CLUSTER: rpl3
@@ -18,7 +17,6 @@ env:
   REGISTRY_HOSTNAME: gcr.io
   DEPLOYMENT_NAME_USERS_API: rpl-users-api
   DEPLOYMENT_NAME_ACTIVITIES_API: rpl-activities-api
-  # NEW_RELIC_LICENSE_KEY: ${{ secrets.NEW_RELIC_LICENSE_KEY }}
 
 jobs:
   test:
