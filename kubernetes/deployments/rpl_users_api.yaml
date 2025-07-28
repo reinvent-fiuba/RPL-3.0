@@ -23,12 +23,12 @@ spec:
     spec:
       containers:
       - name: rpl-users-api
-        image: rpl-users-api:local # gcr.io/rpl2-fiuba/rpl-3.0-users:latest
+        image: gcr.io/rpl2-fiuba/rpl-3.0-users:latest # rpl-users-api:local # 
         env:
         - name: FASTAPI_PRODUCTION_PROFILE
           value: "true"
         - name: FRONTEND_URL
-          value: "https://myrpl.ar"
+          value: "https://beta.myrpl.ar"
         - name: JWT_ALGORITHM
           valueFrom:
             secretKeyRef:
@@ -47,8 +47,8 @@ spec:
         - name: DB_URL
           valueFrom:
             secretKeyRef:
-              name: users-db-url-local # TODO: change when deploying to gcp
-              key: users-db-url-local # TODO: change when deploying to gcp
+              name: users-db-url
+              key: users-db-url
         - name: ACTIVITIES_API_URL
           value: "http://rpl-activities-api"
         - name: RPL_HELP_EMAIL_USER
@@ -69,7 +69,7 @@ spec:
           - name: http
             containerPort: 80
         readinessProbe:
-          initialDelaySeconds: 30 #300
+          initialDelaySeconds: 300
           periodSeconds: 60
           httpGet:
             path: /api/v3/health

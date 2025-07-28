@@ -13,7 +13,7 @@ COPY ./rpl_activities/__init__.py /rpl_activities/__init__.py
 
 
 # For development
-CMD ["uvicorn", "rpl_activities.src.main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--reload-dir", "rpl_activities/src", "--use-colors"]
+# CMD ["uvicorn", "rpl_activities.src.main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--reload-dir", "rpl_activities/src", "--use-colors"]
 
-# CMD ["uvicorn", "rpl_activities.src.main:app", "--host", "0.0.0.0", "--port", "80", "--use-colors"]
+CMD ["uvicorn", "rpl_activities.src.main:app", "--host", "0.0.0.0", "--port", "80", "--use-colors"]
 

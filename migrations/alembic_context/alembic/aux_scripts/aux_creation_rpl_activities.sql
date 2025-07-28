@@ -1,13 +1,6 @@
 
 
 
--- CREATE TABLE alembic_version (
---     version_num VARCHAR(32) NOT NULL, 
---     CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
--- );
-
-
-
 CREATE TABLE activity_categories (
     id BIGINT NOT NULL AUTO_INCREMENT, 
     course_id BIGINT NOT NULL, 
@@ -132,4 +125,3 @@ CREATE TABLE unit_test_run (
     FOREIGN KEY(test_run_id) REFERENCES test_run (id)
 );
 
--- INSERT INTO alembic_version (version_num) VALUES ('8acb53cbf546');
