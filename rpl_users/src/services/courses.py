@@ -302,6 +302,8 @@ class CoursesService:
             if course_user:
                 course_user_scores.append(
                     CourseUserScoreResponseDTO(
+                        id=course_user.user.id,
+                        student_id=course_user.user.student_id,
                         name=course_user.user.name,
                         surname=course_user.user.surname,
                         img_uri=course_user.user.img_uri if course_user.user.img_uri else "",
@@ -318,7 +320,12 @@ class CoursesService:
         return course_user.get_permissions()
 
     def get_all_course_users_from_course(
-        self, course_id: int, current_user: User, role_name: Optional[str], student_id: Optional[str]
+        self, 
+        course_id: int, 
+        current_user: User, 
+        role_name: Optional[str], 
+        student_id: Optional[str],
+        return_profile_pictures: Optional[bool] = False
     ) -> List[CourseUserResponseDTO]:
         self.__assert_course_exists(course_id)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["user_view"])
@@ -330,6 +337,14 @@ class CoursesService:
         if student_id is not None:
             course_users = [
                 course_user for course_user in course_users if course_user.user.student_id == student_id
+            ]
+        if return_profile_pictures:
+            return [
+                CourseUserResponseDTO.from_course_user(
+                    course_user, 
+                    course_user.user.img_uri if course_user.user.img_uri else None
+                )
+                for course_user in course_users
             ]
 
         return [CourseUserResponseDTO.from_course_user(course_user) for course_user in course_users]

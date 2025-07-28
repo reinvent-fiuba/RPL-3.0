@@ -23,12 +23,12 @@ spec:
     spec:
       containers:
       - name: rpl-activities-api
-        image: rpl-activities-api:local # gcr.io/rpl2-fiuba/rpl-3.0-activities:latest
+        image: gcr.io/rpl2-fiuba/rpl-3.0-activities:latest #  rpl-activities-api:local
         env:
         - name: FASTAPI_PRODUCTION_PROFILE
           value: "true"
         - name: FRONTEND_URL
-          value: "https://myrpl.ar"
+          value: "https://beta.myrpl.ar"
         - name: USERS_API_URL
           value: "http://rpl-users-api"
         - name: QUEUE_URL
@@ -36,8 +36,8 @@ spec:
         - name: DB_URL
           valueFrom:
             secretKeyRef:
-              name: activities-db-url-local
-              key: activities-db-url-local
+              name: activities-db-url
+              key: activities-db-url
         - name: RUNNER_API_KEY
           valueFrom:
             secretKeyRef:
@@ -47,14 +47,14 @@ spec:
           - name: http
             containerPort: 80
         readinessProbe:
-          initialDelaySeconds: 30 #300
+          initialDelaySeconds: 300
           periodSeconds: 60
           httpGet:
             path: /api/v3/health
             port: 80
         livenessProbe:
           initialDelaySeconds: 300
-          periodSeconds: 300 #60
+          periodSeconds: 60
           failureThreshold: 3
           httpGet:
             path: /api/v3/health

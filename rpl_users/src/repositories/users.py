@@ -49,6 +49,7 @@ class UsersRepository(BaseRepository):
             )
         else:
             fullname_direct_matching = "%".join(split_fullname)
+            fullname_rearranged_matching = "%".join(reversed(split_fullname))
             first_part = split_fullname[0]
             last_part = split_fullname[-1]
             return sa.select(User).where(
@@ -57,6 +58,9 @@ class UsersRepository(BaseRepository):
                     User.name.ilike(f"%{username_or_fullname}%"),
                     User.surname.ilike(f"%{username_or_fullname}%"),
                     sa.func.concat(User.name, " ", User.surname).ilike(f"%{fullname_direct_matching}%"),
+                    sa.func.concat(User.surname, " ", User.name).ilike(f"%{fullname_rearranged_matching}%"),
+                    User.username.ilike(f"%{first_part}%"),
+                    User.username.ilike(f"%{last_part}%"),
                     User.name.ilike(f"%{first_part}%"),
                     User.surname.ilike(f"%{last_part}%"),
                     User.name.ilike(f"%{last_part}%"),

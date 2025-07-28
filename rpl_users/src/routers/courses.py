@@ -115,8 +115,9 @@ def get_all_course_users_from_course(
     db: DBSessionDependency,
     role_name: Optional[str] = None,
     student_id: Optional[str] = None,
+    return_profile_pictures: Optional[bool] = False,
 ):
-    return CoursesService(db).get_all_course_users_from_course(course_id, current_user, role_name, student_id)
+    return CoursesService(db).get_all_course_users_from_course(course_id, current_user, role_name, student_id, return_profile_pictures)
 
 
 @router.get("/users/{user_id}/courses", response_model=List[CourseResponseDTO])
