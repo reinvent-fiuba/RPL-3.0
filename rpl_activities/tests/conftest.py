@@ -45,15 +45,15 @@ from rpl_users.tests.conftest import (
     base_roles_fixture,
 )
 
-DB_URL = "mysql+pymysql://test_user:test_password@testing_db:3306/test_rpl_activities"
-# DB_URL="sqlite:///:memory:"
+# DB_URL = "mysql+pymysql://test_user:test_password@testing_db:3306/test_rpl_activities"
+DB_URL = "sqlite:///:memory:"
 
 
 @pytest.fixture(name="activities_api_dbsession", scope="function")
 def activities_api_dbsession_fixture():
     engine = create_engine(
         DB_URL,
-        # connect_args={"check_same_thread": False}, # Use if sqlite is active
+        connect_args={"check_same_thread": False}, # Use if sqlite is active
         poolclass=StaticPool,
     )
     Base.metadata.create_all(engine)

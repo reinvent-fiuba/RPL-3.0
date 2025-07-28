@@ -43,6 +43,8 @@ jobs:
       - name: Run tests
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)/rpl_activities:$(pwd)/rpl_users
+          cp rpl_activities/.env.example rpl_activities/.env
+          cp rpl_users/.env.example rpl_users/.env
           pytest
 
   setup-build-publish-deploy:

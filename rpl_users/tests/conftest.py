@@ -18,15 +18,15 @@ from rpl_users.src.repositories.models.course import Course
 from rpl_users.src.repositories.models.course_user import CourseUser
 from rpl_users.src.repositories.models.role import Role
 
-DB_URL = "mysql+pymysql://test_user:test_password@testing_db:3306/test_rpl_users"
-# DB_URL="sqlite:///:memory:"
+# DB_URL = "mysql+pymysql://test_user:test_password@testing_db:3306/test_rpl_users"
+DB_URL = "sqlite:///:memory:"
 
 
 @pytest.fixture(name="users_api_dbsession", scope="function")
 def users_api_dbsession_fixture():
     engine = create_engine(
         DB_URL,
-        # connect_args={"check_same_thread": False}, # Use if sqlite is active
+        connect_args={"check_same_thread": False}, # Use if sqlite is active
         echo=False,
         poolclass=StaticPool,
     )
