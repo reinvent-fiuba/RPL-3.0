@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Annotated
-from sqlalchemy import BigInteger, String, Text
+from sqlalchemy import BigInteger, String, Text, Integer
 from sqlalchemy.orm import DeclarativeBase, mapped_column
 
 
@@ -13,7 +13,7 @@ class Base(DeclarativeBase):
     type_annotation_map = {BigInt: BigInteger(), Str: String(255), LargeStr: String(500)}
 
 
-IntPK = Annotated[int, mapped_column(BigInteger, primary_key=True)]
+IntPK = Annotated[int, mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)]
 TextStr = Annotated[str, mapped_column(Text)]
 AutoDateTime = Annotated[datetime, mapped_column(insert_default=datetime.now)]
 

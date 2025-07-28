@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 import pytest
 from fastapi.testclient import TestClient
@@ -26,7 +26,7 @@ DB_URL = "sqlite:///:memory:"
 def users_api_dbsession_fixture():
     engine = create_engine(
         DB_URL,
-        connect_args={"check_same_thread": False}, # Use if sqlite is active
+        connect_args={"check_same_thread": False},  # Use if sqlite is active
         echo=False,
         poolclass=StaticPool,
     )
@@ -182,8 +182,8 @@ def course_with_superadmin_as_admin_user_fixture(
         subject_id="8001",
         description="some-description",
         semester="2019-1c",
-        semester_start_date="2019-03-01T00:00:00",
-        semester_end_date="2019-07-01T00:00:00",
+        semester_start_date=datetime(2019, 3, 1, 0, 0, 0),
+        semester_end_date=datetime(2019, 7, 1, 0, 0, 0),
     )
     users_api_dbsession.add(course)
     users_api_dbsession.commit()
@@ -212,8 +212,8 @@ def course_with_regular_user_as_admin_user_fixture(
         subject_id="8001",
         description="some-description",
         semester="2019-1c",
-        semester_start_date="2019-03-01T00:00:00",
-        semester_end_date="2019-07-01T00:00:00",
+        semester_start_date=datetime(2019, 3, 1, 0, 0, 0),
+        semester_end_date=datetime(2019, 7, 1, 0, 0, 0),
     )
     users_api_dbsession.add(course)
     users_api_dbsession.commit()
