@@ -3,7 +3,7 @@ name: Build and Deploy to GKE
 on:
   workflow_dispatch:
   push:
-    branches: [ master, test/** ]
+    branches: [ main, test/** ]
   schedule:
     - cron: "00 12 1 * *"
 
