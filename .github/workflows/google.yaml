@@ -41,7 +41,9 @@ jobs:
           pip install -r rpl_users/extra_requirements.txt
 
       - name: Run tests
-        run: pytest
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/rpl_activities:$(pwd)/rpl_users
+          pytest
 
   setup-build-publish-deploy:
     name: Setup, Build, Publish, and Deploy
