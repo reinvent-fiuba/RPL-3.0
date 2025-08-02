@@ -29,7 +29,7 @@ class RPLFilesService:
         filtered_files: ExtractedFilesDict = {}
         for filename, file_content in extracted_rplfile.items():
             if filename == tar_utils.METADATA_FILENAME:
-                continue
+                filtered_files[filename] = file_content
             if filename not in general_metadata_dict:
                 filtered_files[filename] = file_content
             else:
