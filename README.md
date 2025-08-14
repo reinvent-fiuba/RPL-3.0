@@ -108,8 +108,8 @@ docker compose -f metaservices.local.yml up -d --build
 docker compose -f docker-compose.local.yml up -d --build
 ```
 
-- Run compose for the RPL-Runner (see [RPL Runner repository](https://github.com/reinvent-fiuba/RPL-2.0-runner))
-- Run the local setup for the frontend via `nvm` to enable automatic reload (see [RPL Frontend repository](https://github.com/reinvent-fiuba/RPL-2.0-web))
+- Run compose for the RPL-Runner (see [RPL Runner repository](https://github.com/reinvent-fiuba/RPL-3.0-runner))
+- Run the local setup for the frontend via `nvm` to enable automatic reload (see [RPL Frontend repository](https://github.com/reinvent-fiuba/RPL-3.0-web))
 
 #### Accessing the APIs
 
@@ -117,7 +117,12 @@ You can access the APIs via:
 - `http://localhost:8000` for the RPL Users API
 - `http://localhost:8001` for the RPL Activities API
 
-
+#### Teardown
+To stop the services, you can run:
+```shell
+docker compose -f metaservices.local.yml down
+docker compose -f docker-compose.local.yml down
+```
 
 
 
@@ -174,6 +179,13 @@ kubectl logs <pod_name> --follow
 
 Now you can proceed with the instructions on both the Runner and the Frontend repositories for this particular setup.
 
+#### Teardown
+
+To stop the services, you can run `kubectl delete -f <path_to_kubernetes_file>` for each of the deployments and services you created, or you can remove all of them at once with: (WARNING: this will stop ALL deployments/services within the namespace)
+```shell
+kubectl delete --all deployments --namespace=default
+kubectl delete --all services --namespace=default
+```
 
 
 
