@@ -20,7 +20,6 @@
     - [Local within devcontainer (dev/test)](#local-within-devcontainer-docker-for-developmenttests-only)
     - [Local PROD environment via docker compose](#local-prod-environment-via-docker-compose)
     - [Local PROD environment with minikube](#local-prod-environment-with-minikube)
-(WIP)
 
 ---
 
