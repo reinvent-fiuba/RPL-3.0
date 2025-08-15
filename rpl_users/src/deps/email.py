@@ -33,7 +33,6 @@ class EmailHandler:
             with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
                 server.login(RPL_HELP_EMAIL_USER, RPL_HELP_EMAIL_PASSWORD)
                 server.send_message(msg)
-                logging.getLogger("uvicorn.error").info(f"Email sent to {to_address} with subject: {subject}")
         except smtplib.SMTPException as e:
             logging.getLogger("uvicorn.error").error(f"Failed to send email to {to_address}. Error: {e}")
 
