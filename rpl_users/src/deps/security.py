@@ -40,10 +40,6 @@ def verify_access_token(token: str) -> str:
         return payload["sub"]
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Expired JWT token")
-    except jwt.InvalidAlgorithmError:
-        logging.getLogger("uvicorn.error").error("[users:security] OCCURRENCE: Invalid algorithm in JWT token")
-        logging.getLogger("uvicorn.error").error("token: %s", token)
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid JWT token") 
     except jwt.PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid JWT token")
 
