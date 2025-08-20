@@ -78,6 +78,20 @@ class ActivitiesRepository(BaseRepository):
             else []
         )
 
+    def get_activity_by_course_id_category_id_and_name(self, course_id: int, category_id: int, name: str):
+        return (
+            self.db_session.execute(
+                sa.select(Activity).where(
+                    Activity.course_id == course_id,
+                    Activity.category_id == category_id,
+                    Activity.name == name,
+                    Activity.deleted == False,
+                )
+            )
+            .scalars()
+            .one_or_none()
+        )
+
     # ====================== MANAGING ====================== #
 
     def delete_activity(self, activity: Activity):
@@ -86,6 +100,12 @@ class ActivitiesRepository(BaseRepository):
         self.db_session.commit()
 
     def create_activity(self, course_id: int, new_activity_data: ActivityCreationRequestDTO) -> Activity:
+        existing_activity = self.get_activity_by_course_id_category_id_and_name(
+            course_id, new_activity_data.category_id, new_activity_data.name
+        )
+        if existing_activity:
+            return existing_activity
+
         compressed_rplfile_bytes = tar_utils.compress_uploadfiles_to_tar_gz(new_activity_data.starting_files)
         truncated_act_name = new_activity_data.name.strip()[:MAX_ACTIVITY_NAME_LEN_FOR_TAR]
         rplfile = self.rplfiles_repo.create_rplfile(

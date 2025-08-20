@@ -232,14 +232,14 @@ class CoursesService:
     def enroll_student_in_course(self, course_id: int, current_user: User) -> RoleResponseDTO:
         self.__assert_course_exists(course_id)
 
-        new_course_user = self.course_users_repo.save_new_course_user(
+        course_user = self.course_users_repo.save_new_course_user(
             course_id=course_id,
             user_id=current_user.id,
             role_id=self._get_role_named("student").id,
             accepted=False,
         )
 
-        return RoleResponseDTO.from_course_user(new_course_user)
+        return RoleResponseDTO.from_course_user(course_user)
 
     def update_course_user(
         self,

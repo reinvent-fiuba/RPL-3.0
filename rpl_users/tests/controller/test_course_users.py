@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 from fastapi import status
+import sqlalchemy as sa
 
+from rpl_users.src.repositories.models.course_user import CourseUser
 from rpl_users.src.repositories.models.role import Role
 
 # ====================== USER ENROLLMENT ====================== #
@@ -24,18 +26,32 @@ def test_enroll_regular_user_into_course(
 
 
 def test_cannot_enroll_an_user_twice(
-    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
+    users_api_client: TestClient,
+    admin_auth_headers,
+    course_with_superadmin_as_admin_user,
+    users_api_dbsession,
 ):
     course_id = course_with_superadmin_as_admin_user["course"].id
+    user_id_of_course_user = course_with_superadmin_as_admin_user["admin_course_user"].user_id
 
-    users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers)
+    users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers)
 
-    response = users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=regular_auth_headers)
-
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
+    response = users_api_client.post(f"/api/v3/courses/{course_id}/enroll", headers=admin_auth_headers)
+    assert response.status_code == status.HTTP_200_OK
     result = response.json()
-    assert "User is already enrolled in the course" in result["detail"]
+
+    existing_course_users_in_db = (
+        users_api_dbsession.execute(
+            sa.select(CourseUser).where(
+                CourseUser.course_id == course_id, CourseUser.user_id == user_id_of_course_user
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert len(existing_course_users_in_db) == 1
+    existing_course_user = existing_course_users_in_db[0]
+    assert existing_course_user.id == result["id"]
 
 
 def test_cannot_enroll_an_user_to_non_existing_course(users_api_client: TestClient, admin_auth_headers):

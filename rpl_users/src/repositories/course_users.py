@@ -18,17 +18,16 @@ class CourseUsersRepository(BaseRepository):
     def save_new_course_user(
         self, course_id: int, user_id: int, role_id: int, accepted: bool = False
     ) -> CourseUser:
+        existing_course_user = self.get_course_user(course_id=course_id, user_id=user_id)
+        if existing_course_user:
+            return existing_course_user
+
         new_course_user = CourseUser(course_id=course_id, user_id=user_id, role_id=role_id, accepted=accepted)
-        try:
-            self.db_session.add(new_course_user)
-            self.db_session.commit()
-            self.db_session.refresh(new_course_user)
-            return new_course_user
-        except IntegrityError:
-            self.db_session.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="User is already enrolled in the course"
-            )
+        self.db_session.add(new_course_user)
+        self.db_session.commit()
+        self.db_session.refresh(new_course_user)
+        return new_course_user
+
 
     def update_course_user(
         self, course_id: int, user_id: int, role_id: Optional[int], accepted: Optional[bool]
