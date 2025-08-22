@@ -12,7 +12,7 @@ MSG_TTL = 3600000  # 1 hour in ms
 class MQSender:
     def __init__(self):
         self.connection = pika.BlockingConnection(
-            [pika.URLParameters(env.QUEUE_URL + "?connection_attempts=3&retry_delay=1")]
+            [pika.URLParameters(env.QUEUE_URL)]
         )
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue="hello", durable=True, arguments={"x-message-ttl": MSG_TTL})
