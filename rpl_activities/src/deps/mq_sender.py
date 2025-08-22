@@ -5,7 +5,6 @@ import pika
 import pika.exceptions
 from rpl_activities.src.config import env
 from fastapi import HTTPException, status
-import time
 
 MSG_TTL = 3600000  # 1 hour in ms
 
@@ -34,35 +33,25 @@ class MQSender:
 
 
 def get_mq_sender():
-    max_attempts = 5
-    delay = 2
-    attempt = 0
-    while attempt < max_attempts:
-        try:
-            mq_sender = MQSender()
-            yield mq_sender
-            break
-        except pika.exceptions.AMQPError as e:
-            attempt += 1
-            logging.getLogger("uvicorn.error").error(
-                f"Failed to connect to MQ (attempt {attempt}): {e}"
-            )
-            if attempt >= max_attempts:
-                raise HTTPException(
-                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE, 
-                    detail="Message Queue service is currently unavailable. Wait a few seconds and try again."
-                )
-            time.sleep(delay)
-        except Exception as e:
-            logging.getLogger("uvicorn.error").error(
-                f"An error occurred while using MQSender: {e}"
-            )
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE, 
-                detail="MQ service is currently unavailable. Wait a few seconds and try again."
-            ) 
-    if mq_sender and mq_sender.connection.is_open:
-        mq_sender.close()
+    try:
+        mq_sender = MQSender()
+        yield mq_sender
+        if mq_sender and mq_sender.connection.is_open:
+            mq_sender.close()
+    except pika.exceptions.AMQPError as e:
+        logging.error(f"Failed to connect to MQ: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, 
+            detail="Message Queue service is currently unavailable. Wait a few seconds and try again."
+        )
+    except Exception as e:
+        logging.getLogger("uvicorn.error").error(
+            f"An error occurred while using MQSender: {e}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, 
+            detail="MQ service is currently unavailable. Wait a few seconds and try again."
+        )
 
 
 MQSenderDependency = Annotated[MQSender, Depends(get_mq_sender)]
