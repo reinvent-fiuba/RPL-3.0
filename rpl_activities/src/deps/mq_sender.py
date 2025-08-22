@@ -41,8 +41,6 @@ def get_mq_sender():
         try:
             mq_sender = MQSender()
             yield mq_sender
-            if mq_sender and mq_sender.connection.is_open:
-                mq_sender.close()
             break
         except pika.exceptions.AMQPError as e:
             attempt += 1
@@ -62,7 +60,9 @@ def get_mq_sender():
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE, 
                 detail="MQ service is currently unavailable. Wait a few seconds and try again."
-            )
+            ) 
+    if mq_sender and mq_sender.connection.is_open:
+        mq_sender.close()
 
 
 MQSenderDependency = Annotated[MQSender, Depends(get_mq_sender)]
