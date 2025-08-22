@@ -18,9 +18,8 @@ spec:
     spec:
       containers:
       - name: rabbitmq
-        # image: deadtrickster/rabbitmq_prometheus:latest # ABANDONED: https://github.com/prometheus-erl/prometheus_rabbitmq_exporter
-        # image: rabbitmq:3.13-management-alpine # apparently this one disables prometheus-style metrics. The base one has it enabled by default: https://github.com/docker-library/rabbitmq/blob/36e4d246e934a96b1c3a920e398f96434f3fc34c/3.13/ubuntu/management/Dockerfile  # TODO See if we can use the base one normally (native dashboard)
-        image: rabbitmq:3.13-alpine
+        image: deadtrickster/rabbitmq_prometheus:latest # https://github.com/prometheus-erl/prometheus_rabbitmq_exporter
+        # image: rabbitmq:3.13-management-alpine 
         ports:
           - containerPort: 15672 # Management UI
           - containerPort: 5671 # AMQPS (TLS)

@@ -128,7 +128,7 @@ class CoursesService:
                 params={"to_course_id": new_course.id},
                 headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
             )
-        except httpx.ConnectError or httpx.TimeoutException as e:
+        except httpx.RequestError as e:
             self.__delete_course(new_course)
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -155,7 +155,7 @@ class CoursesService:
                 params={"user_ids": user_ids},
                 headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
             )
-        except httpx.ConnectError or httpx.TimeoutException as e:
+        except httpx.RequestError as e:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Activities API is not available, try again later",

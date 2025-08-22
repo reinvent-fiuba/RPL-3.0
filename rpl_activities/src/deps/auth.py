@@ -36,10 +36,11 @@ async def get_current_main_user(auth_header: AuthDependency, request: Request) -
             "/api/v3/auth/externalUserMainAuth",
             headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
         )
-    except httpx.ConnectError or httpx.TimeoutException:
+    except httpx.RequestError as e:
         logging.getLogger("uvicorn.error").error(
             f"Failed to connect to users API. Request: {request.method} {request.url}"
         )
+        logging.getLogger("uvicorn.error").error(f"Error details: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Users API is currently unavailable, try again later.",
@@ -100,10 +101,11 @@ async def get_current_course_user(auth_header: AuthDependency, request: Request)
             headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
             params={"course_id": course_id},
         )
-    except httpx.ConnectError or httpx.TimeoutException:
+    except httpx.RequestError as e:
         logging.getLogger("uvicorn.error").error(
             f"Failed to connect to users API. Request: {request.method} {request.url}"
         )
+        logging.getLogger("uvicorn.error").error(f"Error details: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Users API is currently unavailable, try again later.",
@@ -143,10 +145,11 @@ async def get_all_students_course_users_for_current_user(
             params={"role_name": "student"},
             headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
         )
-    except httpx.ConnectError or httpx.TimeoutException:
+    except httpx.RequestError as e:
         logging.getLogger("uvicorn.error").error(
             f"Failed to connect to users API. Request: {request.method} {request.url}"
         )
+        logging.getLogger("uvicorn.error").error(f"Error details: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Users API is currently unavailable, try again later.",
