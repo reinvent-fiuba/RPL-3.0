@@ -31,7 +31,10 @@ from sqlalchemy.orm import Session
 
 class CoursesService:
     def __init__(self, db_session: Session):
-        self.activities_api_client = httpx.Client(base_url=f"{env.ACTIVITIES_API_URL}/api/v3")
+        self.activities_api_client = httpx.Client(
+            base_url=f"{env.ACTIVITIES_API_URL}/api/v3",
+            timeout=httpx.Timeout(120.0, connect=60.0),
+        )
 
         self.users_repo = UsersRepository(db_session)
         self.roles_repo = RolesRepository(db_session)
@@ -132,7 +135,7 @@ class CoursesService:
             self.__delete_course(new_course)
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"Activities API is not available, try again later",
+                detail=f"Activities API is not available, try again later. Error details: {str(e)}",
             )
         if response.status_code != status.HTTP_201_CREATED:
             self.__delete_course(new_course)
