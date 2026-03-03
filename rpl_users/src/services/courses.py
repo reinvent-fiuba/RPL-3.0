@@ -32,8 +32,7 @@ from sqlalchemy.orm import Session
 class CoursesService:
     def __init__(self, db_session: Session):
         self.activities_api_client = httpx.Client(
-            base_url=f"{env.ACTIVITIES_API_URL}/api/v3",
-            timeout=httpx.Timeout(120.0, connect=60.0),
+            base_url=f"{env.ACTIVITIES_API_URL}/api/v3", timeout=httpx.Timeout(120.0, connect=60.0)
         )
 
         self.users_repo = UsersRepository(db_session)
@@ -195,12 +194,12 @@ class CoursesService:
         return CourseResponseDTO.from_course(new_course)
 
     def update_course(
-        self, course_id: int, course_data: CourseUptateRequestDTO, current_user: User
+        self, course_id: int, new_course_data: CourseUptateRequestDTO, current_user: User
     ) -> CourseResponseDTO:
         self.__assert_course_exists(course_id)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["course_edit"])
 
-        updated_course = self.courses_repo.update_course(course_id, course_data)
+        updated_course = self.courses_repo.update_course(course_id, new_course_data)
 
         return CourseResponseDTO.from_course(updated_course)
 
@@ -215,12 +214,14 @@ class CoursesService:
             if course_user:
                 courses_with_user_info.append(
                     CourseWithUserInformationResponseDTO.from_course_and_user_info(
-                        course, True, course_user.accepted
+                        course, enrolled=True, accepted=course_user.accepted
                     )
                 )
             else:
                 courses_with_user_info.append(
-                    CourseWithUserInformationResponseDTO.from_course_and_user_info(course, False, False)
+                    CourseWithUserInformationResponseDTO.from_course_and_user_info(
+                        course, enrolled=False, accepted=False
+                    )
                 )
         return courses_with_user_info
 
@@ -323,12 +324,12 @@ class CoursesService:
         return course_user.get_permissions()
 
     def get_all_course_users_from_course(
-        self, 
-        course_id: int, 
-        current_user: User, 
-        role_name: Optional[str], 
+        self,
+        course_id: int,
+        current_user: User,
+        role_name: Optional[str],
         student_id: Optional[str],
-        return_profile_pictures: Optional[bool] = False
+        return_profile_pictures: Optional[bool] = False,
     ) -> List[CourseUserResponseDTO]:
         self.__assert_course_exists(course_id)
         self.__assert_course_user_exists_and_has_permissions(course_id, current_user.id, ["user_view"])
@@ -344,8 +345,7 @@ class CoursesService:
         if return_profile_pictures:
             return [
                 CourseUserResponseDTO.from_course_user(
-                    course_user, 
-                    course_user.user.img_uri if course_user.user.img_uri else None
+                    course_user, course_user.user.img_uri if course_user.user.img_uri else None
                 )
                 for course_user in course_users
             ]

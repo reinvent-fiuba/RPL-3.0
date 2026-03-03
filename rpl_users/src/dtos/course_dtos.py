@@ -27,7 +27,8 @@ class CourseUptateRequestDTO(BaseModel):
     university: str
     subject_id: str
     description: Optional[str] = None
-    active: Optional[bool] = True
+    active: Optional[bool] = None
+    deleted: Optional[bool] = None
     semester: str
     semester_start_date: datetime.date
     semester_end_date: datetime.date
@@ -59,6 +60,7 @@ class CourseResponseDTO(BaseModel):
     subject_id: Optional[str] = None
     description: Optional[str] = None
     active: bool
+    deleted: Optional[bool] = None
     semester: str
     semester_start_date: datetime.date
     semester_end_date: datetime.date
@@ -73,6 +75,7 @@ class CourseResponseDTO(BaseModel):
             subject_id=course.subject_id,
             description=course.description,
             active=course.active,
+            deleted=course.deleted,
             semester=course.semester,
             semester_start_date=course.semester_start_date.date(),
             semester_end_date=course.semester_end_date.date(),
@@ -87,6 +90,7 @@ class CourseWithUserInformationResponseDTO(BaseModel):
     subject_id: Optional[str] = None
     description: Optional[str] = None
     active: bool
+    deleted: Optional[bool] = None
     semester: str
     semester_start_date: datetime.date
     semester_end_date: datetime.date
@@ -106,6 +110,7 @@ class CourseWithUserInformationResponseDTO(BaseModel):
             subject_id=course.subject_id,
             description=course.description,
             active=course.active,
+            deleted=course.deleted,
             semester=course.semester,
             semester_start_date=course.semester_start_date.date(),
             semester_end_date=course.semester_end_date.date(),
@@ -135,7 +140,9 @@ class CourseUserResponseDTO(BaseModel):
     last_updated: datetime.datetime
 
     @classmethod
-    def from_course_user(cls, course_user: "CourseUser", with_profile_picture: Optional[str] = None) -> "CourseUserResponseDTO":
+    def from_course_user(
+        cls, course_user: "CourseUser", with_profile_picture: Optional[str] = None
+    ) -> "CourseUserResponseDTO":
         return cls(
             id=course_user.user.id,
             course_id=course_user.course.id,
