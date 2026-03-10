@@ -54,7 +54,10 @@ def update_category(
 
 @router.post("/courses/{course_id}/activityCategories/clone", status_code=status.HTTP_201_CREATED)
 def clone_all_info(
-    course_id: int, current_main_user: CurrentMainUserDependency, db: DBSessionDependency, to_course_id=int
+    course_id: int, 
+    to_course_id: int,
+    current_main_user: CurrentMainUserDependency, 
+    db: DBSessionDependency, 
 ):
     from_course_id = course_id
     return CategoriesService(db).clone_all_info(current_main_user, from_course_id, to_course_id)
