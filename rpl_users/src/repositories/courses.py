@@ -59,22 +59,26 @@ class CoursesRepository(BaseRepository):
             self.db_session.rollback()
             self._raise_http_conflict_exception()
 
-    def update_course(self, course_id: int, course_data: CourseUptateRequestDTO) -> Course:
+    def update_course(self, course_id: int, new_data: CourseUptateRequestDTO) -> Course:
         try:
-            updated_course = self.get_course_with_id(course_id)
-            updated_course.name = course_data.name
-            updated_course.university = course_data.university
-            updated_course.subject_id = course_data.subject_id
-            updated_course.description = course_data.description
-            updated_course.active = course_data.active
-            updated_course.semester = course_data.semester
-            updated_course.semester_start_date = course_data.semester_start_date
-            updated_course.semester_end_date = course_data.semester_end_date
-            updated_course.img_uri = course_data.img_uri
-            updated_course.last_updated = datetime.now(timezone.utc)
+            course = self.get_course_with_id(course_id)
+            course.name = new_data.name
+            course.university = new_data.university
+            course.subject_id = new_data.subject_id
+            course.description = (
+                new_data.description if new_data.description is not None else course.description
+            )
+            course.active = new_data.active if new_data.active is not None else course.active
+            course.deleted = new_data.deleted if new_data.deleted is not None else course.deleted
+            course.semester = new_data.semester
+            course.semester_start_date = new_data.semester_start_date
+            course.semester_end_date = new_data.semester_end_date
+            course.img_uri = new_data.img_uri if new_data.img_uri is not None else course.img_uri
+
+            course.last_updated = datetime.now(timezone.utc)
             self.db_session.commit()
-            self.db_session.refresh(updated_course)
-            return updated_course
+            self.db_session.refresh(course)
+            return course
         except IntegrityError:
             self.db_session.rollback()
             self._raise_http_conflict_exception()
