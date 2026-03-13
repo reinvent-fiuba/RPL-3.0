@@ -262,6 +262,70 @@ def test_clone_non_existing_course(users_api_client: TestClient, example_users, 
     assert "Course not found" in result["detail"]
 
 
+# ====================== HARD DELETE COURSE ====================== #
+
+
+def test_hard_delete_course_with_admin_user_success(
+    httpx_mock: HTTPXMock, users_api_client: TestClient, example_users, admin_auth_headers
+):
+    course_data = {
+        "name": "Algo1Mendez",
+        "university": "FIUBA",
+        "subject_id": "8001",
+        "semester": "2019-1c",
+        "semester_start_date": "2019-03-01",
+        "semester_end_date": "2019-07-01",
+        "course_admin_user_id": example_users["admin"].id,
+    }
+    course_data_for_soft_delete = course_data.copy()
+    course_data_for_soft_delete["deleted"] = True
+    course_data_for_soft_delete.pop("course_admin_user_id")
+
+    creation_response = users_api_client.post("/api/v3/courses", json=course_data, headers=admin_auth_headers)
+    assert creation_response.status_code == status.HTTP_201_CREATED
+    course_id = creation_response.json()["id"]
+    users_api_client.put(
+        f"/api/v3/courses/{course_id}", json=course_data_for_soft_delete, headers=admin_auth_headers
+    )
+
+    delete_url = httpx.URL(url=f"{env.ACTIVITIES_API_URL}/api/v3/courses/{course_id}/activityCategories")
+    httpx_mock.add_response(
+        status_code=status.HTTP_204_NO_CONTENT,
+        method="DELETE",
+        url=delete_url,
+        match_headers=admin_auth_headers,
+    )
+
+    delete_response = users_api_client.delete(f"/api/v3/courses/{course_id}", headers=admin_auth_headers)
+    assert delete_response.status_code == status.HTTP_204_NO_CONTENT
+
+    deleted_course_response = users_api_client.get(f"/api/v3/courses/{course_id}", headers=admin_auth_headers)
+    assert deleted_course_response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Course not found" in deleted_course_response.json()["detail"]
+
+
+def test_hard_delete_course_with_admin_user_without_having_been_soft_deleted_first_fails(
+    users_api_client: TestClient, admin_auth_headers, course_with_superadmin_as_admin_user
+):
+    course_id = course_with_superadmin_as_admin_user["course"].id
+
+    response = users_api_client.delete(f"/api/v3/courses/{course_id}", headers=admin_auth_headers)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Course must be soft-deleted before hard deletion" in response.json()["detail"]
+
+
+def test_hard_delete_course_with_regular_user_forbidden(
+    users_api_client: TestClient, regular_auth_headers, course_with_superadmin_as_admin_user
+):
+    course_id = course_with_superadmin_as_admin_user["course"].id
+
+    response = users_api_client.delete(f"/api/v3/courses/{course_id}", headers=regular_auth_headers)
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert "Only admins can delete courses" in response.json()["detail"]
+
+
 # ====================== GET ALL COURSES ====================== #
 
 

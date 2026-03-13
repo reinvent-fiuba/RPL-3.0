@@ -44,6 +44,16 @@ def update_course(
     return CoursesService(db).update_course(course_id, course_data, current_user)
 
 
+@router.delete("/courses/{course_id}", status_code=status.HTTP_204_NO_CONTENT)
+def hard_delete_course(
+    course_id: int,
+    current_user: CurrentUserDependency,
+    db: DBSessionDependency,
+    auth_header: AuthDependency,
+):
+    CoursesService(db).hard_delete_course(course_id, current_user, auth_header)
+
+
 # ====================== QUERYING - COURSES ====================== #
 
 

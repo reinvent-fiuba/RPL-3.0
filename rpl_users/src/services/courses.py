@@ -205,6 +205,38 @@ class CoursesService:
 
     # ====================== QUERYING - COURSES ====================== #
 
+    def hard_delete_course(
+        self, course_id: int, current_user: User, auth_header: HTTPAuthorizationCredentials
+    ) -> None:
+        if not current_user.is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Only admins can delete courses"
+            )
+        course = self.__assert_course_exists(course_id)
+        if not course.deleted:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Course must be soft-deleted before hard deletion",
+            )
+
+        try:
+            response = self.activities_api_client.delete(
+                url=f"/courses/{course_id}/activityCategories",
+                headers={"Authorization": f"{auth_header.scheme} {auth_header.credentials}"},
+            )
+        except httpx.RequestError as e:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Activities API is not available, try again later. Error details: {str(e)}",
+            )
+        if response.status_code != status.HTTP_204_NO_CONTENT:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Failed to delete course activity data. Response from activities api was: {response.text}",
+            )
+
+        self.__delete_course(course)
+
     def get_all_courses_including_their_relationship_with_user(
         self, current_user: User
     ) -> List[CourseWithUserInformationResponseDTO]:

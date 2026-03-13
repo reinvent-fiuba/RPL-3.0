@@ -207,3 +207,31 @@ def test_clone_all_info_when_no_tests_on_activity(
         params=params,
     )
     assert response.status_code == status.HTTP_201_CREATED
+
+
+# ==============================================================================
+
+
+def test_delete_all_course_info_success(
+    activities_api_client: TestClient, admin_auth_headers, example_activity: Activity
+):
+    activity_id_copy = example_activity.id
+    response = activities_api_client.delete(
+        f"/api/v3/courses/{example_activity.course_id}/activityCategories", headers=admin_auth_headers
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = activities_api_client.get(
+        f"/api/v3/courses/{activity_id_copy}/activityCategories", headers=admin_auth_headers
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == []
+
+
+def test_delete_all_course_info_without_admin_permissions_forbidden(
+    activities_api_client: TestClient, regular_auth_headers, example_activity: Activity
+):
+    response = activities_api_client.delete(
+        f"/api/v3/courses/{example_activity.course_id}/activityCategories", headers=regular_auth_headers
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN

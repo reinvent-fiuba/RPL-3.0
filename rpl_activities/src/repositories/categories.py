@@ -80,3 +80,9 @@ class CategoriesRepository(BaseRepository):
         self.db_session.commit()
         self.db_session.refresh(category)
         return category
+
+    def delete_all_categories(self, course_id: int) -> None:
+        self.db_session.execute(
+            sa.delete(ActivityCategory).where(ActivityCategory.course_id == course_id)
+        )
+        self.db_session.commit()

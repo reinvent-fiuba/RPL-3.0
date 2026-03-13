@@ -61,3 +61,12 @@ def clone_all_info(
 ):
     from_course_id = course_id
     return CategoriesService(db).clone_all_info(current_main_user, from_course_id, to_course_id)
+
+
+@router.delete("/courses/{course_id}/activityCategories", status_code=status.HTTP_204_NO_CONTENT)
+def delete_all_course_info(
+    course_id: int,
+    current_main_user: CurrentMainUserDependency,
+    db: DBSessionDependency,
+):
+    CategoriesService(db).delete_all_course_info(current_main_user, course_id)
