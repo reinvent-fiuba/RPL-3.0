@@ -182,7 +182,7 @@ class ActivitiesService:
 
     def __hard_delete_submissions_for_activities(
         self, activities_ids: list[int], submissions: list[ActivitySubmission]
-    ) -> None:
+    ):
         if not submissions:
             return
 
@@ -200,7 +200,7 @@ class ActivitiesService:
         if solution_rplfiles_ids:
             self.rplfiles_repo.delete_rplfiles(solution_rplfiles_ids)
 
-    def __hard_delete_tests_for_activities(self, activities_ids: list[int]) -> None:
+    def __hard_delete_tests_for_activities(self, activities_ids: list[int]):
         unit_test_rplfiles_ids = self.tests_service.tests_repo.get_unit_test_suite_rplfile_ids_for_activities(
             activities_ids
         )
@@ -209,8 +209,7 @@ class ActivitiesService:
         if unit_test_rplfiles_ids:
             self.rplfiles_repo.delete_rplfiles(unit_test_rplfiles_ids)
 
-    def __hard_delete_activity_files(self, activities: list[Activity]) -> None:
-        starting_rplfiles_ids = [a.starting_rplfile_id for a in activities]
+    def __hard_delete_activity_files(self, starting_rplfiles_ids: list[int]):
         self.rplfiles_repo.delete_rplfiles(starting_rplfiles_ids)
 
     # ====================== MANAGING ====================== #
@@ -263,15 +262,16 @@ class ActivitiesService:
             new_activity = self.activities_repo.clone_activity(activity, to_category)
             self.tests_service.clone_all_activity_tests(current_main_user, activity, new_activity)
 
-    def hard_delete_all_for_category(self, category: ActivityCategory) -> None:
+    def hard_delete_all_for_category(self, category: ActivityCategory):
         activities = self.activities_repo.get_all_activities_by_category_id_including_deleted(category.id)
         if not activities:
             return
 
         activities_ids = [a.id for a in activities]
+        starting_rplfiles_ids = [a.starting_rplfile_id for a in activities]
         submissions = self.submissions_repo.get_all_submissions_for_activities(activities_ids)
 
         self.__hard_delete_submissions_for_activities(activities_ids, submissions)
         self.__hard_delete_tests_for_activities(activities_ids)
-        self.__hard_delete_activity_files(activities)
         self.activities_repo.hard_delete_activities(activities_ids)
+        self.__hard_delete_activity_files(starting_rplfiles_ids)
