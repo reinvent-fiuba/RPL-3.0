@@ -273,3 +273,22 @@ class SubmissionsRepository(BaseRepository):
             .scalars()
             .all()
         )
+
+    def get_all_submissions_for_activities(self, activities_ids: list[int]) -> list[ActivitySubmission]:
+        if not activities_ids:
+            return []
+        return (
+            self.db_session.execute(
+                sa.select(ActivitySubmission).where(ActivitySubmission.activity_id.in_(activities_ids))
+            )
+            .scalars()
+            .all()
+        )
+
+    def delete_submissions_for_activities(self, activities_ids: list[int]) -> None:
+        if not activities_ids:
+            return
+        self.db_session.execute(
+            sa.delete(ActivitySubmission).where(ActivitySubmission.activity_id.in_(activities_ids))
+        )
+        self.db_session.commit()

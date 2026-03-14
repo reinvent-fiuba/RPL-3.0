@@ -1,11 +1,13 @@
-from typing import Optional
-from rpl_activities.src.repositories.base import BaseRepository
+from typing import List, Optional
+
 import sqlalchemy as sa
+
+from rpl_activities.src.repositories.base import BaseRepository
+
 from .models.rpl_file import RPLFile
 
 
 class RPLFilesRepository(BaseRepository):
-
     def get_by_id(self, file_id: int) -> Optional[RPLFile]:
         return (
             self.db_session.execute(sa.select(RPLFile).where(RPLFile.id == file_id)).scalars().one_or_none()
@@ -33,3 +35,9 @@ class RPLFilesRepository(BaseRepository):
         self.db_session.commit()
         self.db_session.refresh(rplfile)
         return rplfile
+
+    def delete_rplfiles(self, rplfiles_ids: List[int]) -> None:
+        if not rplfiles_ids:
+            return
+        self.db_session.execute(sa.delete(RPLFile).where(RPLFile.id.in_(rplfiles_ids)))
+        self.db_session.commit()

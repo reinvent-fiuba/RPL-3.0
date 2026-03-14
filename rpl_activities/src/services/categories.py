@@ -127,3 +127,14 @@ class CategoriesService:
                 detail="User does not have permission to clone a category",
             )
         self._clone_all_categories(current_main_user, from_course_id, to_course_id)
+
+    def delete_all_course_info(self, current_main_user: CurrentMainUser, course_id: int) -> None:
+        if not current_main_user.is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User does not have permission to delete course data",
+            )
+        categories = self.categories_repo.get_all_categories(course_id)
+        for category in categories:
+            self.activities_service.hard_delete_all_for_category(category)
+        self.categories_repo.delete_all_categories(course_id)

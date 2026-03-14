@@ -16,6 +16,7 @@ from rpl_activities.src.repositories.models.activity_category import ActivityCat
 from rpl_activities.src.repositories.models.activity_submission import ActivitySubmission
 from rpl_activities.src.repositories.submissions import SubmissionsRepository
 from rpl_activities.src.services.activity_tests import TestsService
+from rpl_activities.src.repositories.rpl_files import RPLFilesRepository
 
 
 class ActivitiesService:
@@ -24,6 +25,7 @@ class ActivitiesService:
         self.submissions_repo = SubmissionsRepository(db)
         self.categories_repo = CategoriesRepository(db)
         self.tests_service = TestsService(db)
+        self.rplfiles_repo = RPLFilesRepository(db)
 
     # ====================== PRIVATE - PERMISSIONS ====================== #
 
@@ -178,6 +180,38 @@ class ActivitiesService:
 
     # ====================== PRIVATE - MANAGING ====================== #
 
+    def __hard_delete_submissions_for_activities(
+        self, activities_ids: list[int], submissions: list[ActivitySubmission]
+    ):
+        if not submissions:
+            return
+
+        submissions_ids = [s.id for s in submissions]
+        solution_rplfiles_ids = [s.solution_rplfile_id for s in submissions]
+
+        execution_log_ids = self.tests_service.tests_repo.get_execution_log_ids_for_submissions(
+            submissions_ids
+        )
+        if execution_log_ids:
+            self.tests_service.tests_repo.delete_io_test_runs_for_execution_logs(execution_log_ids)
+            self.tests_service.tests_repo.delete_unit_test_runs_for_execution_logs(execution_log_ids)
+        self.tests_service.tests_repo.delete_execution_logs_for_submissions(submissions_ids)
+        self.submissions_repo.delete_submissions_for_activities(activities_ids)
+        if solution_rplfiles_ids:
+            self.rplfiles_repo.delete_rplfiles(solution_rplfiles_ids)
+
+    def __hard_delete_tests_for_activities(self, activities_ids: list[int]):
+        unit_test_rplfiles_ids = self.tests_service.tests_repo.get_unit_test_suite_rplfile_ids_for_activities(
+            activities_ids
+        )
+        self.tests_service.tests_repo.delete_all_io_tests_for_activities(activities_ids)
+        self.tests_service.tests_repo.delete_unit_test_suites_for_activities(activities_ids)
+        if unit_test_rplfiles_ids:
+            self.rplfiles_repo.delete_rplfiles(unit_test_rplfiles_ids)
+
+    def __hard_delete_activity_files(self, starting_rplfiles_ids: list[int]):
+        self.rplfiles_repo.delete_rplfiles(starting_rplfiles_ids)
+
     # ====================== MANAGING ====================== #
 
     def delete_activity(
@@ -227,3 +261,17 @@ class ActivitiesService:
                 continue
             new_activity = self.activities_repo.clone_activity(activity, to_category)
             self.tests_service.clone_all_activity_tests(current_main_user, activity, new_activity)
+
+    def hard_delete_all_for_category(self, category: ActivityCategory):
+        activities = self.activities_repo.get_all_activities_by_category_id_including_deleted(category.id)
+        if not activities:
+            return
+
+        activities_ids = [a.id for a in activities]
+        starting_rplfiles_ids = [a.starting_rplfile_id for a in activities]
+        submissions = self.submissions_repo.get_all_submissions_for_activities(activities_ids)
+
+        self.__hard_delete_submissions_for_activities(activities_ids, submissions)
+        self.__hard_delete_tests_for_activities(activities_ids)
+        self.activities_repo.hard_delete_activities(activities_ids)
+        self.__hard_delete_activity_files(starting_rplfiles_ids)

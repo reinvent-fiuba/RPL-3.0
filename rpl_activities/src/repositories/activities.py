@@ -207,3 +207,16 @@ class ActivitiesRepository(BaseRepository):
         if activity.is_io_tested:
             activity = self.update_iotest_mode_for_activity(activity, False)
         return activity
+
+    def get_all_activities_by_category_id_including_deleted(self, category_id: int) -> list[Activity]:
+        return (
+            self.db_session.execute(sa.select(Activity).where(Activity.category_id == category_id))
+            .scalars()
+            .all()
+        )
+
+    def hard_delete_activities(self, activities_ids: list[int]) -> None:
+        if not activities_ids:
+            return
+        self.db_session.execute(sa.delete(Activity).where(Activity.id.in_(activities_ids)))
+        self.db_session.commit()

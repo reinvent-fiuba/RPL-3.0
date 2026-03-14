@@ -222,3 +222,61 @@ class TestsRepository(BaseRepository):
 
         passed_all_tests = suite_summary.amount_failed == 0 and suite_summary.amount_errored == 0
         return passed_all_tests
+
+    def get_unit_test_suite_rplfile_ids_for_activities(self, activities_ids: list[int]) -> list[int]:
+        if not activities_ids:
+            return []
+        return list(
+            self.db_session.execute(
+                sa.select(UnitTestSuite.test_rplfile_id).where(UnitTestSuite.activity_id.in_(activities_ids))
+            ).scalars().all()
+        )
+
+    def delete_unit_test_suites_for_activities(self, activities_ids: list[int]) -> None:
+        if not activities_ids:
+            return
+        self.db_session.execute(sa.delete(UnitTestSuite).where(UnitTestSuite.activity_id.in_(activities_ids)))
+        self.db_session.commit()
+
+    def delete_all_io_tests_for_activities(self, activities_ids: list[int]) -> None:
+        if not activities_ids:
+            return
+        self.db_session.execute(sa.delete(IOTest).where(IOTest.activity_id.in_(activities_ids)))
+        self.db_session.commit()
+
+    def get_execution_log_ids_for_submissions(self, submissions_ids: list[int]) -> list[int]:
+        if not submissions_ids:
+            return []
+        return list(
+            self.db_session.execute(
+                sa.select(TestsExecutionLog.id).where(
+                    TestsExecutionLog.activity_submission_id.in_(submissions_ids)
+                )
+            ).scalars().all()
+        )
+
+    def delete_io_test_runs_for_execution_logs(self, execution_logs_ids: list[int]) -> None:
+        if not execution_logs_ids:
+            return
+        self.db_session.execute(
+            sa.delete(IOTestRun).where(IOTestRun.tests_execution_log_id.in_(execution_logs_ids))
+        )
+        self.db_session.commit()
+
+    def delete_unit_test_runs_for_execution_logs(self, execution_logs_ids: list[int]) -> None:
+        if not execution_logs_ids:
+            return
+        self.db_session.execute(
+            sa.delete(UnitTestRun).where(UnitTestRun.tests_execution_log_id.in_(execution_logs_ids))
+        )
+        self.db_session.commit()
+
+    def delete_execution_logs_for_submissions(self, submissions_ids: list[int]) -> None:
+        if not submissions_ids:
+            return
+        self.db_session.execute(
+            sa.delete(TestsExecutionLog).where(
+                TestsExecutionLog.activity_submission_id.in_(submissions_ids)
+            )
+        )
+        self.db_session.commit()
